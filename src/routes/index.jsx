@@ -6,6 +6,7 @@ import AuthLayout from '../components/layouts/AuthLayout';
 import Login from '../pages/Auth/Login';
 import Register from '../pages/Auth/Register';
 import Dashboard from '../pages/Dashboard/Dashboard';
+import OptikOlusturma from '../pages/Optik/OptikOlusturma';
 import NotFound from '../pages/NotFound';
 
 // PrivateRoute bileşeni
@@ -37,6 +38,10 @@ const routes = (isAuthenticated) => [
       { 
         path: 'dashboard', 
         element: <PrivateRoute><Dashboard /></PrivateRoute> 
+      },
+      { 
+        path: 'optik-olustur', 
+        element: <PrivateRoute><OptikOlusturma /></PrivateRoute> 
       },
       { 
         path: '*', 

@@ -1,4 +1,6 @@
+import './Dashboard.css';
 import { useAuth } from '../../hooks/useAuth';
+import { Link } from 'react-router-dom';
 import Button from '../../components/ui/Button/Button';
 
 const Dashboard = () => {
@@ -16,7 +18,12 @@ const Dashboard = () => {
           <div className="dashboard-card">
             <h3>Optik Formlar</h3>
             <p>Optik formlarınızı yönetin</p>
-            <Button variant="outline">Görüntüle</Button>
+            <div className="card-actions">
+              <Button variant="outline">Görüntüle</Button>
+              <Link to="/optik-olustur">
+                <Button variant="primary">Optik Oluştur</Button>
+              </Link>
+            </div>
           </div>
           
           <div className="dashboard-card">
