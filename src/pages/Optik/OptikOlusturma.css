@@ -109,4 +109,72 @@
     border-color: var(--primary-color);
     box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.2);
   }
+  @media print {
+    /* Yazdırma sırasında sayfanın genel görünümünü ayarla */
+    .optik-olusturma-page {
+      padding: 0;
+      margin: 0;
+    }
+    
+    /* Başlık ve butonları gizle */
+    .page-header,
+    .error-alert,
+    .optik-creator-container > *:first-child {
+      display: none !important;
+    }
+    
+    /* Grid düzenini kaldır */
+    .optik-creator-container {
+      display: block;
+      overflow: visible;
+      height: auto;
+    }
+    
+    /* A4 container stillerini ayarla */
+    .A4Container .wrapper {
+      box-shadow: none;
+      padding: 0;
+      margin: 0;
+      width: 100%;
+    }
+    
+    .A4Container .container {
+      margin: 0;
+      box-shadow: none;
+      border: none;
+      height: auto;
+      width: 100%;
+      min-height: auto;
+    }
+    
+    /* Izgara çizgilerini gizle */
+    .A4Container .gridLines {
+      display: none;
+    }
+    
+    /* Yeniden boyutlandırma tutamaçlarını ve kaldırma butonlarını gizle */
+    .resize-handle,
+    .removeButton {
+      display: none !important;
+    }
+    
+    /* Navbar ve footer'ı gizle */
+    .navbar,
+    .footer {
+      display: none !important;
+    }
+    
+    /* Sayfa kesme kuralları */
+    @page {
+      size: A4 portrait;
+      margin: 0;
+    }
+    
+    body {
+      width: 210mm;
+      height: 297mm;
+      margin: 0;
+      padding: 0;
+    }
+  }
 }

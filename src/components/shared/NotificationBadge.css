@@ -1,0 +1,116 @@
+.notification-badge-container {
+    position: relative;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    color: white;
+    margin-left: 1rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+  }
+  
+  .notification-badge-container:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .notification-icon {
+    font-size: 1.25rem;
+  }
+  
+  .notification-count {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background-color: var(--error-color);
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+  }
+  
+  .notification-dropdown {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background-color: white;
+    box-shadow: var(--shadow-md);
+    border-radius: 4px;
+    min-width: 300px;
+    max-width: 400px;
+    z-index: 100;
+    margin-top: 0.5rem;
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid var(--border-color);
+  }
+  
+  .notification-header {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+    font-weight: 500;
+    color: var(--text-color-dark);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .notification-empty {
+    padding: 1.5rem;
+    text-align: center;
+    color: var(--text-color-light);
+  }
+  
+  .notification-list {
+    padding: 0;
+  }
+  
+  .notification-item {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+  
+  .notification-item:last-child {
+    border-bottom: none;
+  }
+  
+  .notification-item-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+  }
+  
+  .notification-item-title {
+    font-weight: 500;
+    color: var(--text-color-dark);
+  }
+  
+  .notification-item-date {
+    font-size: 0.75rem;
+    color: var(--text-color-light);
+  }
+  
+  .notification-item-content {
+    margin-bottom: 0.75rem;
+    font-size: 0.875rem;
+  }
+  
+  .notification-item-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  .loading-spinner-small {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(var(--primary-color-rgb), 0.1);
+    border-radius: 50%;
+    border-top-color: var(--primary-color);
+    animation: spin 1s ease-in-out infinite;
+    margin: 0 auto;
+  }

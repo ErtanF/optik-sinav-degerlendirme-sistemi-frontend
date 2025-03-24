@@ -1,10 +1,10 @@
-// src/pages/Optik/OptikOlusturma.jsx - Güncelleme
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './OptikOlusturma.css';
 import Button from '../../components/ui/Button/Button';
 import LeftSidebar from './components/LeftSidebar';
 import A4Container from './components/A4Container';
+import PreviewModal from './components/PreviewModal';
 import { FormEditorProvider, useFormEditor } from './context/FormEditorContext';
 import optikApi from '../../api/optik';
 
@@ -15,6 +15,9 @@ const OptikOlusturmaContent = () => {
   const [formTitle, setFormTitle] = useState('Yeni Optik Form');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
+  
+  // Önizleme için state
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   
   const handleTitleChange = (e) => {
     setFormTitle(e.target.value);
@@ -45,6 +48,40 @@ const OptikOlusturmaContent = () => {
       setSaving(false);
     }
   };
+
+  // Önizleme modalını aç
+  const openPreview = () => {
+    setIsPreviewOpen(true);
+  };
+
+  // Önizleme modalını kapat
+  const closePreview = () => {
+    setIsPreviewOpen(false);
+  };
+  
+  // Mavi çerçeveyi otomatik ekle
+  const getEnhancedElements = () => {
+    // Mavi çerçeve halihazırda var mı kontrol et
+    const hasBlueFrame = pageElements.some(elem => elem.id === 'blueFrame');
+    
+    if (hasBlueFrame) {
+      return pageElements;
+    }
+    
+    // Yoksa elemanlara ekle
+    return [
+      {
+        id: 'blueFrame',
+        uniqueId: 'blueFrame-' + Date.now(),
+        type: 'frame',
+        position: { x: 160, y: 260 },
+        size: { width: 320, height: 450 },
+        zIndex: 0,
+        border: '2px solid #0066cc'
+      },
+      ...pageElements
+    ];
+  };
   
   return (
     <div className="optik-olusturma-page">
@@ -67,6 +104,12 @@ const OptikOlusturmaContent = () => {
           >
             {saving ? 'Kaydediliyor...' : 'Kaydet'}
           </Button>
+          <Button 
+            variant="secondary" 
+            onClick={openPreview}
+          >
+            Önizleme
+          </Button>
           <Link to="/dashboard">
             <Button variant="outline">Dashboard'a Dön</Button>
           </Link>
@@ -79,6 +122,14 @@ const OptikOlusturmaContent = () => {
         <LeftSidebar />
         <A4Container />
       </div>
+      
+      {/* Önizleme Modalı - mavi çerçeveyi dahil et */}
+      <PreviewModal 
+        isOpen={isPreviewOpen}
+        onClose={closePreview}
+        pageElements={getEnhancedElements()}
+        formTitle={formTitle}
+      />
     </div>
   );
 };

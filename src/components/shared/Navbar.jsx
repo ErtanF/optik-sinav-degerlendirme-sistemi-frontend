@@ -1,7 +1,10 @@
 import './Navbar.css';
+import './NotificationBadge.css';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import TeacherApprovalDropdown from './TeacherApprovalDropdown';
+import usersApi from '../../api/users';
 
 const Navbar = () => {
   const { isAuthenticated, currentUser, logout } = useAuth();
@@ -17,6 +20,9 @@ const Navbar = () => {
     setDropdownOpen(!dropdownOpen);
   };
 
+  // Kullanıcı süper admin veya okul yöneticisi mi?
+  const canApproveTeachers = currentUser?.role === 'admin' || currentUser?.role === 'superadmin';
+
   return (
     <nav className="navbar">
       <div className="navbar-container">
@@ -27,9 +33,19 @@ const Navbar = () => {
           {isAuthenticated ? (
             <>
               <Link to="/dashboard" className="navbar-item">Dashboard</Link>
+              
+              {/* Onay Bildirimleri - Sadece yönetici ve süper admin için */}
+              {canApproveTeachers && <TeacherApprovalDropdown />}
+              
               <div className="navbar-item user-dropdown">
                 <span onClick={toggleDropdown} className="dropdown-trigger">
-                  {currentUser?.name || 'Kullanıcı'}
+                  {currentUser?.name || 'Kullanıcı'} 
+                  {currentUser?.role && (
+                    <span className="user-role">
+                      ({currentUser.role === 'superadmin' ? 'Süper Admin' : 
+                         currentUser.role === 'admin' ? 'Okul Yöneticisi' : 'Öğretmen'})
+                    </span>
+                  )}
                 </span>
                 {dropdownOpen && (
                   <div className="dropdown-content">
