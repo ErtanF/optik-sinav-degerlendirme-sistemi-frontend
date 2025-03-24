@@ -1,68 +1,31 @@
-import React from 'react';
+import React, { memo } from 'react';
+import { useFormEditor } from '../context/FormEditorContext';
+import styles from './ResizeHandles.module.css';
 
-const ResizeHandles = ({ onStartResize }) => {
-  // CSS stillerini içeri entegre ettim
-  const styles = {
-    handle: {
-      position: 'absolute',
-      width: '12px',
-      height: '12px',
-      backgroundColor: 'white',
-      border: '1px solid var(--primary-color)',
-      borderRadius: '50%',
-      opacity: 0,
-      transition: 'opacity 0.2s ease, background-color 0.2s ease'
-    },
-    topLeft: {
-      top: '-6px',
-      left: '-6px',
-      cursor: 'nwse-resize'
-    },
-    topRight: {
-      top: '-6px',
-      right: '-6px',
-      cursor: 'nesw-resize'
-    },
-    bottomLeft: {
-      bottom: '-6px',
-      left: '-6px',
-      cursor: 'nesw-resize'
-    },
-    bottomRight: {
-      bottom: '-6px',
-      right: '-6px',
-      cursor: 'nwse-resize'
-    }
-  };
+const ResizeHandles = memo(function ResizeHandles({ elementId }) {
+  const { startResize } = useFormEditor();
 
   const corners = [
-    { name: 'top-left', style: styles.topLeft, corner: 'topLeft' },
-    { name: 'top-right', style: styles.topRight, corner: 'topRight' },
-    { name: 'bottom-left', style: styles.bottomLeft, corner: 'bottomLeft' },
-    { name: 'bottom-right', style: styles.bottomRight, corner: 'bottomRight' }
+    { name: 'topLeft', className: styles.topLeft, corner: 'topLeft' },
+    { name: 'topRight', className: styles.topRight, corner: 'topRight' },
+    { name: 'bottomLeft', className: styles.bottomLeft, corner: 'bottomLeft' },
+    { name: 'bottomRight', className: styles.bottomRight, corner: 'bottomRight' }
   ];
 
   return (
     <>
-      {corners.map(({name, style, corner}) => (
+      {corners.map(({name, className, corner}) => (
         <div 
           key={name}
-          className={`resize-handle ${name}`}
-          style={{
-            ...styles.handle,
-            ...style
-          }}
-          onMouseDown={(e) => onStartResize(e, corner)}
-          onMouseOver={(e) => {
-            e.currentTarget.style.backgroundColor = 'var(--primary-color-light)';
-          }}
-          onMouseOut={(e) => {
-            e.currentTarget.style.backgroundColor = 'white';
+          className={`resize-handle ${styles.handle} ${className}`}
+          onMouseDown={(e) => {
+            console.log('Resize handle mousedown:', corner);
+            startResize(e, elementId, corner);
           }}
         />
       ))}
     </>
   );
-};
+});
 
 export default ResizeHandles;

@@ -1,0 +1,49 @@
+.container {
+    background-color: white;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    margin-bottom: 15px;
+    padding: 8px;
+  }
+  
+  .title {
+    font-size: 14px;
+    color: var(--primary-color);
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+  
+  .studentList {
+    max-height: 150px;
+    overflow-y: auto;
+    padding-right: 5px;
+    margin-bottom: 5px;
+  }
+  
+  .studentItem {
+    padding: 8px;
+    border-bottom: 1px solid var(--border-color);
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+  }
+  
+  .studentItem:hover {
+    background-color: rgba(var(--primary-color-rgb), 0.05);
+  }
+  
+  .studentName {
+    font-weight: bold;
+    font-size: 14px;
+  }
+  
+  .studentInfo {
+    color: var(--text-color-light);
+    font-size: 12px;
+  }
+  
+  .loading {
+    text-align: center;
+    padding: 1rem;
+    color: var(--text-color-light);
+  }

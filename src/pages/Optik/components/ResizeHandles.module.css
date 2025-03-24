@@ -1,0 +1,39 @@
+.handle {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background-color: white;
+    border: 1px solid var(--primary-color, #3f51b5);
+    border-radius: 50%;
+    z-index: 100;
+    opacity: 1;
+    transition: background-color 0.2s ease;
+  }
+  
+  .handle:hover {
+    background-color: var(--primary-color-light, #757de8);
+  }
+  
+  .topLeft {
+    top: -6px;
+    left: -6px;
+    cursor: nwse-resize;
+  }
+  
+  .topRight {
+    top: -6px;
+    right: -6px;
+    cursor: nesw-resize;
+  }
+  
+  .bottomLeft {
+    bottom: -6px;
+    left: -6px;
+    cursor: nesw-resize;
+  }
+  
+  .bottomRight {
+    bottom: -6px;
+    right: -6px;
+    cursor: nwse-resize;
+  }

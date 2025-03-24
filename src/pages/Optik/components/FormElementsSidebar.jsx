@@ -1,77 +1,41 @@
-import React from 'react';
+import React, { memo } from 'react';
+import styles from './FormElementsSidebar.module.css';
 
-const FormElementsSidebar = ({ formElements, onDragStart }) => {
-  const styles = {
-    container: {
-      backgroundColor: 'white',
-      border: '1px solid var(--border-color)',
-      borderRadius: '4px'
-    },
-    title: {
-      fontSize: '16px',
-      padding: '12px',
-      borderBottom: '1px solid var(--border-color)',
-      color: 'var(--primary-color)',
-      fontWeight: '500'
-    },
-    elementsList: {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '10px',
-      padding: '10px',
-      maxHeight: '400px', // Sabit yükseklik
-      overflowY: 'auto' // Kaydırma çubuğu ekler
-    },
-    elementItem: {
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      padding: '10px',
-      border: '1px solid var(--border-color)',
-      borderRadius: '4px',
-      cursor: 'grab',
-      backgroundColor: 'white'
-    },
-    elementImage: {
-      maxWidth: '100%',
-      marginBottom: '8px'
-    },
-    elementTitle: {
-      fontSize: '14px',
-      textAlign: 'center'
-    }
+const FormElementsSidebar = memo(function FormElementsSidebar({ formElements }) {
+  const handleDragStart = (e, element) => {
+    console.log('Drag started for element:', element);
+    
+    // JSON.stringify ile element verisini saklıyoruz
+    e.dataTransfer.setData('application/json', JSON.stringify(element));
+    
+    // Görünmez sürükleme resmi
+    const emptyImg = new Image();
+    emptyImg.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+    e.dataTransfer.setDragImage(emptyImg, 0, 0);
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.title}>Form Elemanları</div>
-      <div style={styles.elementsList}>
+    <div className={styles.container}>
+      <div className={styles.title}>Form Elemanları</div>
+      <div className={styles.elementsList}>
         {formElements.map(element => (
           <div
             key={element.id}
-            style={styles.elementItem}
-            draggable
-            onDragStart={(e) => onDragStart(e, element)}
-            onMouseOver={(e) => {
-              e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
-              e.currentTarget.style.borderColor = 'var(--primary-color-light)';
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.boxShadow = '';
-              e.currentTarget.style.borderColor = 'var(--border-color)';
-            }}
+            className={styles.elementItem}
+            draggable={true}
+            onDragStart={(e) => handleDragStart(e, element)}
           >
             <img 
               src={element.image} 
               alt={element.title} 
-              style={styles.elementImage} 
+              className={styles.elementImage} 
             />
-            <span style={styles.elementTitle}>{element.title}</span>
+            <span className={styles.elementTitle}>{element.title}</span>
           </div>
         ))}
       </div>
     </div>
   );
-};
+});
 
 export default FormElementsSidebar;

@@ -30,4 +30,12 @@
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+
+     /* Optik form özel değişkenleri */
+  --grid-size: 20px;
+  --element-border-color: #e0e0e0;
+  --element-active-border-color: var(--primary-color);
+  --element-hover-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --resize-handle-size: 12px;
+  --resize-handle-color: var(--primary-color);
   }

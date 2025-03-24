@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
+import styles from './StudentSelector.module.css';
 
-const StudentSelector = ({ onStudentSelect }) => {
+const StudentSelector = memo(function StudentSelector({ onStudentSelect }) {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   
@@ -30,64 +31,22 @@ const StudentSelector = ({ onStudentSelect }) => {
     fetchStudents();
   }, []);
   
-  const styles = {
-    container: {
-      backgroundColor: 'white',
-      border: '1px solid var(--border-color)',
-      borderRadius: '4px',
-      marginBottom: '15px',
-      padding: '8px'
-    },
-    title: {
-      fontSize: '14px',
-      color: 'var(--primary-color)',
-      marginBottom: '8px',
-      fontWeight: '500'
-    },
-    studentList: {
-      maxHeight: '150px',
-      overflowY: 'auto',
-      paddingRight: '5px',
-      marginBottom: '5px'
-    },
-    studentItem: {
-      padding: '8px',
-      borderBottom: '1px solid var(--border-color)',
-      cursor: 'pointer',
-      borderRadius: '4px'
-    },
-    studentName: {
-      fontWeight: 'bold',
-      fontSize: '14px'
-    },
-    studentInfo: {
-      color: 'var(--text-color-light)',
-      fontSize: '12px'
-    }
-  };
-  
   return (
-    <div style={styles.container}>
+    <div className={styles.container}>
       {loading ? (
-        <div>Öğrenciler yükleniyor...</div>
+        <div className={styles.loading}>Öğrenciler yükleniyor...</div>
       ) : (
         <>
-          <div style={styles.title}>Öğrenci Seçimi</div>
-          <div style={styles.studentList}>
+          <div className={styles.title}>Öğrenci Seçimi</div>
+          <div className={styles.studentList}>
             {students.map(student => (
               <div 
                 key={student.id}
-                style={styles.studentItem}
+                className={styles.studentItem}
                 onClick={() => onStudentSelect(student)}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.backgroundColor = 'rgba(var(--primary-color-rgb), 0.05)';
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                }}
               >
-                <div style={styles.studentName}>{student.name}</div>
-                <div style={styles.studentInfo}>Sınıf: {student.class} | No: {student.number}</div>
+                <div className={styles.studentName}>{student.name}</div>
+                <div className={styles.studentInfo}>Sınıf: {student.class} | No: {student.number}</div>
               </div>
             ))}
           </div>
@@ -95,6 +54,6 @@ const StudentSelector = ({ onStudentSelect }) => {
       )}
     </div>
   );
-};
+});
 
 export default StudentSelector;

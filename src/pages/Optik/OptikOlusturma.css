@@ -1,12 +1,14 @@
-/* Optik Form Oluşturma Sayfası Stilleri */
+/* Sadece sayfa genel düzeni için CSS */
 .optik-olusturma-page {
   max-width: 1400px;
   margin: 0 auto;
   padding: 1rem;
-  height: calc(100vh - 60px); /* Footer yüksekliği için alan bırak */
+  /* 100vh değil, daha yüksek bir değer kullanıyoruz */
+  min-height: calc(100vh - 60px); /* Footer yüksekliği için alan bırakma */
+  height: auto; /* auto değerine değiştirdik */
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: visible; /* overflow'ı hidden'dan visible'a değiştirdik */
   padding-bottom: 50px; /* Footer için ek boşluk */
 }
 
@@ -34,106 +36,24 @@
   grid-template-columns: 250px 1fr;
   gap: 2rem;
   flex: 1;
-  min-height: 0; /* Flex container için önemli */
-  overflow: hidden;
+  min-height: 600px; /* Minimum yükseklik belirledik */
+  height: auto; /* auto değerine değiştirdik */
+  overflow: visible; /* overflow'ı visible olarak değiştirdik */
 }
 
-/* A4 kağıdı ile ilgili genel stiller */
-.a4-container-wrapper {
-  background-color: var(--background-color);
-  border-radius: 8px;
-  box-shadow: var(--shadow-sm);
-  padding: 1rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  overflow: hidden;
-}
-
-.a4-container {
-  position: relative;
-  aspect-ratio: 210/297; /* A4 oranı */
-  height: 100%;
-  max-height: 100%;
-  width: auto;
-  background-color: white;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-/* Izgara çizgileri */
-.grid-lines {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-size: 20px 20px; /* 20px'lik ızgara */
-  background-image:
-    linear-gradient(to right, rgba(0, 0, 0, 0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
-  pointer-events: none; /* Tıklamaları arkaya geçir */
-}
-
-/* A4 üzerindeki elemanlar */
-.page-element {
-  position: absolute;
-  cursor: grab;
-  user-select: none;
-  background-color: white;
-  border: 1px solid transparent;
-  border-radius: 4px;
-  transition: box-shadow 0.2s ease, border-color 0.2s ease;
-  box-sizing: border-box;
-}
-
-.page-element:hover {
-  box-shadow: var(--shadow-sm);
-  border-color: var(--primary-color-light);
-}
-
-.page-element.active {
-  border: 1px solid var(--primary-color);
-  box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.2);
-}
-
-.page-element.resizing {
-  opacity: 0.8;
-  border: 1px dashed var(--primary-color);
-  cursor: nwse-resize;
-}
-
-.page-element img {
-  max-width: 100%;
-  max-height: 100%;
-  display: block;
-  pointer-events: none; /* Resimi tıklanamaz yap */
-}
-
-/* Özel kaydırma çubuğu stilleri */
-/* Webkit (Chrome, Safari, etc.) */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--primary-color-light);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--primary-color);
-}
-
-/* Firefox */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: var(--primary-color-light) #f1f1f1;
+/* Yazdırma için stil düzenlemeleri */
+@media print {
+  .optik-olusturma-page {
+    height: auto;
+    overflow: visible;
+    padding: 0;
+  }
+  
+  .optik-creator-container {
+    display: block;
+    height: auto;
+    overflow: visible;
+  }
 }
 
 /* Responsive tasarım için medya sorguları */
@@ -146,23 +66,14 @@
 /* Mobil için düzenlemeler */
 @media (max-width: 768px) {
   .optik-olusturma-page {
-    height: calc(100vh - 80px); /* Mobilde footer daha yüksek olabilir */
+    height: auto;
+    min-height: calc(100vh - 80px);
   }
   
   .optik-creator-container {
     grid-template-columns: 1fr;
     grid-template-rows: auto 1fr;
     gap: 1rem;
-  }
-  
-  .a4-container-wrapper {
-    padding: 0.5rem;
-  }
-  
-  .a4-container {
-    width: 100%;
-    height: auto;
-    max-height: none;
   }
   
   .page-header {
@@ -177,53 +88,5 @@
   
   .header-actions button {
     flex: 1;
-  }
-}
-
-/* Yazdırma görünümü için ayarlar */
-@media print {
-  .optik-olusturma-page {
-    padding: 0;
-    max-width: none;
-  }
-  
-  .page-header,
-  .form-elements-sidebar {
-    display: none;
-  }
-  
-  .optik-creator-container {
-    display: block;
-    height: auto;
-  }
-  
-  .a4-container-wrapper {
-    padding: 0;
-    overflow: visible;
-    background: none;
-    box-shadow: none;
-  }
-  
-  .a4-container {
-    width: 210mm;
-    height: 297mm;
-    box-shadow: none;
-    margin: 0;
-    page-break-after: always;
-  }
-  
-  .grid-lines {
-    display: none;
-  }
-  
-  .page-element {
-    position: absolute;
-    border: none !important;
-    box-shadow: none !important;
-  }
-  
-  .resize-handle,
-  .remove-element {
-    display: none !important;
   }
 }

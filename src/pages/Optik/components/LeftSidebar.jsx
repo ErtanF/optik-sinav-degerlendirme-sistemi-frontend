@@ -1,25 +1,22 @@
 import React from 'react';
 import StudentSelector from './StudentSelector';
 import FormElementsSidebar from './FormElementsSidebar';
+import { formElementsData } from '../utils/formElements';
+import { useFormEditor } from '../context/FormEditorContext';
+import styles from './LeftSidebar.module.css';
 
-// LeftSidebar bileşeni, StudentSelector ve FormElementsSidebar bileşenlerini birleştirir
-const LeftSidebar = ({ formElements, onDragStart, onStudentSelect }) => {
-  const styles = {
-    container: {
-      display: 'flex',
-      flexDirection: 'column',
-      height: '100%',
-      gap: '15px'
-    }
+const LeftSidebar = () => {
+  const { updateStudentFields } = useFormEditor();
+  
+  // Öğrenci seçildiğinde
+  const handleStudentSelect = (student) => {
+    updateStudentFields(student);
   };
-
+  
   return (
-    <div style={styles.container}>
-      <StudentSelector onStudentSelect={onStudentSelect} />
-      <FormElementsSidebar 
-        formElements={formElements} 
-        onDragStart={onDragStart} 
-      />
+    <div className={styles.container}>
+      <StudentSelector onStudentSelect={handleStudentSelect} />
+      <FormElementsSidebar formElements={formElementsData} />
     </div>
   );
 };
