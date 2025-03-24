@@ -1,8 +1,9 @@
+// src/api/client.jsx - Ortam değişkenlerini kullanmak için güncelleme
 import axios from 'axios';
 
 // API konfigürasyonu
 const apiConfig = {
-  baseURL: 'http://localhost:5000/api', // Backend API URL'i (sonra değiştirilecek)
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5500/api', // Ortam değişkeni veya varsayılan
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json'

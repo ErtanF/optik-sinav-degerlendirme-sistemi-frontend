@@ -1,12 +1,15 @@
+// src/pages/Auth/Login.jsx - Güncelleme
 import './Login.css';
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import Input from '../../components/ui/Input/Input';
 import Button from '../../components/ui/Button/Button';
 import { useAuth } from '../../hooks/useAuth';
+import authApi from '../../api/auth';
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
   
   const [formData, setFormData] = useState({
@@ -16,6 +19,9 @@ const Login = () => {
   
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Location state'inden mesajı al (kayıt başarılı mesajı gibi)
+  const message = location.state?.message;
   
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -61,17 +67,19 @@ const Login = () => {
       setIsSubmitting(true);
       
       try {
-        // Burada gerçek API yerine geçici olarak kullanıyoruz
-        // API entegrasyonu yapıldığında bu kısım değişecek
-        setTimeout(() => {
-          // Başarılı login simülasyonu
-          login({ id: 1, name: 'Test User', email: formData.email }, 'fake-jwt-token');
-          navigate('/dashboard');
-        }, 1000);
+        // Gerçek API çağrısı
+        const response = await authApi.login({
+          email: formData.email,
+          password: formData.password
+        });
+        
+        // Başarılı login
+        login(response.user, response.token);
+        navigate('/dashboard');
       } catch (error) {
         setErrors({
           ...errors,
-          general: 'Giriş başarısız. Lütfen bilgilerinizi kontrol edin.'
+          general: error.response?.data?.message || 'Giriş başarısız. Lütfen bilgilerinizi kontrol edin.'
         });
       } finally {
         setIsSubmitting(false);
@@ -82,6 +90,10 @@ const Login = () => {
   return (
     <div className="login-page">
       <h2 className="auth-title">Giriş Yap</h2>
+      
+      {message && (
+        <div className="success-alert">{message}</div>
+      )}
       
       {errors.general && (
         <div className="error-alert">{errors.general}</div>

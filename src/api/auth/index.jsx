@@ -1,3 +1,4 @@
+// src/api/auth/index.jsx - Güncelleme
 import apiClient from '../client';
 
 // Auth ile ilgili API istekleri
@@ -5,7 +6,7 @@ const authApi = {
   // Kullanıcı girişi
   login: async (credentials) => {
     try {
-      const response = await apiClient.post('/auth/login', credentials);
+      const response = await apiClient.post('/auth/signin', credentials);
       return response;
     } catch (error) {
       throw error;
@@ -15,7 +16,7 @@ const authApi = {
   // Kullanıcı kaydı
   register: async (userData) => {
     try {
-      const response = await apiClient.post('/auth/register', userData);
+      const response = await apiClient.post('/auth/signup', userData);
       return response;
     } catch (error) {
       throw error;

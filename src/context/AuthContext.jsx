@@ -1,8 +1,11 @@
+// src/context/AuthContext.jsx - Güncelleme
 import { createContext, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
+  const navigate = useNavigate();
   const [currentUser, setCurrentUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);

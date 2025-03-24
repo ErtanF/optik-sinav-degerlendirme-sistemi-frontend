@@ -1,8 +1,11 @@
+// src/pages/Auth/Register.jsx - Güncelleme
 import './Register.css';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Input from '../../components/ui/Input/Input';
 import Button from '../../components/ui/Button/Button';
+import authApi from '../../api/auth';
+import schoolApi from '../../api/schools';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -11,11 +14,35 @@ const Register = () => {
     name: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    schoolId: ''
   });
   
+  const [schools, setSchools] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Okulları yükle
+  useEffect(() => {
+    const fetchSchools = async () => {
+      try {
+        setLoading(true);
+        const schoolsData = await schoolApi.getAllSchools();
+        setSchools(schoolsData.data || []);
+      } catch (error) {
+        setErrors({
+          ...errors,
+          general: 'Okullar yüklenirken bir hata oluştu.'
+        });
+        console.error('Okullar yüklenirken hata:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchSchools();
+  }, []);
   
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -66,6 +93,11 @@ const Register = () => {
       isValid = false;
     }
     
+    if (!formData.schoolId) {
+      formErrors.schoolId = 'Lütfen bir okul seçin';
+      isValid = false;
+    }
+    
     setErrors(formErrors);
     return isValid;
   };
@@ -77,16 +109,22 @@ const Register = () => {
       setIsSubmitting(true);
       
       try {
-        // Burada gerçek API yerine geçici olarak kullanıyoruz
-        // API entegrasyonu yapıldığında bu kısım değişecek
-        setTimeout(() => {
-          // Başarılı kayıt simülasyonu
-          navigate('/login', { state: { message: 'Kayıt başarılı. Lütfen giriş yapın.' } });
-        }, 1000);
+        // Gerçek API çağrısı
+        await authApi.register({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+          schoolId: formData.schoolId
+        });
+        
+        // Başarılı kayıt, login sayfasına yönlendir
+        navigate('/login', { 
+          state: { message: 'Kayıt başarılı. Lütfen giriş yapın. Öğretmen hesabınız okul yöneticisi tarafından onaylandıktan sonra giriş yapabilirsiniz.' } 
+        });
       } catch (error) {
         setErrors({
           ...errors,
-          general: 'Kayıt başarısız. Lütfen bilgilerinizi kontrol edin.'
+          general: error.response?.data?.message || 'Kayıt başarısız. Lütfen bilgilerinizi kontrol edin.'
         });
       } finally {
         setIsSubmitting(false);
@@ -126,6 +164,34 @@ const Register = () => {
           error={errors.email}
           required
         />
+        
+        <div className="form-group">
+          <label htmlFor="schoolId" className="input-label">
+            Okul
+            <span className="required-mark">*</span>
+          </label>
+          <select
+            id="schoolId"
+            name="schoolId"
+            value={formData.schoolId}
+            onChange={handleChange}
+            className={`input-field ${errors.schoolId ? 'input-error' : ''}`}
+            disabled={loading || schools.length === 0}
+            required
+          >
+            <option value="">Okul Seçin</option>
+            {schools.map(school => (
+              <option key={school._id} value={school._id}>
+                {school.name}
+              </option>
+            ))}
+          </select>
+          {errors.schoolId && <div className="error-message">{errors.schoolId}</div>}
+          {loading && <div className="info-message">Okullar yükleniyor...</div>}
+          {!loading && schools.length === 0 && (
+            <div className="info-message">Henüz kayıtlı okul bulunmuyor.</div>
+          )}
+        </div>
         
         <Input
           type="password"
