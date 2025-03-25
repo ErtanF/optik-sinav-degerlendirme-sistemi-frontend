@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './OptikOlusturma.css';
 import Button from '../../components/ui/Button/Button';
@@ -7,6 +7,7 @@ import A4Container from './components/A4Container';
 import PreviewModal from './components/PreviewModal';
 import { FormEditorProvider, useFormEditor } from './context/FormEditorContext';
 import optikApi from '../../api/optik';
+import html2canvas from 'html2canvas';
 
 // FormEditor Context'ine erişmek için wrapper bileşen
 const OptikOlusturmaContent = () => {
@@ -15,12 +16,60 @@ const OptikOlusturmaContent = () => {
   const [formTitle, setFormTitle] = useState('Yeni Optik Form');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
+  const [userData, setUserData] = useState(null);
   
   // Önizleme için state
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   
+  // Component yüklendiğinde kullanıcı bilgilerini al
+  useEffect(() => {
+    try {
+      const userStr = localStorage.getItem('user');
+      if (userStr) {
+        const parsedUser = JSON.parse(userStr);
+        setUserData(parsedUser);
+      }
+    } catch (err) {
+      console.error("Kullanıcı bilgileri alınamadı:", err);
+    }
+  }, []);
+  
   const handleTitleChange = (e) => {
     setFormTitle(e.target.value);
+  };
+  
+  // A4 alanını resme dönüştür
+  const captureFormImage = async () => {
+    try {
+      const a4Container = document.getElementById('a4-container');
+      if (!a4Container) return null;
+      
+      // Kaldırma butonlarını ve yeniden boyutlandırma tutamaçlarını gizle
+      const removeButtons = a4Container.querySelectorAll('.removeButton');
+      const resizeHandles = a4Container.querySelectorAll('.resize-handle');
+      
+      // Geçici olarak gizle
+      removeButtons.forEach(btn => btn.style.display = 'none');
+      resizeHandles.forEach(handle => handle.style.display = 'none');
+      
+      // HTML2Canvas ile resim oluştur
+      const canvas = await html2canvas(a4Container, {
+        backgroundColor: 'white',
+        scale: 1,
+        useCORS: true,
+        logging: false
+      });
+      
+      // Gizlediğimiz elemanları tekrar göster
+      removeButtons.forEach(btn => btn.style.display = '');
+      resizeHandles.forEach(handle => handle.style.display = '');
+      
+      // Canvas'ı base64 resim URL'sine dönüştür
+      return canvas.toDataURL('image/png');
+    } catch (err) {
+      console.error("Form resmi oluşturulurken hata:", err);
+      return null;
+    }
   };
   
   const handleSave = async () => {
@@ -28,27 +77,125 @@ const OptikOlusturmaContent = () => {
       setSaving(true);
       setError(null);
       
-      // Form verilerini hazırla
+      // Form doğrulama kontrollerini yap
+      if (!formTitle.trim()) {
+        setError("Form başlığı boş olamaz");
+        setSaving(false);
+        return;
+      }
+      
+      if (pageElements.length === 0) {
+        setError("Form elemanları eklemeden kaydedemezsiniz");
+        setSaving(false);
+        return;
+      }
+      
+      // Kullanıcı bilgilerini kontrol et
+      if (!userData) {
+        const userStr = localStorage.getItem('user');
+        if (!userStr) {
+          setError("Oturum bilgileriniz bulunamadı. Lütfen tekrar giriş yapın.");
+          setSaving(false);
+          return;
+        }
+        
+        try {
+          setUserData(JSON.parse(userStr));
+        } catch (err) {
+          setError("Kullanıcı bilgileri geçersiz. Lütfen tekrar giriş yapın.");
+          setSaving(false);
+          return;
+        }
+      }
+      
+      if (!userData._id) {
+        setError("Kullanıcı kimliği bulunamadı. Lütfen tekrar giriş yapın.");
+        setSaving(false);
+        return;
+      }
+      
+      // Okul ID'sini doğru şekilde al
+      let schoolId = null;
+      if (userData.school && userData.school._id) {
+        schoolId = userData.school._id;
+      } else if (userData.schoolId) {
+        schoolId = userData.schoolId;
+      } else {
+        setError("Okul bilgisi bulunamadı. Lütfen tekrar giriş yapın.");
+        setSaving(false);
+        return;
+      }
+      
+      // Form görüntüsünü oluştur
+      const opticalFormImage = await captureFormImage() || 
+        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==";
+      
+      // Form verilerini enhancedElements ile hazırla
+      const enhancedElements = getEnhancedElements();
+      
+      // Form verisi
       const formData = {
         title: formTitle,
-        elements: pageElements
+        school: schoolId,
+        createdBy: userData._id,
+        date: new Date().toISOString(),
+        opticalFormImage: opticalFormImage,
+        components: enhancedElements
       };
       
-      // API ile kaydet
-      await optikApi.createForm(formData);
+      console.log("Gönderilecek form verisi:", {
+        ...formData,
+        opticalFormImage: formData.opticalFormImage.substring(0, 30) + "..." // Konsolu boğmamak için
+      });
       
+      // Önemli alanları son kez kontrol et
+      if (!formData.createdBy || formData.createdBy === "undefined") {
+        setError("Kullanıcı kimliği geçersiz. Lütfen tekrar giriş yapın.");
+        setSaving(false);
+        return;
+      }
+      
+      if (!formData.school || formData.school === "undefined") {
+        setError("Okul kimliği geçersiz. Lütfen tekrar giriş yapın.");
+        setSaving(false);
+        return;
+      }
+      console.log("Form verisi detayları:", {
+        title: formData.title,
+        school: formData.school,
+        createdBy: formData.createdBy,
+        date: formData.date,
+        // opticalFormImage'i kısaltarak gösterme
+        opticalFormImageLength: formData.opticalFormImage.length,
+        opticalFormImagePreview: formData.opticalFormImage.substring(0, 100) + "...",
+        // Componentlerin detaylı incelenmesi
+        componentsCount: formData.components.length,
+        componentsSample: formData.components.slice(0, 3),
+        components: formData.components.map(comp => ({
+          id: comp.id,
+          uniqueId: comp.uniqueId,
+          type: comp.type,
+          position: comp.position,
+          size: comp.size,
+          content: comp.content
+        }))
+      });
+      // API ile kaydet
+      const response = await optikApi.createForm(formData);
+      console.log("API yanıtı:", response);
+      console.log(formData);
       // Başarıyla kaydedildi, dashboard'a yönlendir
       navigate('/dashboard', { 
         state: { message: 'Form başarıyla kaydedildi.' } 
       });
     } catch (error) {
-      setError(error.response?.data?.message || 'Form kaydedilirken bir hata oluştu.');
       console.error('Form kaydedilirken hata:', error);
+      setError(error.response?.data?.message || error.message || 'Form kaydedilirken bir hata oluştu.');
     } finally {
       setSaving(false);
     }
   };
-
+  
   // Önizleme modalını aç
   const openPreview = () => {
     setIsPreviewOpen(true);

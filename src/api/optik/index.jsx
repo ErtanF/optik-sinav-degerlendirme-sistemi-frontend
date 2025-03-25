@@ -1,21 +1,31 @@
-// src/api/optik/index.jsx - Yeni dosya
+// src/api/optik/index.jsx
 import apiClient from '../client';
 
 const optikApi = {
   // Form oluştur
   createForm: async (formData) => {
     try {
-      const response = await apiClient.post('/optik/save', formData);
+      // Kritik alanlar için veri doğrulama
+      if (!formData.createdBy || formData.createdBy === 'undefined') {
+        throw new Error('Geçerli bir kullanıcı ID\'si gereklidir.');
+      }
+      
+      if (!formData.school || formData.school === 'undefined') {
+        throw new Error('Geçerli bir okul ID\'si gereklidir.');
+      }
+      
+      const response = await apiClient.post('/exam/addexam', formData);
       return response;
     } catch (error) {
+      console.error("Form oluşturma hatası:", error);
       throw error;
     }
   },
   
   // Tüm formları getir
-  getAllForms: async () => {
+  getAllForms: async (creatorId) => {
     try {
-      const response = await apiClient.get('/optik/list');
+      const response = await apiClient.get(`/exam/getExam/creator/${creatorId}`);
       return response;
     } catch (error) {
       throw error;
@@ -25,7 +35,7 @@ const optikApi = {
   // Belirli bir formu getir
   getFormById: async (id) => {
     try {
-      const response = await apiClient.get(`/optik/${id}`);
+      const response = await apiClient.get(`/exam/getExams/${id}`);
       return response;
     } catch (error) {
       throw error;
@@ -35,7 +45,7 @@ const optikApi = {
   // Formu güncelle
   updateForm: async (id, formData) => {
     try {
-      const response = await apiClient.put(`/optik/${id}`, formData);
+      const response = await apiClient.put(`/exam/editExam/${id}`, formData);
       return response;
     } catch (error) {
       throw error;
@@ -45,7 +55,7 @@ const optikApi = {
   // Formu sil
   deleteForm: async (id) => {
     try {
-      const response = await apiClient.delete(`/optik/${id}`);
+      const response = await apiClient.delete(`/exam/deleteExam/${id}`);
       return response;
     } catch (error) {
       throw error;
