@@ -10,6 +10,12 @@ const OptikDetay = () => {
   const [form, setForm] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // Backend URL'ini al - API URL'inden "/api" kısmını çıkararak
+  const getBaseUrl = () => {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5500/api';
+    return apiUrl.replace('/api', '');
+  };
 
   useEffect(() => {
     const fetchFormDetails = async () => {
@@ -17,6 +23,7 @@ const OptikDetay = () => {
         setLoading(true);
         setError(null);
         const response = await optikApi.getFormById(id);
+        console.log('Form verisi:', response.data); // Veriyi kontrol etmek için
         setForm(response.data);
       } catch (error) {
         console.error('Form detayları yüklenirken hata:', error);
@@ -40,6 +47,9 @@ const OptikDetay = () => {
       return;
     }
     
+    const baseUrl = getBaseUrl();
+    const formImageUrl = `${baseUrl}${form.opticalFormImage}`;
+    
     const htmlContent = `
       <!DOCTYPE html>
       <html>
@@ -55,7 +65,7 @@ const OptikDetay = () => {
       <body>
         <div class="container">
           <h1>${form.title}</h1>
-          <img src="${form.opticalFormImage}" alt="${form.title}" class="form-image" />
+          <img src="${formImageUrl}" alt="${form.title}" class="form-image" />
         </div>
         <script>window.onload = () => { window.print(); setTimeout(() => window.close(), 500); };</script>
       </body>
@@ -118,6 +128,9 @@ const OptikDetay = () => {
     );
   }
 
+  // Backend'in temel URL'ini oluştur
+  const baseUrl = getBaseUrl();
+
   return (
     <div className="optik-detay-page">
       <div className="page-header">
@@ -144,7 +157,7 @@ const OptikDetay = () => {
         <div className="form-preview">
           {form.opticalFormImage ? (
             <img 
-              src={form.opticalFormImage} 
+              src={`${baseUrl}${form.opticalFormImage}`}
               alt={form.title} 
               className="form-image"
             />
