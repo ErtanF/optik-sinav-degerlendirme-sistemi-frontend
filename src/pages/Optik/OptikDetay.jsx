@@ -1,3 +1,4 @@
+// src/pages/Optik/OptikDetay.jsx
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import './OptikDetay.css';
@@ -59,7 +60,7 @@ const OptikDetay = () => {
           @page { size: A4; margin: 0; }
           body { margin: 0; padding: 0; }
           .container { width: 100%; max-width: 800px; margin: 0 auto; padding: 20px; }
-          .form-image { width: 100%; height: auto; }
+          .form-image { width: 100%; height: auto; aspect-ratio: 210/297; }
         </style>
       </head>
       <body>
