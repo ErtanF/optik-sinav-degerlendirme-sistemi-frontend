@@ -7,6 +7,8 @@ import Login from '../pages/Auth/Login';
 import Register from '../pages/Auth/Register';
 import Dashboard from '../pages/Dashboard/Dashboard';
 import OptikOlusturma from '../pages/Optik/OptikOlusturma';
+import OptikFormlarim from '../pages/Optik/OptikFormlarim';
+import OptikDetay from '../pages/Optik/OptikDetay';
 import NotFound from '../pages/NotFound';
 
 // PrivateRoute bileşeni
@@ -42,6 +44,14 @@ const routes = (isAuthenticated) => [
       { 
         path: 'optik-olustur', 
         element: <PrivateRoute><OptikOlusturma /></PrivateRoute> 
+      },
+      { 
+        path: 'optik-formlarim', 
+        element: <PrivateRoute><OptikFormlarim /></PrivateRoute> 
+      },
+      { 
+        path: 'optik/:id', 
+        element: <PrivateRoute><OptikDetay /></PrivateRoute> 
       },
       { 
         path: '*', 

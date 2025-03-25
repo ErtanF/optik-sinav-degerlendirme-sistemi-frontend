@@ -72,7 +72,7 @@ const OptikOlusturmaContent = () => {
     }
   };
   
-  const handleSave = async () => {
+   const handleSave = async () => {
     try {
       setSaving(true);
       setError(null);
@@ -127,8 +127,18 @@ const OptikOlusturmaContent = () => {
       }
       
       // Form görüntüsünü oluştur
-      const opticalFormImage = await captureFormImage() || 
-        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==";
+      let opticalFormImage;
+      try {
+        opticalFormImage = await captureFormImage();
+        if (!opticalFormImage) {
+          throw new Error("Form görüntüsü oluşturulamadı");
+        }
+      } catch (err) {
+        console.error("Form görüntüsü oluşturulurken hata:", err);
+        setError("Form görüntüsü oluşturulamadı: " + err.message);
+        setSaving(false);
+        return;
+      }
       
       // Form verilerini enhancedElements ile hazırla
       const enhancedElements = getEnhancedElements();
@@ -143,54 +153,35 @@ const OptikOlusturmaContent = () => {
         components: enhancedElements
       };
       
-      console.log("Gönderilecek form verisi:", {
-        ...formData,
-        opticalFormImage: formData.opticalFormImage.substring(0, 30) + "..." // Konsolu boğmamak için
-      });
-      
-      // Önemli alanları son kez kontrol et
-      if (!formData.createdBy || formData.createdBy === "undefined") {
-        setError("Kullanıcı kimliği geçersiz. Lütfen tekrar giriş yapın.");
-        setSaving(false);
-        return;
-      }
-      
-      if (!formData.school || formData.school === "undefined") {
-        setError("Okul kimliği geçersiz. Lütfen tekrar giriş yapın.");
-        setSaving(false);
-        return;
-      }
-      console.log("Form verisi detayları:", {
+      console.log("Gönderilecek veriler:", {
         title: formData.title,
         school: formData.school,
         createdBy: formData.createdBy,
         date: formData.date,
-        // opticalFormImage'i kısaltarak gösterme
-        opticalFormImageLength: formData.opticalFormImage.length,
-        opticalFormImagePreview: formData.opticalFormImage.substring(0, 100) + "...",
-        // Componentlerin detaylı incelenmesi
-        componentsCount: formData.components.length,
-        componentsSample: formData.components.slice(0, 3),
-        components: formData.components.map(comp => ({
-          id: comp.id,
-          uniqueId: comp.uniqueId,
-          type: comp.type,
-          position: comp.position,
-          size: comp.size,
-          content: comp.content
-        }))
+        imageSize: formData.opticalFormImage.length,
+        componentsCount: formData.components.length
       });
+      
       // API ile kaydet
       const response = await optikApi.createForm(formData);
       console.log("API yanıtı:", response);
-      console.log(formData);
+      
       // Başarıyla kaydedildi, dashboard'a yönlendir
       navigate('/dashboard', { 
         state: { message: 'Form başarıyla kaydedildi.' } 
       });
     } catch (error) {
       console.error('Form kaydedilirken hata:', error);
-      setError(error.response?.data?.message || error.message || 'Form kaydedilirken bir hata oluştu.');
+      
+      // Detaylı hata mesajı göster
+      const errorMessage = error.response?.data?.message || error.message || 'Form kaydedilirken bir hata oluştu.';
+      let detailMessage = '';
+      
+      if (error.response?.data?.errors) {
+        detailMessage = ': ' + error.response.data.errors.join(', ');
+      }
+      
+      setError(errorMessage + detailMessage);
     } finally {
       setSaving(false);
     }
