@@ -43,14 +43,14 @@ export const formElementsData = [
       id: 'image',        // Benzersiz tanımlayıcı
       type: 'image',      // Eleman türü olarak 'image' kullanıyoruz
       title: 'Resim',     // Sidebar'da gösterilecek başlık
-      image: '/src/assets/images/resim/Screenshot_2.png', // Sidebar önizleme
+      image: '/src/assets/images/resim/Screenshot_2.jpg', // Sidebar önizleme
       content: ''         // Varsayılan olarak boş, kullanıcı değiştirebilir
     },
     {
       id: 'image',        // Benzersiz tanımlayıcı
       type: 'image',      // Eleman türü olarak 'image' kullanıyoruz
       title: 'Resim',     // Sidebar'da gösterilecek başlık
-      image: '/src/assets/images/resim/Screenshot_2.jpg', // Sidebar önizleme
+      image: '/src/assets/images/resim/baha3.png', // Sidebar önizleme
       content: ''         // Varsayılan olarak boş, kullanıcı değiştirebilir
     },
     { 

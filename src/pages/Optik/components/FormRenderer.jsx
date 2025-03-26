@@ -2,7 +2,7 @@
 import React, { useRef, useEffect } from 'react';
 import html2canvas from 'html2canvas';
 
-const FormRenderer = ({ pageElements, formTitle, onRender, visible = false }) => {
+const FormRenderer = ({ pageElements, onRender, visible = false }) => {
   const containerRef = useRef(null);
   
   useEffect(() => {
@@ -74,6 +74,25 @@ const FormRenderer = ({ pageElements, formTitle, onRender, visible = false }) =>
         pageBreakInside: 'avoid'
       }}
     >
+      {/* Optik form mazgallarını ekle */}
+      <div 
+        className="optik-grid"
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundSize: '20px 20px',
+          backgroundImage: `
+            linear-gradient(to right, rgba(230, 230, 230, 0.5) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(230, 230, 230, 0.5) 1px, transparent 1px)
+          `,
+          zIndex: 0,
+          pointerEvents: 'none'
+        }}
+      />
+      
       {/* Filtrelenmiş elemanları göster */}
       {filteredElements.map(element => {
         // Normal elementler için stil tanımlaması
@@ -84,7 +103,7 @@ const FormRenderer = ({ pageElements, formTitle, onRender, visible = false }) =>
           width: `${element.size?.width || 100}px`,
           height: `${element.size?.height || 100}px`,
           boxSizing: 'border-box',
-          backgroundColor: 'white',
+          backgroundColor: 'transparent', // Arka planı şeffaf yap
           zIndex: element.zIndex || 1,
           transform: 'translate(0, 0)', // Sıfır transform değeri
           pointerEvents: 'none' // Etkileşimleri devre dışı bırak

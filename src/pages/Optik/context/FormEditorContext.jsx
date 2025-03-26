@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useMemo, useRef } from 'react';
-import { snapToGrid } from '../utils/helpers';
+import { GRID_SIZE } from '../utils/helpers';
 
 const FormEditorContext = createContext();
 
@@ -18,6 +18,43 @@ export const FormEditorProvider = ({ children }) => {
   const startSizeRef = useRef({ width: 0, height: 0 });
   const startElementPositionRef = useRef({ x: 0, y: 0 });
 
+  // İki elementin çarpışıp çarpışmadığını kontrol et
+  const checkCollision = (rect1, rect2) => {
+    // Sadece tam üst üste gelme durumunu kontrol et
+    return !(
+      rect1.right <= rect2.left ||
+      rect1.left >= rect2.right ||
+      rect1.bottom <= rect2.top ||
+      rect1.top >= rect2.bottom
+    );
+  };
+  
+  // Yeni boyut ve pozisyon ile çarpışma kontrolü
+  const isResizeValid = (elementId, newX, newY, newWidth, newHeight) => {
+    const newRect = {
+      left: newX,
+      top: newY,
+      right: newX + newWidth,
+      bottom: newY + newHeight
+    };
+    
+    // Diğer elementlerle çarpışma kontrolü
+    const hasCollision = pageElements.some(el => {
+      if (el.uniqueId === elementId) return false; // Kendisiyle çarpışma kontrolü yapma
+      
+      const otherRect = {
+        left: el.position.x,
+        top: el.position.y,
+        right: el.position.x + (el.size?.width || GRID_SIZE * 22),
+        bottom: el.position.y + (el.size?.height || GRID_SIZE * 22)
+      };
+      
+      return checkCollision(newRect, otherRect);
+    });
+    
+    return !hasCollision;
+  };
+
   // Eleman güncelleme
   const updateElement = useCallback((uniqueId, updates) => {
     setPageElements(prev => prev.map(el => 
@@ -31,13 +68,20 @@ export const FormEditorProvider = ({ children }) => {
     
     console.log('Adding element with ID:', uniqueId, 'Element:', element, 'Position:', position);
     
+    // Grid boyutu 10px olduğundan, 22 mazgal için 22x10 = 220px
+    const gridSize = GRID_SIZE;
+    const mazgalSayisi = 22;
+    
     setPageElements(prev => [
       ...prev,
       {
         ...element,
         uniqueId,
         position,
-        size: element.size || { width: 100, height: 80 } // Default size
+        size: element.size || { 
+          width: gridSize * mazgalSayisi, 
+          height: gridSize * mazgalSayisi 
+        } // 22 mazgal boyutunda
       }
     ]);
     
@@ -97,8 +141,10 @@ export const FormEditorProvider = ({ children }) => {
     const deltaX = e.clientX - startPositionRef.current.x;
     const deltaY = e.clientY - startPositionRef.current.y;
     
-    const snappedDeltaX = Math.round(deltaX / 20) * 20; // gridSize = 20
-    const snappedDeltaY = Math.round(deltaY / 20) * 20;
+    // Grid'e göre hizalama
+    const gridSize = GRID_SIZE; // Mazgal boyutu
+    const snappedDeltaX = Math.round(deltaX / gridSize) * gridSize;
+    const snappedDeltaY = Math.round(deltaY / gridSize) * gridSize;
     
     const { width: startWidth, height: startHeight } = startSizeRef.current;
     const { x: startX, y: startY } = startElementPositionRef.current;
@@ -111,34 +157,53 @@ export const FormEditorProvider = ({ children }) => {
     // Köşeye göre hesaplama
     switch (resizeCorner) {
       case 'topLeft':
-        newWidth = Math.max(20, startWidth - snappedDeltaX);
-        newHeight = Math.max(20, startHeight - snappedDeltaY);
+        newWidth = Math.max(gridSize, startWidth - snappedDeltaX);
+        newHeight = Math.max(gridSize, startHeight - snappedDeltaY);
+        // Mazgal boyutuna göre ayarla
+        newWidth = Math.round(newWidth / gridSize) * gridSize;
+        newHeight = Math.round(newHeight / gridSize) * gridSize;
         newX = startX + (startWidth - newWidth);
         newY = startY + (startHeight - newHeight);
         break;
       case 'topRight':
-        newWidth = Math.max(20, startWidth + snappedDeltaX);
-        newHeight = Math.max(20, startHeight - snappedDeltaY);
+        newWidth = Math.max(gridSize, startWidth + snappedDeltaX);
+        newHeight = Math.max(gridSize, startHeight - snappedDeltaY);
+        // Mazgal boyutuna göre ayarla
+        newWidth = Math.round(newWidth / gridSize) * gridSize;
+        newHeight = Math.round(newHeight / gridSize) * gridSize;
         newY = startY + (startHeight - newHeight);
         break;
       case 'bottomLeft':
-        newWidth = Math.max(20, startWidth - snappedDeltaX);
-        newHeight = Math.max(20, startHeight + snappedDeltaY);
+        newWidth = Math.max(gridSize, startWidth - snappedDeltaX);
+        newHeight = Math.max(gridSize, startHeight + snappedDeltaY);
+        // Mazgal boyutuna göre ayarla
+        newWidth = Math.round(newWidth / gridSize) * gridSize;
+        newHeight = Math.round(newHeight / gridSize) * gridSize;
         newX = startX + (startWidth - newWidth);
         break;
       case 'bottomRight':
-        newWidth = Math.max(20, startWidth + snappedDeltaX);
-        newHeight = Math.max(20, startHeight + snappedDeltaY);
+        newWidth = Math.max(gridSize, startWidth + snappedDeltaX);
+        newHeight = Math.max(gridSize, startHeight + snappedDeltaY);
+        // Mazgal boyutuna göre ayarla
+        newWidth = Math.round(newWidth / gridSize) * gridSize;
+        newHeight = Math.round(newHeight / gridSize) * gridSize;
         break;
       default:
         break;
     }
     
-    updateElement(activeElementId, {
-      position: { x: newX, y: newY },
-      size: { width: newWidth, height: newHeight }
-    });
-  }, [resizing, activeElementId, resizeCorner, updateElement]);
+    // Konumu da mazgala göre ayarla
+    newX = Math.round(newX / gridSize) * gridSize;
+    newY = Math.round(newY / gridSize) * gridSize;
+    
+    // Çarpışma kontrolü
+    if (isResizeValid(activeElementId, newX, newY, newWidth, newHeight)) {
+      updateElement(activeElementId, {
+        position: { x: newX, y: newY },
+        size: { width: newWidth, height: newHeight }
+      });
+    }
+  }, [resizing, activeElementId, resizeCorner, updateElement, pageElements]);
 
   // Boyutlandırma durdurma
   const stopResize = useCallback(() => {
@@ -177,23 +242,7 @@ export const FormEditorProvider = ({ children }) => {
     setActiveElementId(uniqueId);
   }, [editingTextId, saveTextContent]);
 
-  // Öğrenci alanlarını güncelleme
-  const updateStudentFields = useCallback((student) => {
-    if (!student) return;
-    
-    setPageElements(elements => elements.map(element => {
-      if (element.type === 'field') {
-        if (element.id === 'nameSurname') {
-          return { ...element, content: student.name };
-        } else if (element.id === 'schoolNumber') {
-          return { ...element, content: student.number };
-        } else if (element.id === 'classInfo') {
-          return { ...element, content: student.class };
-        }
-      }
-      return element;
-    }));
-  }, []);
+
 
   // Sıraya göre elemanları verme
   const sortedElements = useMemo(() => {
@@ -219,7 +268,6 @@ export const FormEditorProvider = ({ children }) => {
     startEditing,
     handleContentChange,
     saveTextContent,
-    updateStudentFields
   };
 
   return (

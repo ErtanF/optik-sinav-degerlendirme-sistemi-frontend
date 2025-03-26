@@ -75,7 +75,7 @@ const OptikOlusturmaContent = () => {
         
         try {
           setUserData(JSON.parse(userStr));
-        } catch (err) {
+        } catch {
           setError("Kullanıcı bilgileri geçersiz. Lütfen tekrar giriş yapın.");
           setSaving(false);
           return;

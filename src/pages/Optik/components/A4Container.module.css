@@ -15,7 +15,7 @@
   position: relative;
   width: 210mm; /* Tam A4 genişliği (mm) */
   height: 297mm; /* Tam A4 yüksekliği (mm) */
-  background-color: white;
+  background-color: transparent; /* Arkaplanı şeffaf yap */
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   margin: 1rem 0;
   overflow: visible;
@@ -27,9 +27,10 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-size: 20px 20px;
+  background-size: 10px 10px;
   background-image:
     linear-gradient(to right, rgba(0, 0, 0, 0.05) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
   pointer-events: none;
+  z-index: 0;
 }

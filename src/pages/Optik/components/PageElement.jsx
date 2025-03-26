@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { memo, useEffect, useRef } from 'react';
 import styles from './PageElement.module.css';
 import ResizeHandles from './ResizeHandles';
 import TextEditor from './TextEditor';
@@ -24,11 +24,52 @@ const PageElement = memo(function PageElement({
     setEditingContent
   } = useFormEditor();
   
+  const elementRef = useRef(null);
+  const dragStartPosRef = useRef(null);
+  const elementStartPosRef = useRef(null);
+  
+  // Sürükleme sonrası elementin draggable özelliğinin tekrar etkinleştirilmesini sağla
+  useEffect(() => {
+    const elementNode = elementRef.current;
+    
+    if (elementNode && isActive && !isResizing && !isEditing) {
+      // DragEnd olayından sonra draggable özelliğini yeniden ayarla
+      const enableDraggable = () => {
+        elementNode.draggable = true;
+      };
+      
+      elementNode.addEventListener('dragend', enableDraggable);
+      
+      return () => {
+        elementNode.removeEventListener('dragend', enableDraggable);
+      };
+    }
+  }, [isActive, isResizing, isEditing]);
+  
+  // Sürüklenen element için daha iyi yönetim
+  useEffect(() => {
+    if (isActive && !isResizing && !isEditing && elementRef.current) {
+      const element = elementRef.current;
+      
+      // Element aktif olduğunda draggable yap
+      element.draggable = true;
+      
+      // Element draggable olduğunda CSS'i güncelle
+      if (element.draggable) {
+        element.classList.add(styles.draggableActive);
+      }
+      
+      return () => {
+        element.classList.remove(styles.draggableActive);
+      };
+    }
+  }, [isActive, isResizing, isEditing]);
+  
   const elementStyle = {
     left: `${element.position?.x || 0}px`,
     top: `${element.position?.y || 0}px`,
-    width: element.size?.width ? `${element.size.width}px` : 'auto',
-    height: element.size?.height ? `${element.size.height}px` : 'auto',
+    width: element.size?.width ? `${element.size.width}px` : '450px',
+    height: element.size?.height ? `${element.size.height}px` : '260px',
   };
 
   // Basit sınıf birleştirme
@@ -37,6 +78,11 @@ const PageElement = memo(function PageElement({
   const handleActivate = (e) => {
     e.stopPropagation();
     setActiveElement(element.uniqueId);
+    
+    // Tıklandığında da draggable özelliğini aktifleştir
+    if (elementRef.current) {
+      elementRef.current.draggable = !isResizing && !isEditing;
+    }
   };
 
   const handleRemove = (e) => {
@@ -51,6 +97,65 @@ const PageElement = memo(function PageElement({
       setEditingTextId(null);
       setEditingContent('');
     }
+  };
+
+  // Sürükleme bittiğinde elementi tekrar sürüklenebilir yapma
+  const handleCustomDragEnd = (e) => {
+    // Normal sürükleme bitirme işlemini yap
+    onDragEnd(e);
+    
+    // Elementi aktif ve sürüklenebilir halde tut
+    if (elementRef.current) {
+      elementRef.current.draggable = true;
+      setActiveElement(element.uniqueId);
+      elementRef.current.classList.add(styles.draggableActive);
+    }
+  };
+
+  const handleElementDragStart = (e) => {
+    if (e.target.closest('.resize-handle') || e.target.closest('.editing')) {
+      e.preventDefault();
+      return;
+    }
+    
+    // Yeni başlayan bir sürükleme için elemana tıklama yap
+    setActiveElement(element.uniqueId);
+    e.dataTransfer.setData('application/json', JSON.stringify({ uniqueId: element.uniqueId }));
+    
+    // onDragStart callback'i çağır
+    onDragStart(e, element.uniqueId);
+    
+    // Sürükleme başlangıç pozisyonlarını kaydet
+    dragStartPosRef.current = { x: e.clientX, y: e.clientY };
+    
+    const elementNode = document.getElementById(element.uniqueId);
+    if (elementNode) {
+      elementStartPosRef.current = {
+        x: parseInt(elementNode.style.left, 10) || 0,
+        y: parseInt(elementNode.style.top, 10) || 0
+      };
+      
+      // Sürükleme sırasında opaklığı azalt ve önplanda göster
+      elementNode.classList.add(styles.dragging);
+      elementNode.style.zIndex = "1000";
+      
+      // İçerik görünürlüğünü artır
+      const contentElements = elementNode.querySelectorAll('img, .' + styles.textContent);
+      contentElements.forEach(el => {
+        el.style.backgroundColor = 'rgba(255, 255, 255, 0.7)';
+        el.style.boxShadow = '0 0 8px rgba(255, 165, 100, 0.3)';
+        el.style.border = '1px dashed rgba(255, 155, 100, 0.6)';
+      });
+      
+      // Element aktif olduğunu belirten bir veri özelliği ekle
+      elementNode.dataset.active = "true";
+    }
+    
+    // Sürükleme sırasında gölge efektini kaldır
+    e.dataTransfer.effectAllowed = 'move';
+    const emptyImg = new Image();
+    emptyImg.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+    e.dataTransfer.setDragImage(emptyImg, 0, 0);
   };
 
   const renderContent = () => {
@@ -68,8 +173,12 @@ const PageElement = memo(function PageElement({
     if (element.type === 'text' || element.type === 'field') {
       return (
         <div 
-          className={styles.textContent}
+          className={`${styles.textContent} ${isActive ? styles.activeContent : ''}`}
           onDoubleClick={() => startEditing(element)}
+          style={{ 
+            backgroundColor: element.type === 'field' ? 'rgba(252, 228, 215, 0.8)' : 'transparent',
+            border: element.type === 'field' ? '1px dashed rgba(255, 155, 100, 0.5)' : 'none'
+          }}
         >
           {element.content || (element.type === 'field' ? 
             element.title === 'Ad Soyad Alanı' ? 'Ad Soyad Bilgisi' : 
@@ -87,25 +196,28 @@ const PageElement = memo(function PageElement({
         <img 
           src={element.content || element.image} 
           alt="Form Image" 
-          className={styles.formImage}
+          className={`${styles.formImage} ${isActive ? styles.activeContent : ''}`}
           style={{ width: '100%', height: '100%', objectFit: 'contain' }}
         />
       );
     }
   
-
-    return <img src={element.image} alt={element.title} className={styles.image} />;
+    return <img src={element.image} alt={element.title} className={`${styles.image} ${isActive ? styles.activeContent : ''}`} />;
   };
 
   return (
     <div
       id={element.uniqueId}
+      ref={elementRef}
       className={elementClassName}
       style={elementStyle}
       draggable={!isResizing && !isEditing}
-      onDragStart={(e) => onDragStart(e, element.uniqueId)}
-      onDragEnd={onDragEnd}
+      onDragStart={handleElementDragStart}
+      onDragEnd={handleCustomDragEnd}
       onClick={handleActivate}
+      data-draggable="true"
+      data-element-id={element.uniqueId}
+      data-is-active={isActive}
     >
       {renderContent()}
       
