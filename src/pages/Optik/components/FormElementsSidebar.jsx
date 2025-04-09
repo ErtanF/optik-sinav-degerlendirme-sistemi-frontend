@@ -1,38 +1,77 @@
 import React, { memo } from 'react';
 import styles from './FormElementsSidebar.module.css';
+import { useFormEditor } from '../context/FormEditorContext';
 
-const FormElementsSidebar = memo(function FormElementsSidebar({ formElements }) {
-  const handleDragStart = (e, element) => {
-    console.log('Drag started for element:', element);
-    
-    // JSON.stringify ile element verisini saklıyoruz
-    e.dataTransfer.setData('application/json', JSON.stringify(element));
-    
-    // Görünmez sürükleme resmi
-    const emptyImg = new Image();
-    emptyImg.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
-    e.dataTransfer.setDragImage(emptyImg, 0, 0);
+const FormElementsSidebar = memo(function FormElementsSidebar() {
+  const { selectedTool, selectTool } = useFormEditor();
+  
+  // Optik form elemanları
+  const optikElements = [
+    {
+      id: 'nameSurname',
+      title: 'Ad Soyad Alanı',
+      description: 'Seçtiğiniz grid genişliği kadar harf gösterilir (A-Z)',
+      icon: '🔠'
+    },
+    {
+      id: 'number',
+      title: 'Numara Alanı',
+      description: 'Seçtiğiniz grid genişliği kadar rakam gösterilir (0-9)',
+      icon: '🔢'
+    },
+    {
+      id: 'multipleChoice',
+      title: 'Çoktan Seçmeli',
+      description: 'İlk sütun soru numarası, diğer sütunlar A,B,C,D,E şıkları',
+      icon: '📝'
+    },
+    /* Diğer elemanlar buraya eklenebilir */
+  ];
+  
+  // Tool seçme işlevi
+  const handleToolSelect = (toolId) => {
+    // Zaten seçili ise kaldır, değilse seç
+    selectTool(selectedTool === toolId ? null : toolId);
   };
-
+  
   return (
     <div className={styles.container}>
-      <div className={styles.title}>Form Elemanları</div>
+      <div className={styles.title}>Optik Form Elemanları</div>
+      
       <div className={styles.elementsList}>
-        {formElements.map(element => (
+        {optikElements.map(element => (
           <div
             key={element.id}
-            className={styles.elementItem}
-            draggable={true}
-            onDragStart={(e) => handleDragStart(e, element)}
+            className={`${styles.elementItem} ${selectedTool === element.id ? styles.selected : ''}`}
+            onClick={() => handleToolSelect(element.id)}
           >
-            <img 
-              src={element.image} 
-              alt={element.title} 
-              className={styles.elementImage} 
-            />
-            <span className={styles.elementTitle}>{element.title}</span>
+            <div className={styles.elementIcon}>{element.icon}</div>
+            <div className={styles.elementInfo}>
+              <span className={styles.elementTitle}>{element.title}</span>
+              <span className={styles.elementDesc}>{element.description}</span>
+            </div>
           </div>
         ))}
+      </div>
+      
+      <div className={styles.instructions}>
+        {!selectedTool && (
+          <p>Bir eleman türü seçin ve A4 sayfasında alan oluşturun.</p>
+        )}
+        {selectedTool && (
+          <div>
+            <p className={styles.activeToolInfo}>
+              <strong>{optikElements.find(e => e.id === selectedTool)?.title}</strong> seçildi.
+            </p>
+            <p>A4 sayfasında mouse ile sürükleyerek bir alan belirleyin.</p>
+            <button 
+              className={styles.cancelButton}
+              onClick={() => selectTool(null)}
+            >
+              İptal Et
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

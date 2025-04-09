@@ -15,10 +15,11 @@
   position: relative;
   width: 210mm; /* Tam A4 genişliği (mm) */
   height: 297mm; /* Tam A4 yüksekliği (mm) */
-  background-color: transparent; /* Arkaplanı şeffaf yap */
+  background-color: white;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   margin: 1rem 0;
   overflow: visible;
+  cursor: default;
 }
 
 .gridLines {
@@ -27,10 +28,62 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-size: 10px 10px;
+  background-size: 20px 20px;
   background-image:
     linear-gradient(to right, rgba(0, 0, 0, 0.05) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
   pointer-events: none;
-  z-index: 0;
+}
+
+.selectionArea {
+  position: absolute;
+  background-color: rgba(63, 81, 181, 0.15);
+  border: 2px dashed var(--primary-color);
+  pointer-events: none;
+  z-index: 10;
+}
+
+.cursorGuide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  cursor: crosshair;
+  z-index: 5;
+  pointer-events: none;
+}
+
+/* Tool selected cursor style */
+.container.toolSelected {
+  cursor: crosshair;
+}
+
+/* Hover helpers */
+.gridCell {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border: 1px dashed rgba(0, 0, 0, 0.1);
+  background-color: rgba(63, 81, 181, 0.05);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Optik eleman yazdırma için stilleri */
+@media print {
+  .wrapper {
+    padding: 0;
+    background-color: white;
+    box-shadow: none;
+  }
+  
+  .container {
+    box-shadow: none;
+    margin: 0;
+  }
+  
+  .gridLines, .selectionArea, .cursorGuide {
+    display: none;
+  }
 }

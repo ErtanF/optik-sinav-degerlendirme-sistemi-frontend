@@ -1,6 +1,62 @@
 .container {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    gap: 15px;
-  }
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 15px;
+}
+
+.helpSection, .infoSection {
+  background-color: white;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 15px;
+  font-size: 14px;
+}
+
+.helpSection h3, .infoSection h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: var(--primary-color);
+  font-size: 16px;
+}
+
+.helpSteps {
+  margin: 0;
+  padding-left: 16px;
+}
+
+.helpSteps li {
+  margin-bottom: 8px;
+  color: var(--text-color);
+}
+
+.infoList {
+  margin: 10px 0 0 0;
+  padding-left: 16px;
+}
+
+.infoList li {
+  margin-bottom: 8px;
+  color: var(--text-color);
+}
+
+.infoSection p {
+  margin-top: 0;
+  color: var(--text-color);
+  line-height: 1.5;
+}
+.infoSection p {
+  margin-top: 0;
+  color: var(--text-color);
+  line-height: 1.5;
+}
+
+.tip {
+  margin-top: 12px;
+  padding: 8px;
+  background-color: rgba(var(--primary-color-rgb), 0.08);
+  border-left: 3px solid var(--primary-color);
+  border-radius: 0 4px 4px 0;
+  font-size: 13px;
+  font-style: italic;
+}

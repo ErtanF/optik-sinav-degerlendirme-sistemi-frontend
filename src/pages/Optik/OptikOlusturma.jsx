@@ -1,4 +1,3 @@
-// src/pages/Optik/OptikOlusturma.jsx
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './OptikOlusturma.css';
@@ -40,7 +39,7 @@ const OptikOlusturmaContent = () => {
     setFormTitle(e.target.value);
   };
   
-  // Elemanları düzenle (mavi çerçeveleri kaldırma burada yapılmaz, FormRenderer'da yapılır)
+  // Elemanları düzenle
   const getEnhancedElements = () => {
     return pageElements;
   };
@@ -75,7 +74,7 @@ const OptikOlusturmaContent = () => {
         
         try {
           setUserData(JSON.parse(userStr));
-        } catch {
+        } catch (err) {
           setError("Kullanıcı bilgileri geçersiz. Lütfen tekrar giriş yapın.");
           setSaving(false);
           return;
@@ -117,7 +116,7 @@ const OptikOlusturmaContent = () => {
         components: getEnhancedElements()
       };
       
-      console.log("Gönderilecek veriler:", {
+      console.log("Gönderilecek form verisi:", {
         title: formData.title,
         school: formData.school,
         createdBy: formData.createdBy,

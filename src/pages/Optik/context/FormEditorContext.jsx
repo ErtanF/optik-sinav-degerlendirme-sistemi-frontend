@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useMemo, useRef } from 'react';
-import { GRID_SIZE } from '../utils/helpers';
+import { snapToGrid } from '../utils/helpers';
 
 const FormEditorContext = createContext();
 
@@ -8,53 +8,15 @@ export const useFormEditor = () => useContext(FormEditorContext);
 export const FormEditorProvider = ({ children }) => {
   const [pageElements, setPageElements] = useState([]);
   const [activeElementId, setActiveElementId] = useState(null);
-  const [editingTextId, setEditingTextId] = useState(null);
-  const [editingContent, setEditingContent] = useState('');
-  const [resizing, setResizing] = useState(false);
-  const [resizeCorner, setResizeCorner] = useState(null);
+  const [selectedTool, setSelectedTool] = useState(null); // Seçilen araç: null, 'nameSurname', 'number', 'multipleChoice'
+  const [selectionMode, setSelectionMode] = useState(false); // Alan seçme modu aktif mi?
+  const [selectionStart, setSelectionStart] = useState(null); // Seçimin başlangıç koordinatları
+  const [selectionEnd, setSelectionEnd] = useState(null); // Seçimin bitiş koordinatları
+  const [isCreating, setIsCreating] = useState(false); // Alan oluşturma işlemi devam ediyor mu?
   
-  // Referanslar
-  const startPositionRef = useRef({ x: 0, y: 0 });
-  const startSizeRef = useRef({ width: 0, height: 0 });
-  const startElementPositionRef = useRef({ x: 0, y: 0 });
-
-  // İki elementin çarpışıp çarpışmadığını kontrol et
-  const checkCollision = (rect1, rect2) => {
-    // Sadece tam üst üste gelme durumunu kontrol et
-    return !(
-      rect1.right <= rect2.left ||
-      rect1.left >= rect2.right ||
-      rect1.bottom <= rect2.top ||
-      rect1.top >= rect2.bottom
-    );
-  };
+  // Grid boyutları
+  const gridSizeRef = useRef(20); // Piksel olarak grid boyutu - tüm hesaplamalar bu değere göre yapılır
   
-  // Yeni boyut ve pozisyon ile çarpışma kontrolü
-  const isResizeValid = (elementId, newX, newY, newWidth, newHeight) => {
-    const newRect = {
-      left: newX,
-      top: newY,
-      right: newX + newWidth,
-      bottom: newY + newHeight
-    };
-    
-    // Diğer elementlerle çarpışma kontrolü
-    const hasCollision = pageElements.some(el => {
-      if (el.uniqueId === elementId) return false; // Kendisiyle çarpışma kontrolü yapma
-      
-      const otherRect = {
-        left: el.position.x,
-        top: el.position.y,
-        right: el.position.x + (el.size?.width || GRID_SIZE * 22),
-        bottom: el.position.y + (el.size?.height || GRID_SIZE * 22)
-      };
-      
-      return checkCollision(newRect, otherRect);
-    });
-    
-    return !hasCollision;
-  };
-
   // Eleman güncelleme
   const updateElement = useCallback((uniqueId, updates) => {
     setPageElements(prev => prev.map(el => 
@@ -62,212 +24,208 @@ export const FormEditorProvider = ({ children }) => {
     ));
   }, []);
 
-  // Yeni eleman ekleme
-  const addElement = useCallback((element, position) => {
-    const uniqueId = `${element.id}-${Date.now()}`;
+  // Yeni eleman ekleme - Optik Element
+  const addOptikElement = useCallback((type, startPos, endPos) => {
+    const gridSize = gridSizeRef.current;
     
-    console.log('Adding element with ID:', uniqueId, 'Element:', element, 'Position:', position);
+    // Başlangıç ve bitiş pozisyonlarını al
+    const startX = Math.min(startPos.x, endPos.x);
+    const startY = Math.min(startPos.y, endPos.y);
+    const endX = Math.max(startPos.x, endPos.x);
+    const endY = Math.max(startPos.y, endPos.y);
     
-    // Grid boyutu 10px olduğundan, 22 mazgal için 22x10 = 220px
-    const gridSize = GRID_SIZE;
-    const mazgalSayisi = 22;
+    // Izgara içinde kaç satır ve sütun var?
+    const rows = Math.floor((endY - startY) / gridSize);
+    const cols = Math.floor((endX - startX) / gridSize);
     
-    setPageElements(prev => [
-      ...prev,
-      {
-        ...element,
-        uniqueId,
-        position,
-        size: element.size || { 
-          width: gridSize * mazgalSayisi, 
-          height: gridSize * mazgalSayisi 
-        } // 22 mazgal boyutunda
-      }
-    ]);
+    // Element türüne göre minimum boyut kontrolü
+    let minRows = 2, minCols = 2;
     
+    switch(type) {
+      case 'nameSurname':
+        minCols = 2; // En az 2 harf için alan
+        break;
+      case 'number':
+        minCols = 2; // En az 2 rakam için alan
+        break;
+      case 'multipleChoice':
+        minCols = 1; // En az 1 şık (A şıkkı)
+        break;
+    }
+    
+    // Seçilen alan minimum boyut kontrolü
+    if (rows < minRows || cols < minCols) {
+      console.warn(`Seçilen alan çok küçük. En az ${minRows}x${minCols} grid seçilmelidir.`);
+      return null;
+    }
+    
+    // Elementin yerleşim ve boyut bilgileri - gridler içinde tam olarak sığacak şekilde
+    const position = {
+      x: startX,
+      y: startY
+    };
+    
+    const size = {
+      width: cols * gridSize,
+      height: rows * gridSize
+    };
+    
+    // Benzersiz ID oluştur
+    const uniqueId = `${type}-${Date.now()}`;
+    
+    // Yeni element objesi oluştur
+    const newElement = {
+      type,
+      uniqueId,
+      position,
+      size,
+      rows: rows,
+      cols: cols // Seçilen sütun sayısını koru
+    };
+    
+    // Element listesine ekle
+    setPageElements(prev => [...prev, newElement]);
+    
+    // Eklenen elementin ID'sini döndür (başka işlemler için kullanılabilir)
     return uniqueId;
   }, []);
-
+  
   // Eleman silme
   const removeElement = useCallback((uniqueId) => {
     setPageElements(prev => prev.filter(el => el.uniqueId !== uniqueId));
     
-    if (editingTextId === uniqueId) {
-      setEditingTextId(null);
-      setEditingContent('');
-    }
-    
     if (activeElementId === uniqueId) {
       setActiveElementId(null);
     }
-  }, [activeElementId, editingTextId]);
-
-  // Boyutlandırma başlatma
-  const startResize = useCallback((e, uniqueId, corner) => {
-    e.preventDefault();
-    e.stopPropagation();
+  }, [activeElementId]);
+  
+  // Alan seçme modunu başlat
+  const startAreaSelection = useCallback((tool, startPosition) => {
+    if (!tool) return;
     
-    console.log('Starting resize for element:', uniqueId, 'corner:', corner);
+    // Başlangıç pozisyonunu grid'e hizala
+    const gridSize = gridSizeRef.current;
+    const alignedStart = {
+      x: Math.floor(startPosition.x / gridSize) * gridSize,
+      y: Math.floor(startPosition.y / gridSize) * gridSize
+    };
     
-    setActiveElementId(uniqueId);
-    setResizing(true);
-    setResizeCorner(corner);
-    
-    startPositionRef.current = { x: e.clientX, y: e.clientY };
-    
-    const element = document.getElementById(uniqueId);
-    if (element) {
-      startSizeRef.current = { 
-        width: element.offsetWidth, 
-        height: element.offsetHeight 
-      };
-      
-      const elementData = pageElements.find(el => el.uniqueId === uniqueId);
-      if (elementData) {
-        startElementPositionRef.current = { 
-          x: elementData.position.x, 
-          y: elementData.position.y 
-        };
-      }
-    }
-  }, [pageElements]);
-
-  // Boyutlandırma devam ediyor
-  const handleResize = useCallback((e) => {
-    if (!resizing || !activeElementId || !resizeCorner) return;
-    
-    console.log('Resizing element:', activeElementId, 'corner:', resizeCorner);
-    
-    const deltaX = e.clientX - startPositionRef.current.x;
-    const deltaY = e.clientY - startPositionRef.current.y;
-    
-    // Grid'e göre hizalama
-    const gridSize = GRID_SIZE; // Mazgal boyutu
-    const snappedDeltaX = Math.round(deltaX / gridSize) * gridSize;
-    const snappedDeltaY = Math.round(deltaY / gridSize) * gridSize;
-    
-    const { width: startWidth, height: startHeight } = startSizeRef.current;
-    const { x: startX, y: startY } = startElementPositionRef.current;
-    
-    let newWidth = startWidth;
-    let newHeight = startHeight;
-    let newX = startX;
-    let newY = startY;
-    
-    // Köşeye göre hesaplama
-    switch (resizeCorner) {
-      case 'topLeft':
-        newWidth = Math.max(gridSize, startWidth - snappedDeltaX);
-        newHeight = Math.max(gridSize, startHeight - snappedDeltaY);
-        // Mazgal boyutuna göre ayarla
-        newWidth = Math.round(newWidth / gridSize) * gridSize;
-        newHeight = Math.round(newHeight / gridSize) * gridSize;
-        newX = startX + (startWidth - newWidth);
-        newY = startY + (startHeight - newHeight);
-        break;
-      case 'topRight':
-        newWidth = Math.max(gridSize, startWidth + snappedDeltaX);
-        newHeight = Math.max(gridSize, startHeight - snappedDeltaY);
-        // Mazgal boyutuna göre ayarla
-        newWidth = Math.round(newWidth / gridSize) * gridSize;
-        newHeight = Math.round(newHeight / gridSize) * gridSize;
-        newY = startY + (startHeight - newHeight);
-        break;
-      case 'bottomLeft':
-        newWidth = Math.max(gridSize, startWidth - snappedDeltaX);
-        newHeight = Math.max(gridSize, startHeight + snappedDeltaY);
-        // Mazgal boyutuna göre ayarla
-        newWidth = Math.round(newWidth / gridSize) * gridSize;
-        newHeight = Math.round(newHeight / gridSize) * gridSize;
-        newX = startX + (startWidth - newWidth);
-        break;
-      case 'bottomRight':
-        newWidth = Math.max(gridSize, startWidth + snappedDeltaX);
-        newHeight = Math.max(gridSize, startHeight + snappedDeltaY);
-        // Mazgal boyutuna göre ayarla
-        newWidth = Math.round(newWidth / gridSize) * gridSize;
-        newHeight = Math.round(newHeight / gridSize) * gridSize;
-        break;
-      default:
-        break;
-    }
-    
-    // Konumu da mazgala göre ayarla
-    newX = Math.round(newX / gridSize) * gridSize;
-    newY = Math.round(newY / gridSize) * gridSize;
-    
-    // Çarpışma kontrolü
-    if (isResizeValid(activeElementId, newX, newY, newWidth, newHeight)) {
-      updateElement(activeElementId, {
-        position: { x: newX, y: newY },
-        size: { width: newWidth, height: newHeight }
-      });
-    }
-  }, [resizing, activeElementId, resizeCorner, updateElement, pageElements]);
-
-  // Boyutlandırma durdurma
-  const stopResize = useCallback(() => {
-    console.log('Stopping resize');
-    setResizing(false);
-    setResizeCorner(null);
+    setSelectedTool(tool);
+    setSelectionMode(true);
+    setSelectionStart(alignedStart);
+    setSelectionEnd(alignedStart); // Başlangıçta başlangıç ve bitiş aynı
+    setIsCreating(true);
   }, []);
-
-  // Metin düzenleme başlatma
-  const startEditing = useCallback((element) => {
-    if (element.type === 'text' || element.type === 'field') {
-      setEditingTextId(element.uniqueId);
-      setEditingContent(element.content || '');
-    }
-  }, []);
-
-  // Metin içeriğini değiştirme
-  const handleContentChange = useCallback((e) => {
-    setEditingContent(e.target.value);
-  }, []);
-
-  // Metin içeriğini kaydetme
-  const saveTextContent = useCallback(() => {
-    if (!editingTextId) return;
+  
+  // Alan seçimi sırasında
+  const updateAreaSelection = useCallback((currentPosition) => {
+    if (!selectionMode || !selectionStart) return;
     
-    updateElement(editingTextId, { content: editingContent });
-    setEditingTextId(null);
-    setEditingContent('');
-  }, [editingTextId, editingContent, updateElement]);
-
+    // Izgara tabanlı bitiş pozisyonu
+    const gridSize = gridSizeRef.current;
+    const endX = Math.floor(currentPosition.x / gridSize) * gridSize;
+    const endY = Math.floor(currentPosition.y / gridSize) * gridSize;
+    
+    setSelectionEnd({ x: endX, y: endY });
+  }, [selectionMode, selectionStart]);
+  
+  // Alan seçimini tamamla
+  const completeAreaSelection = useCallback(() => {
+    if (!selectionMode || !selectionStart || !selectionEnd || !selectedTool) {
+      setSelectionMode(false);
+      setSelectionStart(null);
+      setSelectionEnd(null);
+      setIsCreating(false);
+      return;
+    }
+    
+    // Tam grid çizgilerine hizalanan seçim sınırlarını hesapla
+    const gridSize = gridSizeRef.current;
+    
+    // Başlangıç ve bitiş noktaları tam grid çizgilerine hizalanır
+    const alignedStart = {
+      x: Math.floor(selectionStart.x / gridSize) * gridSize,
+      y: Math.floor(selectionStart.y / gridSize) * gridSize
+    };
+    
+    const alignedEnd = {
+      x: Math.ceil(selectionEnd.x / gridSize) * gridSize,
+      y: Math.ceil(selectionEnd.y / gridSize) * gridSize
+    };
+    
+    // Yeni optik element oluştur
+    addOptikElement(selectedTool, alignedStart, alignedEnd);
+    
+    // Seçim modunu sıfırla
+    setSelectionMode(false);
+    setSelectionStart(null);
+    setSelectionEnd(null);
+    setSelectedTool(null);
+    setIsCreating(false);
+  }, [selectionMode, selectionStart, selectionEnd, selectedTool, addOptikElement]);
+  
+  // İptal etme
+  const cancelAreaSelection = useCallback(() => {
+    setSelectionMode(false);
+    setSelectionStart(null);
+    setSelectionEnd(null);
+    setIsCreating(false);
+  }, []);
+  
   // Aktif elemanı ayarlama
   const setActiveElement = useCallback((uniqueId) => {
-    if (editingTextId && editingTextId !== uniqueId) {
-      saveTextContent();
+    // Seçim modu aktifse seçimi iptal et
+    if (selectionMode) {
+      cancelAreaSelection();
     }
+    
     setActiveElementId(uniqueId);
-  }, [editingTextId, saveTextContent]);
+  }, [selectionMode, cancelAreaSelection]);
+  
+  // Araç seçimi
+  const selectTool = useCallback((tool) => {
+    setSelectedTool(tool);
+    
+    // Aktif elemandan çık
+    setActiveElementId(null);
+  }, []);
+  
+  // Geçerli seçim alanının boyutları
+  const selectionArea = useMemo(() => {
+    if (!selectionStart || !selectionEnd) return null;
+    
+    const startX = Math.min(selectionStart.x, selectionEnd.x);
+    const startY = Math.min(selectionStart.y, selectionEnd.y);
+    const width = Math.abs(selectionEnd.x - selectionStart.x);
+    const height = Math.abs(selectionEnd.y - selectionStart.y);
+    
+    return { 
+      x: startX, 
+      y: startY, 
+      width, 
+      height 
+    };
+  }, [selectionStart, selectionEnd]);
 
-
-
-  // Sıraya göre elemanları verme
-  const sortedElements = useMemo(() => {
-    return [...pageElements].sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
-  }, [pageElements]);
-
+  // Context değeri
   const value = {
-    pageElements: sortedElements,
+    pageElements,
     activeElementId,
-    editingTextId,
-    editingContent,
-    resizing,
-    resizeCorner,
+    selectedTool,
+    selectionMode,
+    selectionStart,
+    selectionEnd,
+    selectionArea,
+    isCreating,
+    gridSize: gridSizeRef.current,
     setActiveElement,
     updateElement,
-    addElement,
     removeElement,
-    startResize,
-    handleResize,
-    stopResize,
-    setResizing,
-    setResizeCorner,
-    startEditing,
-    handleContentChange,
-    saveTextContent,
+    selectTool,
+    startAreaSelection,
+    updateAreaSelection,
+    completeAreaSelection,
+    cancelAreaSelection
   };
 
   return (
@@ -276,3 +234,5 @@ export const FormEditorProvider = ({ children }) => {
     </FormEditorContext.Provider>
   );
 };
+
+export default FormEditorContext;

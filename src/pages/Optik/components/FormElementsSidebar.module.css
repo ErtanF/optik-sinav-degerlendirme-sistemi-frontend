@@ -1,49 +1,101 @@
 .container {
-    background-color: white;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-  }
-  
-  .title {
-    font-size: 16px;
-    padding: 12px;
-    border-bottom: 1px solid var(--border-color);
-    color: var(--primary-color);
-    font-weight: 500;
-  }
-  
-  .elementsList {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    padding: 10px;
-    max-height: 400px;
-    overflow-y: auto;
-  }
-  
-  .elementItem {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 10px;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    cursor: grab;
-    background-color: white;
-    transition: box-shadow 0.2s, border-color 0.2s;
-  }
-  
-  .elementItem:hover {
-    box-shadow: var(--shadow-sm);
-    border-color: var(--primary-color-light);
-  }
-  
-  .elementImage {
-    max-width: 100%;
-    margin-bottom: 8px;
-  }
-  
-  .elementTitle {
-    font-size: 14px;
-    text-align: center;
-  }
+  background-color: white;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.title {
+  font-size: 16px;
+  padding: 12px;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--primary-color);
+  font-weight: 500;
+}
+
+.elementsList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.elementItem {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: white;
+  transition: all 0.2s;
+}
+
+.elementItem:hover {
+  background-color: var(--background-color-light);
+  border-color: var(--primary-color-light);
+}
+
+.selected {
+  background-color: rgba(var(--primary-color-rgb), 0.1);
+  border-color: var(--primary-color);
+}
+
+.elementIcon {
+  font-size: 24px;
+  margin-right: 12px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.elementInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.elementTitle {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-color-dark);
+}
+
+.elementDesc {
+  font-size: 12px;
+  color: var(--text-color-light);
+  margin-top: 2px;
+}
+
+.instructions {
+  padding: 12px;
+  background-color: #f8f8f8;
+  font-size: 13px;
+  color: var(--text-color);
+  border-top: 1px solid var(--border-color);
+}
+
+.activeToolInfo {
+  color: var(--primary-color);
+  margin-bottom: 5px;
+}
+
+.cancelButton {
+  margin-top: 8px;
+  padding: 6px 12px;
+  background-color: #f5f5f5;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  color: var(--text-color);
+}
+
+.cancelButton:hover {
+  background-color: #eee;
+}

@@ -1,0 +1,125 @@
+/* Ortak Stil - Grid ölçüsü 20x20px */
+.bubble {
+  width: 16px;
+  height: 16px;
+  border: 1px solid #333;
+  border-radius: 50%;
+  background-color: white;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 2px; /* Merkez hizalama için dairenin kenarlarında eşit boşluk */
+  box-sizing: border-box;
+}
+
+.bubbleLabel {
+  font-size: 9px;
+  font-weight: bold;
+  color: #555;
+}
+
+.bubble:hover {
+  background-color: #f0f0f0;
+}
+
+/* YATAY (Çoktan Seçmeli) */
+.horizontalGrid {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.questionRow {
+  display: flex;
+  height: 20px; /* Tam 1 grid yüksekliği */
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.questionNumber {
+  width: 20px; /* Tam 1 grid genişliği */
+  height: 20px; /* Tam 1 grid yüksekliği */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: bold;
+  color: #666;
+  box-sizing: border-box;
+}
+
+.choices {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.choiceContainer {
+  width: 20px; /* Tam 1 grid genişliği */
+  height: 20px; /* Tam 1 grid yüksekliği */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+/* DİKEY (Ad-Soyad, Numara) YENİ TASARIM - Her SÜTUN bir harf/rakam için */
+.verticalGridNew {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* El ile yazı yazılacak alan */
+.manualWriteArea {
+  display: flex;
+  height: 30px; /* El ile yazılacak alan yüksekliği - 1.5 grid */
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  border-bottom: 1px solid #ddd;
+  background-color: #f9f9f9;
+}
+
+.writeCell {
+  flex: 1;
+  height: 100%;
+  border-right: 1px solid #eee;
+  box-sizing: border-box;
+}
+
+.writeCell:last-child {
+  border-right: none;
+}
+
+/* Sütunlar ve hücreler */
+.columnContainer {
+  display: flex;
+  width: 100%;
+}
+
+.bubbleColumn {
+  flex: 1;
+  display: flex;
+  flex-direction: column; /* Dikey yerleşim - yukarıdan aşağıya A-Z veya 0-9 */
+  box-sizing: border-box;
+}
+
+.bubbleCell {
+  width: 100%;
+  height: 20px; /* Tam 1 grid yüksekliği */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
