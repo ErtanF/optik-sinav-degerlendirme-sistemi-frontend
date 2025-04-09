@@ -1,4 +1,4 @@
-import React, { memo, useState } from 'react';
+import React, { memo, useState, useEffect } from 'react';
 import BubbleGrid from './BubbleGrid';
 import styles from './OptikElement.module.css';
 
@@ -10,10 +10,82 @@ const OptikElement = memo(function OptikElement({
   size,
   isActive,
   onActivate,
-  onRemove
+  onRemove,
+  startNumber = 1
 }) {
   // Manuel başlık için state
   const [manualTitle, setManualTitle] = useState('');
+  
+  // Eleman türüne göre varsayılan başlık belirle
+  useEffect(() => {
+    let defaultTitle = '';
+    switch(type) {
+      case 'nameSurname':
+        defaultTitle = 'AD SOYAD';
+        break;
+      case 'number':
+        defaultTitle = 'NUMARA';
+        break;
+      case 'tcNumber':
+        defaultTitle = 'TC KİMLİK NO';
+        break;
+      case 'phoneNumber':
+        defaultTitle = 'TELEFON NO';
+        break;
+      case 'multipleChoice':
+        defaultTitle = 'TEST';
+        break;
+      default:
+        defaultTitle = 'BAŞLIK';
+    }
+    setManualTitle(defaultTitle);
+  }, [type]);
+  
+  // Elemanın gerçek yüksekliğini ayarlamak için
+  const [adjustedSize, setAdjustedSize] = useState({
+    width: size.width,
+    height: size.height
+  });
+  
+  // İlk yükleme ve boyut değişiminde hesaplanmış boyutu güncelle
+  useEffect(() => {
+    // Izgara tabanlı ayarlanmış boyut hesaplama
+    const gridSize = 20;
+    const adjustedWidth = Math.ceil(size.width / gridSize) * gridSize;
+    
+    // Elemanın içindeki satır sayısına göre hesaplanan minimum yükseklik
+    let calculatedHeight;
+    
+    if (type === 'multipleChoice') {
+      // Her soru satırı 20px + başlık yüksekliği (30px)
+      const visibleRows = Math.min(rows, 20); // Maksimum 20 satır gösterilecek
+      calculatedHeight = (visibleRows * 20) + 30; // Başlık yüksekliği için ek 30px
+    } else if (type === 'nameSurname') {
+      // 30px başlık + 30px el yazı alanı + 26 * 20px karakter alanı (A-Z)
+      calculatedHeight = 30 + 30 + (26 * 20); 
+      // Ad soyad için yüksekliği sabit tut
+    } else if (type === 'number' || type === 'tcNumber' || type === 'phoneNumber') {
+      // 30px başlık + 30px el yazı alanı + 10 * 20px karakter alanı (0-9)
+      calculatedHeight = 30 + 30 + (10 * 20); 
+      // Numara, TC Kimlik ve Telefon için yüksekliği sabit tut
+    } else {
+      // Varsayılan yükseklik hesaplama
+      calculatedHeight = Math.ceil(size.height / gridSize) * gridSize;
+    }
+    
+    // Ad Soyad, Numara, TC Kimlik ve Telefon için yüksekliği sabit tut, diğer elemanlar için kullanıcı seçimine göre ayarla
+    let finalHeight;
+    if (type === 'nameSurname' || type === 'number' || type === 'tcNumber' || type === 'phoneNumber') {
+      finalHeight = calculatedHeight; // Sabit yükseklik
+    } else {
+      finalHeight = Math.max(calculatedHeight, size.height); // Kullanıcı seçimi veya hesaplanan minimum
+    }
+    
+    setAdjustedSize({
+      width: adjustedWidth,
+      height: finalHeight
+    });
+  }, [size, rows, cols, type]);
   
   // Alan türüne göre kodlanabilir karakterleri belirle
   const getCharacterSet = () => {
@@ -21,6 +93,8 @@ const OptikElement = memo(function OptikElement({
       case 'nameSurname':
         return Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i)); // A'dan Z'ye harfler
       case 'number':
+      case 'tcNumber':
+      case 'phoneNumber':
         return ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']; // 0'dan 9'a rakamlar
       case 'multipleChoice':
         return ['A', 'B', 'C', 'D', 'E']; // A'dan E'ye şıklar
@@ -44,25 +118,6 @@ const OptikElement = memo(function OptikElement({
     y: Math.floor(position.y / gridSize) * gridSize
   };
   
-  // Boyutu tam grid sayısına göre ayarla
-  // Ad soyad ve numara alanları için yüksekliği otomatik ayarla
-  let adjustedHeight = Math.ceil(size.height / gridSize) * gridSize;
-  
-  // Dikey düzende (Ad soyad, numara) için minimum yükseklik
-  if (type === 'nameSurname' || type === 'number') {
-    // 1.5 grid başlık + 1.5 grid el yazı alanı + her harf/rakam 1 grid
-    const minHeight = type === 'nameSurname' 
-      ? 30 + 30 + 26 * gridSize // Başlık + yazı alanı + 26 harf
-      : 30 + 30 + 10 * gridSize; // Başlık + yazı alanı + 10 rakam
-    
-    adjustedHeight = Math.max(adjustedHeight, minHeight);
-  }
-  
-  const adjustedSize = {
-    width: Math.ceil(size.width / gridSize) * gridSize,
-    height: adjustedHeight
-  };
-
   const characters = getCharacterSet();
 
   return (
@@ -82,9 +137,7 @@ const OptikElement = memo(function OptikElement({
         className={styles.manualHeaderInput}
         value={manualTitle}
         onChange={handleTitleChange}
-        placeholder={type === 'nameSurname' ? 'AD SOYAD' : 
-                    type === 'number' ? 'NUMARA' : 
-                    type === 'multipleChoice' ? 'TEST' : 'Başlık'}
+        placeholder="Form Başlığı"
       />
       
       {/* Kodlanacak daireler - BubbleGrid bileşeni */}
@@ -94,6 +147,7 @@ const OptikElement = memo(function OptikElement({
           cols={cols}
           characters={characters}
           type={type}
+          startNumber={startNumber}
         />
       </div>
       

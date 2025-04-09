@@ -1,17 +1,22 @@
 import React from 'react';
 import FormElementsSidebar from './FormElementsSidebar';
+import ElementPropertiesPanel from './ElementPropertiesPanel';
 import styles from './LeftSidebar.module.css';
 import { useFormEditor } from '../context/FormEditorContext';
 
 const LeftSidebar = () => {
-  const { selectedTool } = useFormEditor();
+  const { selectedTool, activeElementId } = useFormEditor();
   
   return (
     <div className={styles.container}>
+      {/* Aktif eleman özellikleri panel - Artık üstte */}
+      {activeElementId && <ElementPropertiesPanel />}
+      
+      {/* Form Elemanları Seçici - Artık altta */}
       <FormElementsSidebar />
       
       {/* Seçim modunda yardım */}
-      {selectedTool && (
+      {selectedTool && !activeElementId && (
         <div className={styles.helpSection}>
           <h3>Nasıl Kullanılır?</h3>
           <ol className={styles.helpSteps}>
@@ -22,18 +27,20 @@ const LeftSidebar = () => {
         </div>
       )}
       
-      {/* Araç seçilmediğinde genel bilgi */}
-      {!selectedTool && (
+      {/* Araç seçilmediğinde ve aktif eleman yokken genel bilgi */}
+      {!selectedTool && !activeElementId && (
         <div className={styles.infoSection}>
-        <h3>Optik Form Oluşturucu</h3>
-        <p>Solda bulunan "Optik Form Elemanları" bölümünden bir eleman türü seçerek sınav formu oluşturmaya başlayabilirsiniz.</p>
-        <ul className={styles.infoList}>
-          <li><strong>Ad Soyad Alanı:</strong> Seçilen genişlik kadar harfler (A-Z) gösterilir. En fazla 26 grid genişliğinde olabilir.</li>
-          <li><strong>Numara Alanı:</strong> Seçilen genişlik kadar rakamlar (0-9) gösterilir. En fazla 10 grid genişliğinde olabilir.</li>
-          <li><strong>Çoktan Seçmeli:</strong> İlk sütunda soru numarası, diğer sütunlarda seçilen genişliğe göre A'dan E'ye kadar şıklar gösterilir.</li>
-        </ul>
-        <p className={styles.tip}>İpucu: Her bir grid, bir kodlanabilir daireye denk gelir. Sadece ihtiyacınız kadar grid seçin!</p>
-      </div>
+          <h3>Optik Form Oluşturucu</h3>
+          <p>Aşağıdaki "Optik Form Elemanları" bölümünden bir eleman türü seçerek sınav formu oluşturmaya başlayabilirsiniz.</p>
+          <ul className={styles.infoList}>
+            <li><strong>Ad Soyad Alanı:</strong> Seçilen genişlik kadar harfler (A-Z) gösterilir.</li>
+            <li><strong>Numara Alanı:</strong> Seçilen genişlik kadar rakamlar (0-9) gösterilir. En fazla 15 grid genişliğinde olabilir.</li>
+            <li><strong>TC Kimlik No:</strong> Sabit 11 haneli TC kimlik numarası için kodlama alanı gösterilir.</li>
+            <li><strong>Telefon No:</strong> Sabit 10 haneli telefon numarası için kodlama alanı gösterilir.</li>
+            <li><strong>Çoktan Seçmeli:</strong> İlk sütunda soru numarası, diğer sütunlarda seçilen genişliğe göre A'dan E'ye kadar şıklar gösterilir.</li>
+          </ul>
+          <p className={styles.tip}>İpucu: Her bir grid, bir kodlanabilir daireye denk gelir. Sadece ihtiyacınız kadar grid seçin!</p>
+        </div>
       )}
     </div>
   );

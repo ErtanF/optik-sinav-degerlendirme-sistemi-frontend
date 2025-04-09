@@ -112,6 +112,7 @@ const A4Container = memo(function A4Container() {
             isActive={activeElementId === element.uniqueId}
             onActivate={() => setActiveElement(element.uniqueId)}
             onRemove={() => removeElement(element.uniqueId)}
+            startNumber={element.startNumber || 1}
           />
         ))}
         

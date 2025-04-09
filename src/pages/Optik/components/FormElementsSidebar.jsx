@@ -20,11 +20,23 @@ const FormElementsSidebar = memo(function FormElementsSidebar() {
       icon: '🔢'
     },
     {
+      id: 'tcNumber',
+      title: 'TC Kimlik No',
+      description: '11 rakamlı TC kimlik numarası için alan',
+      icon: '🆔'
+    },
+    {
+      id: 'phoneNumber',
+      title: 'Telefon No',
+      description: '10 rakamlı telefon numarası için alan',
+      icon: '📱'
+    },
+    {
       id: 'multipleChoice',
       title: 'Çoktan Seçmeli',
       description: 'İlk sütun soru numarası, diğer sütunlar A,B,C,D,E şıkları',
       icon: '📝'
-    },
+    }
     /* Diğer elemanlar buraya eklenebilir */
   ];
   

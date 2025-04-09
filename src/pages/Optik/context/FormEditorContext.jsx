@@ -38,18 +38,51 @@ export const FormEditorProvider = ({ children }) => {
     const rows = Math.floor((endY - startY) / gridSize);
     const cols = Math.floor((endX - startX) / gridSize);
     
-    // Element türüne göre minimum boyut kontrolü
+    // Element türüne göre minimum boyut kontrolü ve sütun sınırlaması
     let minRows = 2, minCols = 2;
+    let effectiveRows = rows;
+    let effectiveCols = cols;
     
     switch(type) {
       case 'nameSurname':
         minCols = 2; // En az 2 harf için alan
+        minRows = 5; // En az 5 satır gerekli (başlık + yazı alanı + birkaç karakter)
+        // Sütun sayısını 26'dan fazla olmasını engelle (A-Z)
+        effectiveCols = Math.min(cols, 26);
+        // Satır sayısını sabit tut (A-Z satırları + başlık + yazı alanı)
+        effectiveRows = 26; // A-Z harfleri görünecek
         break;
       case 'number':
         minCols = 2; // En az 2 rakam için alan
+        minRows = 5; // En az 5 satır gerekli
+        // Sütun sayısını 15'ten fazla olmasını engelle (0-9 + ekstra)
+        effectiveCols = Math.min(cols, 15);
+        // Satır sayısını sabit tut (0-9 rakamları + başlık + yazı alanı)
+        effectiveRows = 10; // 0-9 rakamları görünecek
+        break;
+      case 'tcNumber':
+        minCols = 11; // TC Kimlik No, 11 haneli olduğu için 11 sütun
+        minRows = 5; // En az 5 satır gerekli
+        // TC kimlik no için tam 11 hane olmalı
+        effectiveCols = 11;
+        // Satır sayısını sabit tut (0-9 rakamları + başlık + yazı alanı)
+        effectiveRows = 10; // 0-9 rakamları görünecek
+        break;
+      case 'phoneNumber':
+        minCols = 10; // Telefon numarası, 10 haneli olduğu için 10 sütun
+        minRows = 5; // En az 5 satır gerekli
+        // Telefon numarası için tam 10 hane olmalı
+        effectiveCols = 10;
+        // Satır sayısını sabit tut (0-9 rakamları + başlık + yazı alanı)
+        effectiveRows = 10; // 0-9 rakamları görünecek
         break;
       case 'multipleChoice':
         minCols = 1; // En az 1 şık (A şıkkı)
+        minRows = 2; // En az 2 soru
+        // Şık sayısını 5'ten fazla olmasını engelle (A-E)
+        effectiveCols = Math.min(cols, 5);
+        // Soru sayısını 20'den fazla olmasını engelle (görsel olarak)
+        effectiveRows = Math.min(rows, 20);
         break;
     }
     
@@ -65,10 +98,39 @@ export const FormEditorProvider = ({ children }) => {
       y: startY
     };
     
-    const size = {
-      width: cols * gridSize,
-      height: rows * gridSize
-    };
+    // Eleman türüne göre otomatik boyut ayarlama
+    let size;
+    
+    if (type === 'multipleChoice') {
+      // Çoktan seçmeli için yükseklik: her satır 20px + başlık 30px
+      const visibleRowsHeight = (Math.min(20, effectiveRows) * gridSize) + 30;
+      // Genişlik: Soru numarası sütunu (1) + şık sayısı
+      const width = (effectiveCols + 1) * gridSize;
+      
+      size = {
+        width: width,
+        height: visibleRowsHeight
+      };
+    } else if (type === 'nameSurname') {
+      // Ad soyad alanı için yükseklik: başlık 30px + el yazı alanı 30px + 26 karakter (A-Z)
+      const height = 30 + 30 + (26 * gridSize);
+      size = {
+        width: effectiveCols * gridSize,
+        height: height
+      };
+    } else if (type === 'number' || type === 'tcNumber' || type === 'phoneNumber') {
+      // Numara alanı için yükseklik: başlık 30px + el yazı alanı 30px + 10 rakam (0-9)
+      const height = 30 + 30 + (10 * gridSize);
+      size = {
+        width: effectiveCols * gridSize,
+        height: height
+      };
+    } else {
+      size = {
+        width: effectiveCols * gridSize,
+        height: effectiveRows * gridSize
+      };
+    }
     
     // Benzersiz ID oluştur
     const uniqueId = `${type}-${Date.now()}`;
@@ -79,8 +141,9 @@ export const FormEditorProvider = ({ children }) => {
       uniqueId,
       position,
       size,
-      rows: rows,
-      cols: cols // Seçilen sütun sayısını koru
+      rows: effectiveRows,
+      cols: effectiveCols,
+      startNumber: 1 // Varsayılan başlangıç soru numarası
     };
     
     // Element listesine ekle
@@ -154,7 +217,12 @@ export const FormEditorProvider = ({ children }) => {
     };
     
     // Yeni optik element oluştur
-    addOptikElement(selectedTool, alignedStart, alignedEnd);
+    const newElementId = addOptikElement(selectedTool, alignedStart, alignedEnd);
+    
+    // Yeni oluşturulan elemanı seç (özelliklerini düzenlemeye hazır olması için)
+    if (newElementId) {
+      setActiveElementId(newElementId);
+    }
     
     // Seçim modunu sıfırla
     setSelectionMode(false);
