@@ -214,6 +214,7 @@ const OptikOlusturmaContent = () => {
           formTitle={formTitle}
           onRender={setFormImage}
           visible={true} // Render için görünür yap
+          showGrid={false} // Grid çizgilerini gizle
         />
       </div>
       

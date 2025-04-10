@@ -30,6 +30,8 @@ const A4Container = memo(function A4Container() {
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
       
+      console.log(`Clicking at position: (${x}, ${y}) with tool: ${selectedTool}`);
+      
       // Tıklanan pozisyonda eleman oluştur
       handleCanvasClick({ x, y });
       e.preventDefault();
@@ -58,6 +60,7 @@ const A4Container = memo(function A4Container() {
             cols={element.cols}
             position={element.position}
             size={element.size}
+            content={element.content}
             isActive={activeElementId === element.uniqueId}
             onActivate={() => setActiveElement(element.uniqueId)}
             onRemove={() => removeElement(element.uniqueId)}

@@ -7,6 +7,12 @@ const BubbleGrid = memo(function BubbleGrid({ rows, cols, characters, type, star
   
   // Çoktan seçmeli sorular için yatay layout
   const renderHorizontalGrid = () => {
+    // Kullanılabilir tüm şıklar (A, B, C, D, E)
+    const availableChoices = ['A', 'B', 'C', 'D', 'E'];
+    
+    // Önizlemede tüm şıkları göstermek için cols yerine sabit 5 kullanıyoruz
+    const displayedCols = 5; // A, B, C, D, E şıklarını göstermek için 5 sabit
+
     // Yatay düzende (çoktan seçmeli gibi) her satır bir soru, her sütun bir şık
     return (
       <div className={styles.horizontalGrid}>
@@ -15,7 +21,7 @@ const BubbleGrid = memo(function BubbleGrid({ rows, cols, characters, type, star
           <div key={`question-${rowIndex}`} className={styles.questionRow}>
             <div className={styles.questionNumber}>{startNumber + rowIndex}</div>
             <div className={styles.choices}>
-              {characters.slice(0, Math.min(cols, characters.length)).map((char, colIndex) => (
+              {availableChoices.slice(0, displayedCols).map((char, colIndex) => (
                 <div 
                   key={`choice-${rowIndex}-${colIndex}`}
                   className={styles.choiceContainer}

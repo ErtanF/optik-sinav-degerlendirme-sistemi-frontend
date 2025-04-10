@@ -36,6 +36,12 @@ const FormElementsSidebar = memo(function FormElementsSidebar() {
       title: 'Çoktan Seçmeli',
       description: 'Soru numarası ve A,B,C,D,E şıkları',
       icon: '📝'
+    },
+    {
+      id: 'image',
+      title: 'Resim Ekle',
+      description: 'Cihazınızdan resim yükleyin',
+      icon: '🖼️'
     }
     /* Diğer elemanlar buraya eklenebilir */
   ];

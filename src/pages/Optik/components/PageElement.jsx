@@ -191,18 +191,41 @@ const PageElement = memo(function PageElement({
     }
 
     if (element.type === 'image') {
-      // Resim türü için özel işleme
+      // Resmin tipini kontrol et
+      console.log("Image element:", element);
       return (
-        <img 
-          src={element.content || element.image} 
-          alt="Form Image" 
-          className={`${styles.formImage} ${isActive ? styles.activeContent : ''}`}
-          style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-        />
+        <div className={styles.imageContainer}>
+          <img 
+            src={element.content} 
+            alt="Form Image" 
+            className={`${styles.formImage} ${isActive ? styles.activeContent : ''}`}
+            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+            onError={(e) => {
+              console.error("Image failed to load:", e);
+              e.target.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M20.4 14.5L16 10 4 20"/></svg>';
+              e.target.style.padding = '20px';
+              e.target.style.opacity = '0.5';
+            }}
+          />
+        </div>
       );
     }
-  
-    return <img src={element.image} alt={element.title} className={`${styles.image} ${isActive ? styles.activeContent : ''}`} />;
+    
+    // Diğer optik elemanlar için (nameSurname, number, tcNumber, phoneNumber, multipleChoice)
+    return (
+      <div className={styles.optikElementContent}>
+        {element.type && (
+          <div className={styles.optikElementLabel}>
+            {element.type === 'nameSurname' ? 'Ad Soyad Alanı' : 
+             element.type === 'number' ? 'Numara Alanı' : 
+             element.type === 'tcNumber' ? 'TC Kimlik No' : 
+             element.type === 'phoneNumber' ? 'Telefon No' : 
+             element.type === 'multipleChoice' ? 'Çoktan Seçmeli Test' : 
+             element.title || 'Eleman'}
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -218,6 +241,7 @@ const PageElement = memo(function PageElement({
       data-draggable="true"
       data-element-id={element.uniqueId}
       data-is-active={isActive}
+      data-element-type={element.type}
     >
       {renderContent()}
       

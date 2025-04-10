@@ -59,6 +59,7 @@
   box-shadow: 0 1px 10px rgba(0, 0, 0, 0.1);
   margin-top: 0.5rem;
   background-color: white;
+  overflow: hidden;
 }
 
 .preview-modal-footer {
@@ -84,5 +85,13 @@
     transform: scale(1);
     width: 100%;
     height: auto;
+    overflow: visible;
+    box-shadow: none;
+  }
+  
+  /* Yazdırma için optik dairelerin düzgün görünmesini sağla */
+  .bubble {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
   }
 }

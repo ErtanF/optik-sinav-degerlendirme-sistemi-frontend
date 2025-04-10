@@ -8,6 +8,7 @@ const OptikElement = memo(function OptikElement({
   cols, 
   position,
   size,
+  content,
   isActive,
   onActivate,
   onRemove,
@@ -34,6 +35,9 @@ const OptikElement = memo(function OptikElement({
         break;
       case 'multipleChoice':
         defaultTitle = 'TEST';
+        break;
+      case 'image':
+        defaultTitle = 'RESİM';
         break;
       default:
         defaultTitle = 'BAŞLIK';
@@ -68,6 +72,9 @@ const OptikElement = memo(function OptikElement({
       // 30px başlık + 30px el yazı alanı + 10 * 20px karakter alanı (0-9)
       calculatedHeight = 30 + 30 + (10 * 20); 
       // Numara, TC Kimlik ve Telefon için yüksekliği sabit tut
+    } else if (type === 'image') {
+      // Resim elemanları için yükseklik
+      calculatedHeight = Math.ceil(size.height / gridSize) * gridSize;
     } else {
       // Varsayılan yükseklik hesaplama
       calculatedHeight = Math.ceil(size.height / gridSize) * gridSize;
@@ -130,6 +137,7 @@ const OptikElement = memo(function OptikElement({
         width: `${adjustedSize.width}px`,
         height: `${adjustedSize.height}px`,
       }}
+      data-element-type={type}
     >
       {/* Manuel başlık giriş alanı */}
       <input
@@ -140,15 +148,38 @@ const OptikElement = memo(function OptikElement({
         placeholder="Form Başlığı"
       />
       
-      {/* Kodlanacak daireler - BubbleGrid bileşeni */}
+      {/* Eleman içeriği */}
       <div className={styles.optikContent}>
-        <BubbleGrid 
-          rows={rows} 
-          cols={cols}
-          characters={characters}
-          type={type}
-          startNumber={startNumber}
-        />
+        {type === 'image' ? (
+          // Resim elemanı için
+          <div className={styles.imageContent}>
+            <img 
+              src={content} 
+              alt="Resim"
+              style={{ 
+                maxWidth: '100%', 
+                maxHeight: '100%', 
+                objectFit: 'contain',
+                display: 'block'
+              }} 
+              onError={(e) => {
+                console.error("Image error in OptikElement:", e);
+                e.target.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M20.4 14.5L16 10 4 20"/></svg>';
+                e.target.style.padding = '20px';
+                e.target.style.opacity = '0.5';
+              }}
+            />
+          </div>
+        ) : (
+          // Diğer optik elemanlar için
+          <BubbleGrid 
+            rows={rows} 
+            cols={cols}
+            characters={characters}
+            type={type}
+            startNumber={startNumber}
+          />
+        )}
       </div>
       
       {isActive && (

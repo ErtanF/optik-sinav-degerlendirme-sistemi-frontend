@@ -1,6 +1,6 @@
 .optikElement {
   position: absolute;
-  background-color: white;
+  background-color: transparent; 
   border: 1px solid #ddd;
   border-radius: 4px;
   overflow: hidden; /* Önemli: İçeriği kırpmak için overflow:hidden */
@@ -18,7 +18,7 @@
 }
 
 .manualHeaderInput {
-  background-color: #f5f5f5;
+  background-color: transparent;
   border: none;
   border-bottom: 1px solid #ddd;
   padding: 4px 8px;

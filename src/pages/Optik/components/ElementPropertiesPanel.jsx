@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import styles from './ElementPropertiesPanel.module.css';
 import { useFormEditor } from '../context/FormEditorContext';
 
@@ -6,7 +6,9 @@ const ElementPropertiesPanel = () => {
   const { 
     activeElementId, 
     pageElements, 
-    updateElement 
+    updateElement,
+    handleImageUpload,
+    fileInputRef
   } = useFormEditor();
   
   // Aktif eleman
@@ -18,8 +20,13 @@ const ElementPropertiesPanel = () => {
     cols: 0,
     startNumber: 1, // Başlangıç soru numarası
     posX: 0,        // X pozisyonu
-    posY: 0         // Y pozisyonu
+    posY: 0,         // Y pozisyonu
+    width: 0,       // Genişlik
+    height: 0       // Yükseklik
   });
+  
+  // Özel resim dosyası input referansı
+  const imageInputRef = useRef(null);
   
   // Aktif eleman değiştiğinde özellikleri güncelle
   useEffect(() => {
@@ -29,7 +36,9 @@ const ElementPropertiesPanel = () => {
         cols: activeElement.cols || 0,
         startNumber: activeElement.startNumber || 1,
         posX: activeElement.position?.x || 0,
-        posY: activeElement.position?.y || 0
+        posY: activeElement.position?.y || 0,
+        width: activeElement.size?.width || 0,
+        height: activeElement.size?.height || 0
       });
     }
   }, [activeElement]);
@@ -52,6 +61,8 @@ const ElementPropertiesPanel = () => {
         return 'Telefon No Özellikleri';
       case 'multipleChoice':
         return 'Çoktan Seçmeli Test Özellikleri';
+      case 'image':
+        return 'Resim Özellikleri';
       default:
         return 'Eleman Özellikleri';
     }
@@ -183,6 +194,55 @@ const ElementPropertiesPanel = () => {
     });
   };
   
+  // Resim boyutunu değiştir
+  const handleSizeChange = (dimension, value) => {
+    if (activeElement.type !== 'image') return;
+    
+    const gridSize = 20;
+    // Grid'e hizalanmış değer
+    const alignedValue = Math.max(gridSize, Math.floor(value / gridSize) * gridSize);
+    
+    // Özelliği güncelle
+    setProperties(prev => ({
+      ...prev,
+      [dimension]: alignedValue
+    }));
+    
+    // Elemanı güncelle
+    updateElement(activeElementId, {
+      size: {
+        ...activeElement.size,
+        [dimension]: alignedValue
+      }
+    });
+  };
+  
+  // Resim değiştir
+  const handleChangeImage = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          // Resim verilerini güncelle
+          updateElement(activeElementId, {
+            content: e.target.result
+          });
+          
+          // Input değerini sıfırla
+          if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+          }
+        };
+        reader.readAsDataURL(file);
+      };
+      
+      fileInputRef.current.click();
+    }
+  };
+  
   return (
     <div className={styles.panel}>
       <h3 className={styles.panelTitle}>{getPanelTitle()}</h3>
@@ -237,6 +297,56 @@ const ElementPropertiesPanel = () => {
         </div>
       </div>
 
+      {/* Resim için özel ayarlar */}
+      {activeElement.type === 'image' && (
+        <>
+          <div className={styles.propertySection}>
+            <h4 className={styles.sectionTitle}>Resim Boyutu</h4>
+            <div className={styles.propertyGroup}>
+              <label className={styles.propertyLabel}>Genişlik:</label>
+              <div className={styles.propertyControls}>
+                <input
+                  type="number"
+                  min="20"
+                  step="20"
+                  value={properties.width}
+                  onChange={(e) => handleSizeChange('width', parseInt(e.target.value) || 0)}
+                  className={styles.numberInput}
+                />
+                <span>px</span>
+              </div>
+            </div>
+            <div className={styles.propertyGroup}>
+              <label className={styles.propertyLabel}>Yükseklik:</label>
+              <div className={styles.propertyControls}>
+                <input
+                  type="number"
+                  min="20"
+                  step="20"
+                  value={properties.height}
+                  onChange={(e) => handleSizeChange('height', parseInt(e.target.value) || 0)}
+                  className={styles.numberInput}
+                />
+                <span>px</span>
+              </div>
+            </div>
+          </div>
+          
+          <div className={styles.propertyGroup}>
+            <button
+              className={styles.changeImageButton}
+              onClick={handleChangeImage}
+            >
+              Resmi Değiştir
+            </button>
+          </div>
+          
+          <div className={styles.helpText}>
+            İpucu: Resmin konumunu değiştirmek için yön oklarını kullanın. Boyutunu değiştirmek için yukarıdaki değerleri girebilirsiniz.
+          </div>
+        </>
+      )}
+
       {/* Çoktan seçmeli test için başlangıç soru numarası */}
       {activeElement.type === 'multipleChoice' && (
         <div className={styles.propertyGroup}>
@@ -277,7 +387,7 @@ const ElementPropertiesPanel = () => {
       )}
       
       {/* Sütun sayısı ayarı - TC ve Telefon için gösterme */}
-      {activeElement.type !== 'tcNumber' && activeElement.type !== 'phoneNumber' && (
+      {activeElement.type !== 'tcNumber' && activeElement.type !== 'phoneNumber' && activeElement.type !== 'image' && (
         <div className={styles.propertyGroup}>
           <label className={styles.propertyLabel}>
             {activeElement.type === 'multipleChoice' ? 'Şık Sayısı:' : 
@@ -342,15 +452,17 @@ const ElementPropertiesPanel = () => {
         </div>
       )}
       
-      <div className={styles.helpText}>
-        {activeElement.type === 'multipleChoice' ? 
-          'İpucu: Soru sayısını ve şık sayısını değiştirmek için + ve - butonlarını, konumunu değiştirmek için yön oklarını kullanın.' :
-          activeElement.type === 'tcNumber' ?
-          'İpucu: TC Kimlik no alanı sabit 11 hanedir. Konumunu ayarlamak için yön oklarını kullanın.' :
-          activeElement.type === 'phoneNumber' ?
-          'İpucu: Telefon numarası alanı sabit 10 hanedir. Konumunu ayarlamak için yön oklarını kullanın.' :
-          'İpucu: Elemanın konumunu değiştirmek için yön oklarını kullanın.'}
-      </div>
+      {activeElement.type !== 'image' && (
+        <div className={styles.helpText}>
+          {activeElement.type === 'multipleChoice' ? 
+            'İpucu: Soru sayısını ve şık sayısını değiştirmek için + ve - butonlarını, konumunu değiştirmek için yön oklarını kullanın.' :
+            activeElement.type === 'tcNumber' ?
+            'İpucu: TC Kimlik no alanı sabit 11 hanedir. Konumunu ayarlamak için yön oklarını kullanın.' :
+            activeElement.type === 'phoneNumber' ?
+            'İpucu: Telefon numarası alanı sabit 10 hanedir. Konumunu ayarlamak için yön oklarını kullanın.' :
+            'İpucu: Elemanın konumunu değiştirmek için yön oklarını kullanın.'}
+        </div>
+      )}
     </div>
   );
 };
