@@ -10,13 +10,13 @@ const FormElementsSidebar = memo(function FormElementsSidebar() {
     {
       id: 'nameSurname',
       title: 'Ad Soyad Alanı',
-      description: 'Seçtiğiniz grid genişliği kadar harf gösterilir (A-Z)',
+      description: 'Harfler (A-Z) ile ad soyad kodlama alanı',
       icon: '🔠'
     },
     {
       id: 'number',
       title: 'Numara Alanı',
-      description: 'Seçtiğiniz grid genişliği kadar rakam gösterilir (0-9)',
+      description: 'Rakamlar (0-9) ile öğrenci numarası alanı',
       icon: '🔢'
     },
     {
@@ -34,7 +34,7 @@ const FormElementsSidebar = memo(function FormElementsSidebar() {
     {
       id: 'multipleChoice',
       title: 'Çoktan Seçmeli',
-      description: 'İlk sütun soru numarası, diğer sütunlar A,B,C,D,E şıkları',
+      description: 'Soru numarası ve A,B,C,D,E şıkları',
       icon: '📝'
     }
     /* Diğer elemanlar buraya eklenebilir */
@@ -68,14 +68,14 @@ const FormElementsSidebar = memo(function FormElementsSidebar() {
       
       <div className={styles.instructions}>
         {!selectedTool && (
-          <p>Bir eleman türü seçin ve A4 sayfasında alan oluşturun.</p>
+          <p>Bir eleman türü seçin ve A4 sayfasında yerleştirmek istediğiniz yere tıklayın.</p>
         )}
         {selectedTool && (
           <div>
             <p className={styles.activeToolInfo}>
               <strong>{optikElements.find(e => e.id === selectedTool)?.title}</strong> seçildi.
             </p>
-            <p>A4 sayfasında mouse ile sürükleyerek bir alan belirleyin.</p>
+            <p>A4 sayfasında elemanı yerleştirmek istediğiniz yere tıklayın.</p>
             <button 
               className={styles.cancelButton}
               onClick={() => selectTool(null)}

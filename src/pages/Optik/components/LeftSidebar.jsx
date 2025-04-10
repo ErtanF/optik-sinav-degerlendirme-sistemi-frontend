@@ -20,9 +20,9 @@ const LeftSidebar = () => {
         <div className={styles.helpSection}>
           <h3>Nasıl Kullanılır?</h3>
           <ol className={styles.helpSteps}>
-            <li>A4 sayfasında fare ile sürükleyerek bir alan belirleyin.</li>
-            <li>Belirlediğiniz alanda otomatik kodlanabilir sahalar oluşacaktır.</li>
-            <li>Oluşturulan alana tıklayarak düzenleyebilirsiniz.</li>
+            <li>A4 sayfasında elemanın yerleşmesini istediğiniz yere tıklayın.</li>
+            <li>Eleman sayfaya varsayılan boyutuyla eklenecektir.</li>
+            <li>Oluşturulan elemana tıklayarak özelliklerini düzenleyebilirsiniz.</li>
           </ol>
         </div>
       )}
@@ -33,13 +33,13 @@ const LeftSidebar = () => {
           <h3>Optik Form Oluşturucu</h3>
           <p>Aşağıdaki "Optik Form Elemanları" bölümünden bir eleman türü seçerek sınav formu oluşturmaya başlayabilirsiniz.</p>
           <ul className={styles.infoList}>
-            <li><strong>Ad Soyad Alanı:</strong> Seçilen genişlik kadar harfler (A-Z) gösterilir.</li>
-            <li><strong>Numara Alanı:</strong> Seçilen genişlik kadar rakamlar (0-9) gösterilir. En fazla 15 grid genişliğinde olabilir.</li>
-            <li><strong>TC Kimlik No:</strong> Sabit 11 haneli TC kimlik numarası için kodlama alanı gösterilir.</li>
-            <li><strong>Telefon No:</strong> Sabit 10 haneli telefon numarası için kodlama alanı gösterilir.</li>
-            <li><strong>Çoktan Seçmeli:</strong> İlk sütunda soru numarası, diğer sütunlarda seçilen genişliğe göre A'dan E'ye kadar şıklar gösterilir.</li>
+            <li><strong>Ad Soyad Alanı:</strong> Harfler (A-Z) ile ad soyad kodlama alanı oluşturur.</li>
+            <li><strong>Numara Alanı:</strong> Rakamlar (0-9) ile öğrenci numarası alanı oluşturur.</li>
+            <li><strong>TC Kimlik No:</strong> Sabit 11 haneli TC kimlik numarası için kodlama alanı oluşturur.</li>
+            <li><strong>Telefon No:</strong> Sabit 10 haneli telefon numarası için kodlama alanı oluşturur.</li>
+            <li><strong>Çoktan Seçmeli:</strong> İlk sütunda soru numarası, diğer sütunlarda A'dan E'ye kadar şıklar gösterilir.</li>
           </ul>
-          <p className={styles.tip}>İpucu: Her bir grid, bir kodlanabilir daireye denk gelir. Sadece ihtiyacınız kadar grid seçin!</p>
+          <p className={styles.tip}>İpucu: Her bir eleman varsayılan boyutla eklenir. Ekledikten sonra özelliklerini düzenleyebilirsiniz!</p>
         </div>
       )}
     </div>

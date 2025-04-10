@@ -8,81 +8,30 @@ const A4Container = memo(function A4Container() {
     pageElements,
     activeElementId,
     selectedTool,
-    selectionMode,
-    selectionArea,
     isCreating,
     gridSize,
     setActiveElement,
     removeElement,
-    startAreaSelection,
-    updateAreaSelection,
-    completeAreaSelection,
-    cancelAreaSelection
+    handleCanvasClick
   } = useFormEditor();
   
   const containerRef = useRef(null);
   
-  // Mouse olaylarını izle
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      if (!containerRef.current || !selectionMode) return;
-      
-      const rect = containerRef.current.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      
-      // Alan seçimini güncelle
-      updateAreaSelection({ x, y });
-    };
-    
-    const handleMouseUp = () => {
-      if (selectionMode) {
-        completeAreaSelection();
-      }
-    };
-    
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-    
-    return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, [selectionMode, updateAreaSelection, completeAreaSelection]);
-  
-  // ESC tuşu ile alan seçimini iptal etme
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape' && selectionMode) {
-        cancelAreaSelection();
-      }
-    };
-    
-    document.addEventListener('keydown', handleKeyDown);
-    
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [selectionMode, cancelAreaSelection]);
-  
-  // Mouse down olayı - alan seçimini başlat
-  const handleMouseDown = (e) => {
-    // Bir eleman üzerine tıklandıysa alan seçimi yapma
+  // A4 sayfasına tıklandığında
+  const handleContainerClick = (e) => {
+    // Bir eleman üzerine tıklandıysa işlem yapma
     if (e.target !== containerRef.current && !e.target.classList.contains(styles.gridLines)) {
       return;
     }
     
-    // Seçili bir araç varsa, alan seçimini başlat
+    // Seçili bir araç varsa, elemanı ekle
     if (selectedTool) {
       const rect = containerRef.current.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
       
-      // Grid'e snap yapılmış başlangıç noktası
-      const startX = Math.floor(x / gridSize) * gridSize;
-      const startY = Math.floor(y / gridSize) * gridSize;
-      
-      startAreaSelection(selectedTool, { x: startX, y: startY });
+      // Tıklanan pozisyonda eleman oluştur
+      handleCanvasClick({ x, y });
       e.preventDefault();
     } else {
       // Boş alana tıklandığında aktif elemanı temizle
@@ -95,8 +44,8 @@ const A4Container = memo(function A4Container() {
       <div 
         ref={containerRef}
         id="a4-container"
-        className={styles.container}
-        onMouseDown={handleMouseDown}
+        className={`${styles.container} ${selectedTool ? styles.toolSelected : ''}`}
+        onClick={handleContainerClick}
       >
         <div className={styles.gridLines}></div>
         
@@ -115,19 +64,6 @@ const A4Container = memo(function A4Container() {
             startNumber={element.startNumber || 1}
           />
         ))}
-        
-        {/* Seçim Alanı - Area Selection */}
-        {selectionMode && selectionArea && (
-          <div 
-            className={styles.selectionArea}
-            style={{
-              left: `${selectionArea.x}px`,
-              top: `${selectionArea.y}px`,
-              width: `${selectionArea.width}px`,
-              height: `${selectionArea.height}px`,
-            }}
-          />
-        )}
         
         {/* Pointer-cursor gösterge alanı - sadece seçim modu aktifken */}
         {selectedTool && !isCreating && (
