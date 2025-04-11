@@ -1,6 +1,7 @@
 import React, { useRef, memo } from 'react';
 import styles from './A4Container.module.css';
 import OptikElement from './elements/OptikElement';
+import CornerMarks from './CornerMarks';
 import { useFormEditor } from '../context/FormEditorContext';
 
 const A4Container = memo(function A4Container() {
@@ -13,7 +14,9 @@ const A4Container = memo(function A4Container() {
     updateBubbleContent,
     setActiveElement,
     removeElement,
-    handleCanvasClick
+    handleCanvasClick,
+    safeZoneMargin,
+    safeZonePadding
   } = useFormEditor();
   
   const containerRef = useRef(null);
@@ -50,6 +53,13 @@ const A4Container = memo(function A4Container() {
         className={`${styles.container} ${selectedTool ? styles.toolSelected : ''}`}
         onClick={handleContainerClick}
       >
+        {/* Köşe kalibrasyon işaretleri */}
+        <CornerMarks 
+          safeZoneMargin={safeZoneMargin}
+          safeZonePadding={safeZonePadding}
+          isVisible={true}
+        />
+        
         {/* Izgara çizgileri */}
         <div className={styles.gridLines}></div>
         

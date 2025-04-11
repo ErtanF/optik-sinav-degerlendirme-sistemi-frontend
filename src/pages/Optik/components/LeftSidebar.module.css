@@ -45,10 +45,44 @@
   color: var(--text-color);
   line-height: 1.5;
 }
-.infoSection p {
-  margin-top: 0;
-  color: var(--text-color);
-  line-height: 1.5;
+
+.calibrationInfo {
+  margin-top: 12px;
+  font-size: 13px;
+  color: #555;
+  background-color: rgba(248, 215, 154, 0.2);
+  border-left: 3px solid #f8d79a;
+  padding: 8px 12px;
+  border-radius: 0 4px 4px 0;
+}
+
+.calibrationBox {
+  margin-top: 20px;
+  padding: 12px;
+  background-color: rgba(232, 244, 253, 0.6);
+  border: 1px solid rgba(33, 150, 243, 0.2);
+  border-radius: 6px;
+}
+
+.calibrationBox h4 {
+  margin: 0 0 10px 0;
+  color: var(--primary-color);
+  font-size: 15px;
+}
+
+.calibrationBox p {
+  margin: 8px 0;
+  font-size: 13px;
+}
+
+.calibrationList {
+  margin: 10px 0;
+  padding-left: 16px;
+  font-size: 13px;
+}
+
+.calibrationList li {
+  margin-bottom: 6px;
 }
 
 .tip {

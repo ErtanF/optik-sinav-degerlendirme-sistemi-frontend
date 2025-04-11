@@ -116,6 +116,44 @@
   font-style: italic;
 }
 
+/* Yeni eklenen kalibrasyon uyarıları için stiller */
+.safeZoneWarning {
+  background-color: rgba(255, 193, 7, 0.1);
+  border-left: 3px solid #ffc107;
+  padding: 8px 12px;
+  margin-bottom: 15px;
+  border-radius: 0 4px 4px 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.warningIcon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.safeZoneWarning p {
+  margin: 0;
+  font-size: 12px;
+  color: #856404;
+}
+
+.calibrationNote {
+  background-color: rgba(42, 157, 143, 0.1);
+  border: 1px solid rgba(42, 157, 143, 0.2);
+  border-radius: 4px;
+  padding: 10px;
+  margin-top: 15px;
+}
+
+.calibrationNote p {
+  margin: 0;
+  font-size: 12px;
+  color: #2a9d8f;
+  line-height: 1.4;
+}
+
 /* Yeni eklenen yön kontrolleri için stiller */
 .propertySection {
   margin-bottom: 15px;

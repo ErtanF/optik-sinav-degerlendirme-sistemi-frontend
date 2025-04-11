@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import html2canvas from 'html2canvas';
 import BubbleGrid from './elements/BubbleGrid';
+import CornerMarks from './CornerMarks';
 
 const FormRenderer = ({ 
   pageElements, 
@@ -31,7 +32,8 @@ const FormRenderer = ({
             return element.classList && 
                    (element.classList.contains('gridLines') || 
                     element.classList.contains('resize-handle') ||
-                    element.classList.contains('removeButton'));
+                    element.classList.contains('removeButton') ||
+                    element.classList.contains('safeZoneBorder')); // Güvenli alan çizgisini yazdırma
           }
         }).then(canvas => {
           window.scrollTo(scrollPos.x, scrollPos.y);
@@ -173,6 +175,13 @@ const FormRenderer = ({
         pageBreakInside: 'avoid'
       }}
     >
+      {/* Köşe kalibrasyon işaretleri - her zaman göster */}
+      <CornerMarks
+        safeZoneMargin={20}
+        safeZonePadding={10}
+        isVisible={true}
+      />
+      
       {showGrid && (
         <div 
           className="gridLines"

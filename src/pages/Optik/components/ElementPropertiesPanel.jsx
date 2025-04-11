@@ -1,14 +1,77 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import styles from './ElementPropertiesPanel.module.css';
 import { useFormEditor } from '../context/FormEditorContext';
 
+// Alt bileşenler için ayırma
+const DirectionControls = ({ posX, posY, onPositionChange }) => (
+  <div className={styles.directionControls}>
+    <div className={styles.directionRow}>
+      <div className={styles.emptyCell}></div>
+      <button className={styles.directionButton} onClick={() => onPositionChange('up')} title="Yukarı Taşı">▲</button>
+      <div className={styles.emptyCell}></div>
+    </div>
+    <div className={styles.directionRow}>
+      <button className={styles.directionButton} onClick={() => onPositionChange('left')} title="Sola Taşı">◄</button>
+      <div className={styles.directionCenter}>
+        <span className={styles.positionLabel}>X: {posX}, Y: {posY}</span>
+      </div>
+      <button className={styles.directionButton} onClick={() => onPositionChange('right')} title="Sağa Taşı">►</button>
+    </div>
+    <div className={styles.directionRow}>
+      <div className={styles.emptyCell}></div>
+      <button className={styles.directionButton} onClick={() => onPositionChange('down')} title="Aşağı Taşı">▼</button>
+      <div className={styles.emptyCell}></div>
+    </div>
+  </div>
+);
+
+const QuantityControl = ({ label, value, onDecrease, onIncrease, min = 1, max = Infinity }) => (
+  <div className={styles.propertyGroup}>
+    <label className={styles.propertyLabel}>{label}</label>
+    <div className={styles.propertyControls}>
+      <button 
+        className={styles.controlButton} 
+        onClick={onDecrease} 
+        disabled={value <= min}
+      >-</button>
+      <span className={styles.propertyValue}>{value}</span>
+      <button 
+        className={styles.controlButton} 
+        onClick={onIncrease}
+        disabled={value >= max}
+      >+</button>
+    </div>
+  </div>
+);
+
+const InputControl = ({ label, value, onChange, min, step, unit = "px" }) => (
+  <div className={styles.propertyGroup}>
+    <label className={styles.propertyLabel}>{label}</label>
+    <div className={styles.propertyControls}>
+      <input
+        type="number"
+        min={min}
+        step={step}
+        value={value}
+        onChange={onChange}
+        className={styles.numberInput}
+      />
+      <span>{unit}</span>
+    </div>
+  </div>
+);
+
+const InfoBox = ({ title, children }) => (
+  <div className={styles.infoBox}>
+    <div className={styles.infoTitle}>{title}</div>
+    {children}
+  </div>
+);
+
 const ElementPropertiesPanel = () => {
   const { 
-    activeElementId, 
-    pageElements, 
-    updateElement,
-    handleImageUpload,
-    fileInputRef
+    activeElementId, pageElements, updateElement, fileInputRef,
+    handleImageUpload, isWithinSafeZone
   } = useFormEditor();
   
   // Aktif eleman
@@ -16,17 +79,12 @@ const ElementPropertiesPanel = () => {
   
   // Eleman özelliklerini local state'e al
   const [properties, setProperties] = useState({
-    rows: 0,
-    cols: 0,
-    startNumber: 1, // Başlangıç soru numarası
-    posX: 0,        // X pozisyonu
-    posY: 0,         // Y pozisyonu
-    width: 0,       // Genişlik
-    height: 0       // Yükseklik
+    rows: 0, cols: 0, startNumber: 1,
+    posX: 0, posY: 0, width: 0, height: 0
   });
   
-  // Özel resim dosyası input referansı
-  const imageInputRef = useRef(null);
+  // Güvenli alan içinde olup olmadığını kontrol et
+  const [isInSafeZone, setIsInSafeZone] = useState(true);
   
   // Aktif eleman değiştiğinde özellikleri güncelle
   useEffect(() => {
@@ -40,184 +98,125 @@ const ElementPropertiesPanel = () => {
         width: activeElement.size?.width || 0,
         height: activeElement.size?.height || 0
       });
+      
+      // Güvenli alan kontrolü
+      const inSafeZone = isWithinSafeZone(
+        activeElement.position || { x: 0, y: 0 },
+        activeElement.size || { width: 100, height: 100 }
+      );
+      setIsInSafeZone(inSafeZone);
     }
-  }, [activeElement]);
+  }, [activeElement, isWithinSafeZone]);
   
-  // Eleman seçili değilse panel gösterme
-  if (!activeElement) {
-    return null;
-  }
+  if (!activeElement) return null;
   
   // Eleman tipine göre panel başlığı
   const getPanelTitle = () => {
-    switch (activeElement.type) {
-      case 'nameSurname':
-        return 'Ad Soyad Alanı Özellikleri';
-      case 'number':
-        return 'Numara Alanı Özellikleri';
-      case 'tcNumber':
-        return 'TC Kimlik No Özellikleri';
-      case 'phoneNumber':
-        return 'Telefon No Özellikleri';
-      case 'multipleChoice':
-        return 'Çoktan Seçmeli Test Özellikleri';
-      case 'image':
-        return 'Resim Özellikleri';
-      default:
-        return 'Eleman Özellikleri';
-    }
+    const titles = {
+      'nameSurname': 'Ad Soyad Alanı Özellikleri',
+      'number': 'Numara Alanı Özellikleri',
+      'tcNumber': 'TC Kimlik No Özellikleri',
+      'phoneNumber': 'Telefon No Özellikleri',
+      'multipleChoice': 'Çoktan Seçmeli Test Özellikleri',
+      'image': 'Resim Özellikleri'
+    };
+    return titles[activeElement.type] || 'Eleman Özellikleri';
   };
   
-  // Satır sayısını artır/azalt (sadece çoktan seçmeli için)
+  // İşlev yöneticileri
   const handleRowsChange = (increment) => {
     if (activeElement.type !== 'multipleChoice') return;
     
     const newRows = Math.max(1, properties.rows + increment);
+    setProperties(prev => ({ ...prev, rows: newRows }));
     
-    // Özelliği güncelle
-    setProperties(prev => ({
-      ...prev,
-      rows: newRows
-    }));
-    
-    // Elemanı güncelle
     updateElement(activeElementId, {
       rows: newRows,
-      // Satır sayısı değiştiğinde yüksekliği de güncelle
       size: {
         ...activeElement.size,
-        height: newRows * 20 + 30 // 30px başlık yüksekliği + her satır 20px
+        height: newRows * 20 + 30 // 30px başlık + satır başına 20px
       }
     });
   };
   
-  // Sütun sayısını artır/azalt
   const handleColsChange = (increment) => {
-    // TC kimlik ve telefon için kolonlar sabit
-    if (activeElement.type === 'tcNumber' || activeElement.type === 'phoneNumber') {
-      return;
-    }
+    if (activeElement.type === 'tcNumber' || activeElement.type === 'phoneNumber') return;
+    
+    let newCols = properties.cols + increment;
+    let maxCols = 26;
     
     if (activeElement.type === 'multipleChoice') {
-      // Çoktan seçmeli için maksimum 5 şık (A-E)
-      const maxCols = 5;
-      const newCols = Math.min(maxCols, Math.max(1, properties.cols + increment));
+      maxCols = 5;
+      newCols = Math.min(maxCols, Math.max(1, newCols));
       
-      // Özelliği güncelle
-      setProperties(prev => ({
-        ...prev,
-        cols: newCols
-      }));
-      
-      // Elemanı güncelle
       updateElement(activeElementId, {
         cols: newCols,
-        size: {
-          ...activeElement.size,
-          width: (newCols + 1) * 20 // Soru numarası sütunu (1) + her şık 20px
-        }
+        size: { ...activeElement.size, width: (newCols + 1) * 20 }
       });
     } 
     else if (activeElement.type === 'nameSurname' || activeElement.type === 'number') {
-      // Ad Soyad ve Numara için sütun sayısını değiştir
-      // Numara için maksimum 15, Ad Soyad için istediği kadar
-      const maxCols = activeElement.type === 'number' ? 15 : 26;
-      const newCols = Math.min(maxCols, Math.max(1, properties.cols + increment));
+      maxCols = activeElement.type === 'number' ? 15 : 26;
+      newCols = Math.min(maxCols, Math.max(1, newCols));
       
-      // Özelliği güncelle
-      setProperties(prev => ({
-        ...prev,
-        cols: newCols
-      }));
-      
-      // Elemanı güncelle
       updateElement(activeElementId, {
         cols: newCols,
-        size: {
-          ...activeElement.size,
-          width: newCols * 20 // Her sütun 20px
-        }
+        size: { ...activeElement.size, width: newCols * 20 }
       });
     }
+    
+    setProperties(prev => ({ ...prev, cols: newCols }));
   };
   
-  // Başlangıç soru numarasını değiştir
   const handleStartNumberChange = (e) => {
     const newStartNumber = parseInt(e.target.value) || 1;
-    
-    // Özelliği güncelle
-    setProperties(prev => ({
-      ...prev,
-      startNumber: newStartNumber
-    }));
-    
-    // Elemanı güncelle
-    updateElement(activeElementId, {
-      startNumber: newStartNumber
-    });
+    setProperties(prev => ({ ...prev, startNumber: newStartNumber }));
+    updateElement(activeElementId, { startNumber: newStartNumber });
   };
   
-  // Eleman pozisyonunu değiştir
   const handlePositionChange = (direction, amount = 20) => {
-    let newPosX = properties.posX;
-    let newPosY = properties.posY;
+    let { posX, posY } = properties;
     
-    // Yöne göre pozisyonu güncelle
     switch(direction) {
-      case 'left':
-        newPosX = Math.max(0, newPosX - amount);
-        break;
-      case 'right':
-        newPosX = newPosX + amount;
-        break;
-      case 'up':
-        newPosY = Math.max(0, newPosY - amount);
-        break;
-      case 'down':
-        newPosY = newPosY + amount;
-        break;
+      case 'left': posX = Math.max(0, posX - amount); break;
+      case 'right': posX = posX + amount; break;
+      case 'up': posY = Math.max(0, posY - amount); break;
+      case 'down': posY = posY + amount; break;
     }
     
-    // Özelliği güncelle
-    setProperties(prev => ({
-      ...prev,
-      posX: newPosX,
-      posY: newPosY
-    }));
+    setProperties(prev => ({ ...prev, posX, posY }));
+    updateElement(activeElementId, { position: { x: posX, y: posY } });
     
-    // Elemanı güncelle
-    updateElement(activeElementId, {
-      position: {
-        x: newPosX,
-        y: newPosY
+    // Güvenli alan kontrolü
+    setTimeout(() => {
+      const current = pageElements.find(el => el.uniqueId === activeElementId);
+      if (current) {
+        setIsInSafeZone(isWithinSafeZone(current.position, current.size));
       }
-    });
+    }, 10);
   };
   
-  // Resim boyutunu değiştir
-  const handleSizeChange = (dimension, value) => {
+  const handleSizeChange = (dimension, e) => {
     if (activeElement.type !== 'image') return;
     
+    const value = parseInt(e.target.value) || 0;
     const gridSize = 20;
-    // Grid'e hizalanmış değer
     const alignedValue = Math.max(gridSize, Math.floor(value / gridSize) * gridSize);
     
-    // Özelliği güncelle
-    setProperties(prev => ({
-      ...prev,
-      [dimension]: alignedValue
-    }));
+    setProperties(prev => ({ ...prev, [dimension]: alignedValue }));
     
-    // Elemanı güncelle
     updateElement(activeElementId, {
-      size: {
-        ...activeElement.size,
-        [dimension]: alignedValue
-      }
+      size: { ...activeElement.size, [dimension]: alignedValue }
     });
+    
+    // Güvenli alan kontrolü
+    setTimeout(() => {
+      const current = pageElements.find(el => el.uniqueId === activeElementId);
+      if (current) {
+        setIsInSafeZone(isWithinSafeZone(current.position, current.size));
+      }
+    }, 10);
   };
   
-  // Resim değiştir
   const handleChangeImage = () => {
     if (fileInputRef.current) {
       fileInputRef.current.onchange = (e) => {
@@ -226,15 +225,8 @@ const ElementPropertiesPanel = () => {
 
         const reader = new FileReader();
         reader.onload = (e) => {
-          // Resim verilerini güncelle
-          updateElement(activeElementId, {
-            content: e.target.result
-          });
-          
-          // Input değerini sıfırla
-          if (fileInputRef.current) {
-            fileInputRef.current.value = '';
-          }
+          updateElement(activeElementId, { content: e.target.result });
+          if (fileInputRef.current) fileInputRef.current.value = '';
         };
         reader.readAsDataURL(file);
       };
@@ -242,94 +234,57 @@ const ElementPropertiesPanel = () => {
       fileInputRef.current.click();
     }
   };
+
+  // İçerik render işlemleri
+  const renderChoiceItems = () => (
+    <div className={styles.choicesList}>
+      {Array.from({ length: properties.cols }).map((_, i) => (
+        <span key={i} className={styles.choiceItem}>{String.fromCharCode(65 + i)}</span>
+      ))}
+    </div>
+  );
   
   return (
     <div className={styles.panel}>
       <h3 className={styles.panelTitle}>{getPanelTitle()}</h3>
       
-      {/* Eleman Konumu - Tüm elemanlar için */}
+      {/* Güvenli alan uyarısı */}
+      {!isInSafeZone && (
+        <div className={styles.safeZoneWarning}>
+          <span className={styles.warningIcon}>⚠️</span>
+          <p>Eleman güvenli bölge dışında! Lütfen köşelerdeki kalibrasyon işaretlerinden uzak durması için elemanı güvenli alan içinde tutun.</p>
+        </div>
+      )}
+      
+      {/* Konum Kontrolleri */}
       <div className={styles.propertySection}>
         <h4 className={styles.sectionTitle}>Eleman Konumu</h4>
-        <div className={styles.directionControls}>
-          <div className={styles.directionRow}>
-            <div className={styles.emptyCell}></div>
-            <button 
-              className={styles.directionButton}
-              onClick={() => handlePositionChange('up')}
-              title="Yukarı Taşı"
-            >
-              ▲
-            </button>
-            <div className={styles.emptyCell}></div>
-          </div>
-          <div className={styles.directionRow}>
-            <button 
-              className={styles.directionButton}
-              onClick={() => handlePositionChange('left')}
-              title="Sola Taşı"
-            >
-              ◄
-            </button>
-            <div className={styles.directionCenter}>
-              <span className={styles.positionLabel}>
-                X: {properties.posX}, Y: {properties.posY}
-              </span>
-            </div>
-            <button 
-              className={styles.directionButton}
-              onClick={() => handlePositionChange('right')}
-              title="Sağa Taşı"
-            >
-              ►
-            </button>
-          </div>
-          <div className={styles.directionRow}>
-            <div className={styles.emptyCell}></div>
-            <button 
-              className={styles.directionButton}
-              onClick={() => handlePositionChange('down')}
-              title="Aşağı Taşı"
-            >
-              ▼
-            </button>
-            <div className={styles.emptyCell}></div>
-          </div>
-        </div>
+        <DirectionControls 
+          posX={properties.posX}
+          posY={properties.posY}
+          onPositionChange={handlePositionChange}
+        />
       </div>
 
-      {/* Resim için özel ayarlar */}
+      {/* Elemana özgü ayarlar */}
       {activeElement.type === 'image' && (
         <>
           <div className={styles.propertySection}>
             <h4 className={styles.sectionTitle}>Resim Boyutu</h4>
-            <div className={styles.propertyGroup}>
-              <label className={styles.propertyLabel}>Genişlik:</label>
-              <div className={styles.propertyControls}>
-                <input
-                  type="number"
-                  min="20"
-                  step="20"
-                  value={properties.width}
-                  onChange={(e) => handleSizeChange('width', parseInt(e.target.value) || 0)}
-                  className={styles.numberInput}
-                />
-                <span>px</span>
-              </div>
-            </div>
-            <div className={styles.propertyGroup}>
-              <label className={styles.propertyLabel}>Yükseklik:</label>
-              <div className={styles.propertyControls}>
-                <input
-                  type="number"
-                  min="20"
-                  step="20"
-                  value={properties.height}
-                  onChange={(e) => handleSizeChange('height', parseInt(e.target.value) || 0)}
-                  className={styles.numberInput}
-                />
-                <span>px</span>
-              </div>
-            </div>
+            <InputControl 
+              label="Genişlik:" 
+              value={properties.width}
+              onChange={(e) => handleSizeChange('width', e)}
+              min={20}
+              step={20}
+            />
+            <InputControl 
+              label="Yükseklik:" 
+              value={properties.height}
+              onChange={(e) => handleSizeChange('height', e)}
+              min={20}
+              step={20}
+            />
           </div>
           
           <div className={styles.propertyGroup}>
@@ -340,129 +295,84 @@ const ElementPropertiesPanel = () => {
               Resmi Değiştir
             </button>
           </div>
-          
-          <div className={styles.helpText}>
-            İpucu: Resmin konumunu değiştirmek için yön oklarını kullanın. Boyutunu değiştirmek için yukarıdaki değerleri girebilirsiniz.
-          </div>
         </>
       )}
 
-      {/* Çoktan seçmeli test için başlangıç soru numarası */}
+      {/* Çoktan seçmeli test ayarları */}
       {activeElement.type === 'multipleChoice' && (
-        <div className={styles.propertyGroup}>
-          <label className={styles.propertyLabel}>Başlangıç Soru Numarası:</label>
-          <div className={styles.propertyControls}>
-            <input
-              type="number"
-              min="1"
-              value={properties.startNumber}
-              onChange={handleStartNumberChange}
-              className={styles.numberInput}
-            />
-          </div>
-        </div>
-      )}
-      
-      {/* Satır sayısı ayarı - Sadece çoktan seçmeli için */}
-      {activeElement.type === 'multipleChoice' && (
-        <div className={styles.propertyGroup}>
-          <label className={styles.propertyLabel}>Soru Sayısı:</label>
-          <div className={styles.propertyControls}>
-            <button
-              className={styles.controlButton}
-              onClick={() => handleRowsChange(-1)}
-              disabled={properties.rows <= 1}
-            >
-              -
-            </button>
-            <span className={styles.propertyValue}>{properties.rows}</span>
-            <button
-              className={styles.controlButton}
-              onClick={() => handleRowsChange(1)}
-            >
-              +
-            </button>
-          </div>
-        </div>
-      )}
-      
-      {/* Sütun sayısı ayarı - TC ve Telefon için gösterme */}
-      {activeElement.type !== 'tcNumber' && activeElement.type !== 'phoneNumber' && activeElement.type !== 'image' && (
-        <div className={styles.propertyGroup}>
-          <label className={styles.propertyLabel}>
-            {activeElement.type === 'multipleChoice' ? 'Şık Sayısı:' : 
-             activeElement.type === 'nameSurname' ? 'Harf Sayısı:' : 
-             'Rakam Sayısı:'}
-          </label>
-          <div className={styles.propertyControls}>
-            <button
-              className={styles.controlButton}
-              onClick={() => handleColsChange(-1)}
-              disabled={properties.cols <= 1}
-            >
-              -
-            </button>
-            <span className={styles.propertyValue}>{properties.cols}</span>
-            <button
-              className={styles.controlButton}
-              onClick={() => handleColsChange(1)}
-              disabled={(activeElement.type === 'multipleChoice' && properties.cols >= 5) ||
-                       (activeElement.type === 'number' && properties.cols >= 15)}
-            >
-              +
-            </button>
-          </div>
+        <>
+          <InputControl 
+            label="Başlangıç Soru Numarası:" 
+            value={properties.startNumber}
+            onChange={handleStartNumberChange}
+            min={1}
+            step={1}
+            unit=""
+          />
           
-          {activeElement.type === 'number' && properties.cols >= 15 && (
-            <div className={styles.infoMessage}>Maksimum 15 rakam eklenebilir.</div>
-          )}
-        </div>
+          <QuantityControl 
+            label="Soru Sayısı:"
+            value={properties.rows}
+            onDecrease={() => handleRowsChange(-1)}
+            onIncrease={() => handleRowsChange(1)}
+            min={1}
+          />
+          
+          <QuantityControl 
+            label="Şık Sayısı:"
+            value={properties.cols}
+            onDecrease={() => handleColsChange(-1)}
+            onIncrease={() => handleColsChange(1)}
+            min={1}
+            max={5}
+          />
+          
+          <InfoBox title="Şıklar:">
+            {renderChoiceItems()}
+          </InfoBox>
+        </>
       )}
       
-      {/* TC Kimlik No ve Telefon için sabit bilgi göster */}
+      {/* Ad Soyad veya Numara ayarları */}
+      {(activeElement.type === 'nameSurname' || activeElement.type === 'number') && (
+        <QuantityControl 
+          label={activeElement.type === 'nameSurname' ? 'Harf Sayısı:' : 'Rakam Sayısı:'}
+          value={properties.cols}
+          onDecrease={() => handleColsChange(-1)}
+          onIncrease={() => handleColsChange(1)}
+          min={1}
+          max={activeElement.type === 'number' ? 15 : undefined}
+        />
+      )}
+      
+      {/* TC Kimlik No ve Telefon için sabit bilgi */}
       {activeElement.type === 'tcNumber' && (
-        <div className={styles.infoBox}>
-          <div className={styles.infoTitle}>TC Kimlik Numarası:</div>
-          <div className={styles.infoText}>
-            11 haneli TC kimlik numarası alanı
-          </div>
-        </div>
+        <InfoBox title="TC Kimlik Numarası:">
+          <div className={styles.infoText}>11 haneli TC kimlik numarası alanı</div>
+        </InfoBox>
       )}
       
       {activeElement.type === 'phoneNumber' && (
-        <div className={styles.infoBox}>
-          <div className={styles.infoTitle}>Telefon Numarası:</div>
-          <div className={styles.infoText}>
-            10 haneli telefon numarası alanı
-          </div>
-        </div>
+        <InfoBox title="Telefon Numarası:">
+          <div className={styles.infoText}>10 haneli telefon numarası alanı</div>
+        </InfoBox>
       )}
       
-      {/* Şık isimleri gösterimi (sadece çoktan seçmeli için) */}
-      {activeElement.type === 'multipleChoice' && (
-        <div className={styles.infoBox}>
-          <div className={styles.infoTitle}>Şıklar:</div>
-          <div className={styles.choicesList}>
-            {Array.from({ length: properties.cols }).map((_, i) => (
-              <span key={i} className={styles.choiceItem}>
-                {String.fromCharCode(65 + i)}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
+      {/* Yardımcı ipuçları */}
+      <div className={styles.helpText}>
+        {activeElement.type === 'multipleChoice' 
+          ? 'İpucu: Soru sayısını ve şık sayısını değiştirmek için + ve - butonlarını, konumunu değiştirmek için yön oklarını kullanın.'
+          : activeElement.type === 'tcNumber' || activeElement.type === 'phoneNumber'
+            ? `İpucu: ${activeElement.type === 'tcNumber' ? 'TC Kimlik no alanı sabit 11 hanedir.' : 'Telefon numarası alanı sabit 10 hanedir.'} Konumunu ayarlamak için yön oklarını kullanın.`
+            : 'İpucu: Elemanın konumunu değiştirmek için yön oklarını kullanın.'}
+      </div>
       
-      {activeElement.type !== 'image' && (
-        <div className={styles.helpText}>
-          {activeElement.type === 'multipleChoice' ? 
-            'İpucu: Soru sayısını ve şık sayısını değiştirmek için + ve - butonlarını, konumunu değiştirmek için yön oklarını kullanın.' :
-            activeElement.type === 'tcNumber' ?
-            'İpucu: TC Kimlik no alanı sabit 11 hanedir. Konumunu ayarlamak için yön oklarını kullanın.' :
-            activeElement.type === 'phoneNumber' ?
-            'İpucu: Telefon numarası alanı sabit 10 hanedir. Konumunu ayarlamak için yön oklarını kullanın.' :
-            'İpucu: Elemanın konumunu değiştirmek için yön oklarını kullanın.'}
-        </div>
-      )}
+      {/* Kalibrasyon işaretleri uyarısı */}
+      <div className={styles.calibrationNote}>
+        <p>
+          <strong>Önemli:</strong> Formun köşelerindeki kare kalibrasyon işaretleri, optik okuyucunun formu doğru şekilde tespit etmesi için gereklidir. Lütfen tüm elemanları kesikli çizgi ile gösterilen güvenli alan içinde tutun.
+        </p>
+      </div>
     </div>
   );
 };

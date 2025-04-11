@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useMemo, useRef } from 'react';
+import React, { createContext, useContext, useState, useCallback, useRef } from 'react';
 import { snapToGrid } from '../utils/helpers';
 
 const FormEditorContext = createContext();
@@ -13,11 +13,57 @@ export const FormEditorProvider = ({ children }) => {
   const [tempImageData, setTempImageData] = useState(null);
   const fileInputRef = useRef(null);
   
-  // Grid boyutları
-  const gridSizeRef = useRef(20);
+  // Grid ve güvenli alan ayarları
+  const gridSizeRef = useRef(20); // Grid boyutu
+  const safeZoneMarginRef = useRef(30); // Köşe işaretlerinin bulunduğu kenar boşluğu
+  const safeZonePaddingRef = useRef(10); // Güvenli alan ek boşluğu
   
-  // Bubble içeriklerini saklamak için yeni state
-  // Formatı: { elementId: { "row-col": "özelleştirilmiş değer" } }
+  // Güvenli alan sınırlarını hesapla
+  const getSafeZoneBounds = useCallback(() => {
+    const margin = safeZoneMarginRef.current;
+    const padding = safeZonePaddingRef.current;
+    const totalMargin = margin + padding;
+    
+    return {
+      top: totalMargin,
+      left: totalMargin,
+      right: 210 * 3.78 - totalMargin, // A4 genişliği 210mm, yaklaşık piksel değeri
+      bottom: 297 * 3.78 - totalMargin  // A4 yüksekliği 297mm, yaklaşık piksel değeri
+    };
+  }, []);
+  
+  // Pozisyonun güvenli alan içinde olup olmadığını kontrol et
+  const isWithinSafeZone = useCallback((position, size) => {
+    const bounds = getSafeZoneBounds();
+    
+    // Elemanın kenarlarının sınırlar içinde olup olmadığını kontrol et
+    return (
+      position.x >= bounds.left &&
+      position.y >= bounds.top &&
+      position.x + size.width <= bounds.right &&
+      position.y + size.height <= bounds.bottom
+    );
+  }, [getSafeZoneBounds]);
+  
+  // Pozisyonu güvenli alan içine sığdır
+  const constrainToSafeZone = useCallback((position, size) => {
+    const bounds = getSafeZoneBounds();
+    const gridSize = gridSizeRef.current;
+    
+    // X koordinatını sınırla
+    let x = Math.max(bounds.left, position.x);
+    x = Math.min(x, bounds.right - size.width);
+    x = Math.floor(x / gridSize) * gridSize; // Grid'e hizala
+    
+    // Y koordinatını sınırla
+    let y = Math.max(bounds.top, position.y);
+    y = Math.min(y, bounds.bottom - size.height);
+    y = Math.floor(y / gridSize) * gridSize; // Grid'e hizala
+    
+    return { x, y };
+  }, [getSafeZoneBounds]);
+  
+  // Bubble içeriklerini saklamak için state
   const [customBubbleValues, setCustomBubbleValues] = useState({});
   
   // Bubble içeriğini güncelleme fonksiyonu
@@ -25,22 +71,13 @@ export const FormEditorProvider = ({ children }) => {
     setCustomBubbleValues(prev => {
       const elementValues = prev[elementId] || {};
       
-      // Debug log ekleyelim
-      console.log(`updateBubbleContent: Element ${elementId}, rowCol ${rowCol}, value "${value}"`);
-      
       // Özel boş durumu kontrolü
       if (value === '') {
-        // Boş değer için özel durumu ele alıyoruz - önemli: tamamen silmek yerine boş değeri saklıyoruz
         const newElementValues = { ...elementValues };
-        // Boş değeri açıkça kaydet
         newElementValues[rowCol] = '';
         
         const newValues = { ...prev };
         newValues[elementId] = newElementValues;
-        
-        // Boş değerleri saydır (debug)
-        const emptyCount = Object.values(newElementValues).filter(v => v === '').length;
-        console.log(`Element ${elementId} now has ${emptyCount} empty values`);
         
         return newValues;
       }
@@ -56,21 +93,23 @@ export const FormEditorProvider = ({ children }) => {
     });
   }, []);
 
-  const handleBubbleContentUpdate = (rowCol, value) => {
-    if (onBubbleContentUpdate) {
-      onBubbleContentUpdate(rowCol, value);
-      
-      // Değişiklik yapıldığını konsola yaz (debug)
-      console.log(`Bubble ${rowCol} updated to: "${value}"`);
-    }
-  };
-
   // Eleman güncelleme
   const updateElement = useCallback((uniqueId, updates) => {
-    setPageElements(prev => prev.map(el => 
-      el.uniqueId === uniqueId ? {...el, ...updates} : el
-    ));
-  }, []);
+    setPageElements(prev => prev.map(el => {
+      if (el.uniqueId !== uniqueId) return el;
+      
+      const updatedElement = { ...el, ...updates };
+      
+      // Pozisyon güncellemesi varsa, güvenli alanda kaldığından emin ol
+      if (updates.position) {
+        const size = updatedElement.size || { width: 100, height: 100 };
+        const constrainedPosition = constrainToSafeZone(updates.position, size);
+        updatedElement.position = constrainedPosition;
+      }
+      
+      return updatedElement;
+    }));
+  }, [constrainToSafeZone]);
 
   // Varsayılan eleman boyutlarını belirle
   const getDefaultElementSize = useCallback((type) => {
@@ -165,18 +204,23 @@ export const FormEditorProvider = ({ children }) => {
     if (!tempImageData) return null;
     
     const gridSize = gridSizeRef.current;
-    
-    const alignedX = Math.floor(position.x / gridSize) * gridSize;
-    const alignedY = Math.floor(position.y / gridSize) * gridSize;
-    
     const defaultSize = getDefaultElementSize('image');
+    
+    // Pozisyonu grid'e ve güvenli alana sığdır
+    const constrainedPosition = constrainToSafeZone(
+      { 
+        x: Math.floor(position.x / gridSize) * gridSize,
+        y: Math.floor(position.y / gridSize) * gridSize 
+      },
+      defaultSize
+    );
     
     const uniqueId = `image-${Date.now()}`;
     
     const newElement = {
       type: 'image',
       uniqueId,
-      position: { x: alignedX, y: alignedY },
+      position: constrainedPosition,
       size: {
         width: defaultSize.width,
         height: defaultSize.height
@@ -194,7 +238,7 @@ export const FormEditorProvider = ({ children }) => {
     setActiveElementId(uniqueId);
     
     return uniqueId;
-  }, [tempImageData, getDefaultElementSize]);
+  }, [tempImageData, getDefaultElementSize, constrainToSafeZone]);
 
   // Yeni eleman ekleme - Tek tıklama ile
   const addElementAtPosition = useCallback((type, position) => {
@@ -212,18 +256,23 @@ export const FormEditorProvider = ({ children }) => {
     }
     
     const gridSize = gridSizeRef.current;
-    
-    const alignedX = Math.floor(position.x / gridSize) * gridSize;
-    const alignedY = Math.floor(position.y / gridSize) * gridSize;
-    
     const defaultSize = getDefaultElementSize(type);
+    
+    // Pozisyonu grid'e ve güvenli alana sığdır
+    const constrainedPosition = constrainToSafeZone(
+      { 
+        x: Math.floor(position.x / gridSize) * gridSize,
+        y: Math.floor(position.y / gridSize) * gridSize 
+      },
+      defaultSize
+    );
     
     const uniqueId = `${type}-${Date.now()}`;
     
     const newElement = {
       type,
       uniqueId,
-      position: { x: alignedX, y: alignedY },
+      position: constrainedPosition,
       size: {
         width: defaultSize.width,
         height: defaultSize.height
@@ -236,7 +285,7 @@ export const FormEditorProvider = ({ children }) => {
     setPageElements(prev => [...prev, newElement]);
     
     return uniqueId;
-  }, [getDefaultElementSize, tempImageData, createImageElement]);
+  }, [getDefaultElementSize, tempImageData, createImageElement, constrainToSafeZone]);
   
   // Eleman silme
   const removeElement = useCallback((uniqueId) => {
@@ -315,6 +364,8 @@ export const FormEditorProvider = ({ children }) => {
     isCreating,
     tempImageData,
     gridSize: gridSizeRef.current,
+    safeZoneMargin: safeZoneMarginRef.current,
+    safeZonePadding: safeZonePaddingRef.current,
     customBubbleValues,
     updateBubbleContent,
     setActiveElement,
@@ -326,7 +377,10 @@ export const FormEditorProvider = ({ children }) => {
     handleImageUpload,
     fileInputRef,
     getFormStateForSave,
-    loadFormState
+    loadFormState,
+    getSafeZoneBounds,
+    constrainToSafeZone,
+    isWithinSafeZone
   };
 
   return (
@@ -343,5 +397,3 @@ export const FormEditorProvider = ({ children }) => {
     </FormEditorContext.Provider>
   );
 };
-
-export default FormEditorContext;
