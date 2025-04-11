@@ -12,131 +12,87 @@ import optikApi from '../../api/optik';
 // FormEditor Context'ine erişmek için wrapper bileşen
 const OptikOlusturmaContent = () => {
   const navigate = useNavigate();
-  const { pageElements } = useFormEditor();
+  const { pageElements, customBubbleValues, getFormStateForSave } = useFormEditor();
+  
+  // State değişkenleri
   const [formTitle, setFormTitle] = useState('Yeni Optik Form');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [userData, setUserData] = useState(null);
   const [formImage, setFormImage] = useState(null);
-  
-  // Önizleme için state
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   
-  // Component yüklendiğinde kullanıcı bilgilerini al
+  // Kullanıcı bilgilerini yükle
   useEffect(() => {
     try {
       const userStr = localStorage.getItem('user');
       if (userStr) {
-        const parsedUser = JSON.parse(userStr);
-        setUserData(parsedUser);
+        setUserData(JSON.parse(userStr));
       }
     } catch (err) {
       console.error("Kullanıcı bilgileri alınamadı:", err);
     }
   }, []);
   
+  // Form başlığı değişikliği
   const handleTitleChange = (e) => {
     setFormTitle(e.target.value);
   };
   
-  // Elemanları düzenle
-  const getEnhancedElements = () => {
-    return pageElements;
-  };
-  
-  // Kaydetme işlemi
+  // Form kaydetme
   const handleSave = async () => {
     try {
       setSaving(true);
       setError(null);
       
-      // Form doğrulama kontrollerini yap
+      // Doğrulama kontrolleri
       if (!formTitle.trim()) {
-        setError("Form başlığı boş olamaz");
-        setSaving(false);
-        return;
+        throw new Error("Form başlığı boş olamaz");
       }
       
       if (pageElements.length === 0) {
-        setError("Form elemanları eklemeden kaydedemezsiniz");
-        setSaving(false);
-        return;
+        throw new Error("Form elemanları eklemeden kaydedemezsiniz");
       }
       
       // Kullanıcı bilgilerini kontrol et
-      if (!userData) {
-        const userStr = localStorage.getItem('user');
-        if (!userStr) {
-          setError("Oturum bilgileriniz bulunamadı. Lütfen tekrar giriş yapın.");
-          setSaving(false);
-          return;
-        }
-        
-        try {
-          setUserData(JSON.parse(userStr));
-        } catch (err) {
-          setError("Kullanıcı bilgileri geçersiz. Lütfen tekrar giriş yapın.");
-          setSaving(false);
-          return;
-        }
-      }
-      
-      if (!userData._id) {
-        setError("Kullanıcı kimliği bulunamadı. Lütfen tekrar giriş yapın.");
-        setSaving(false);
-        return;
+      const user = userData || getUserFromStorage();
+      if (!user?._id) {
+        throw new Error("Kullanıcı kimliği bulunamadı. Lütfen tekrar giriş yapın.");
       }
       
       // Okul ID'sini doğru şekilde al
-      let schoolId = null;
-      if (userData.school && userData.school._id) {
-        schoolId = userData.school._id;
-      } else if (userData.schoolId) {
-        schoolId = userData.schoolId;
-      } else {
-        setError("Okul bilgisi bulunamadı. Lütfen tekrar giriş yapın.");
-        setSaving(false);
-        return;
+      const schoolId = user.school?._id || user.schoolId;
+      if (!schoolId) {
+        throw new Error("Okul bilgisi bulunamadı. Lütfen tekrar giriş yapın.");
       }
       
-      // Form görüntüsünü kontrol et
+      // Form görüntüsü kontrolü
       if (!formImage) {
-        setError("Form görüntüsü oluşturulamadı. Lütfen tekrar deneyin.");
-        setSaving(false);
-        return;
+        throw new Error("Form görüntüsü oluşturulamadı. Lütfen tekrar deneyin.");
       }
       
-      // Form verisi
+      // Form verisini hazırla
       const formData = {
         title: formTitle,
         school: schoolId,
-        createdBy: userData._id,
+        createdBy: user._id,
         date: new Date().toISOString(),
         opticalFormImage: formImage,
-        components: getEnhancedElements()
+        components: pageElements.map(element => ({
+          ...element,
+          bubbleValues: customBubbleValues[element.uniqueId] || {}
+        }))
       };
       
-      console.log("Gönderilecek form verisi:", {
-        title: formData.title,
-        school: formData.school,
-        createdBy: formData.createdBy,
-        date: formData.date,
-        imageSize: formData.opticalFormImage ? formData.opticalFormImage.length : 'yok',
-        componentsCount: formData.components.length
-      });
+      // Form verisini sunucuya gönder
+      await optikApi.createForm(formData);
       
-      // API ile kaydet
-      const response = await optikApi.createForm(formData);
-      console.log("API yanıtı:", response);
-      
-      // Başarıyla kaydedildi, dashboard'a yönlendir
+      // Başarıyla kaydetme ve yönlendirme
       navigate('/dashboard', { 
         state: { message: 'Form başarıyla kaydedildi.' } 
       });
     } catch (error) {
-      console.error('Form kaydedilirken hata:', error);
-      
-      // Detaylı hata mesajı göster
+      // Hata mesajını hazırla
       const errorMessage = error.response?.data?.message || error.message || 'Form kaydedilirken bir hata oluştu.';
       let detailMessage = '';
       
@@ -150,6 +106,17 @@ const OptikOlusturmaContent = () => {
     }
   };
   
+  // LocalStorage'dan kullanıcı bilgisini alma
+  const getUserFromStorage = () => {
+    try {
+      const userStr = localStorage.getItem('user');
+      return userStr ? JSON.parse(userStr) : null;
+    } catch (err) {
+      console.error("Kullanıcı bilgileri parse edilemedi:", err);
+      throw new Error("Kullanıcı bilgileri geçersiz. Lütfen tekrar giriş yapın.");
+    }
+  };
+  
   // Önizleme modalını aç
   const openPreview = () => {
     setIsPreviewOpen(true);
@@ -160,10 +127,10 @@ const OptikOlusturmaContent = () => {
     setIsPreviewOpen(false);
   };
   
-  // Önizleme görünümünü kaydetme fonksiyonu
+  // Önizleme görünümünü kaydetme
   const handleSavePreview = () => {
     closePreview();
-    setTimeout(handleSave, 100); // Kısa bir gecikme ile kaydet
+    setTimeout(handleSave, 100);
   };
   
   return (
@@ -201,20 +168,14 @@ const OptikOlusturmaContent = () => {
       </div>
       
       {/* Görünmez renderer - form görüntüsü oluşturmak için */}
-      <div style={{ 
-        position: 'absolute', 
-        left: '-9999px', 
-        top: '-9999px',
-        width: '210mm',
-        height: '297mm',
-        overflow: 'hidden'
-      }}>
+      <div style={{ position: 'absolute', left: '-9999px', top: '-9999px', width: '210mm', height: '297mm', overflow: 'hidden' }}>
         <FormRenderer 
-          pageElements={getEnhancedElements()}
+          pageElements={pageElements}
           formTitle={formTitle}
           onRender={setFormImage}
-          visible={true} // Render için görünür yap
-          showGrid={false} // Grid çizgilerini gizle
+          visible={true}
+          showGrid={false}
+          customBubbleValues={customBubbleValues}
         />
       </div>
       
@@ -222,9 +183,10 @@ const OptikOlusturmaContent = () => {
       <PreviewModal 
         isOpen={isPreviewOpen}
         onClose={closePreview}
-        pageElements={getEnhancedElements()}
+        pageElements={pageElements}
         formTitle={formTitle}
         onSave={handleSavePreview}
+        customBubbleValues={customBubbleValues}
       />
     </div>
   );

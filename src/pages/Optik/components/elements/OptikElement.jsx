@@ -12,37 +12,25 @@ const OptikElement = memo(function OptikElement({
   isActive,
   onActivate,
   onRemove,
-  startNumber = 1
+  startNumber = 1,
+  customBubbleValues = {},
+  onBubbleContentUpdate
 }) {
   // Manuel başlık için state
   const [manualTitle, setManualTitle] = useState('');
   
   // Eleman türüne göre varsayılan başlık belirle
   useEffect(() => {
-    let defaultTitle = '';
-    switch(type) {
-      case 'nameSurname':
-        defaultTitle = 'AD SOYAD';
-        break;
-      case 'number':
-        defaultTitle = 'NUMARA';
-        break;
-      case 'tcNumber':
-        defaultTitle = 'TC KİMLİK NO';
-        break;
-      case 'phoneNumber':
-        defaultTitle = 'TELEFON NO';
-        break;
-      case 'multipleChoice':
-        defaultTitle = 'TEST';
-        break;
-      case 'image':
-        defaultTitle = 'RESİM';
-        break;
-      default:
-        defaultTitle = 'BAŞLIK';
-    }
-    setManualTitle(defaultTitle);
+    const defaultTitles = {
+      'nameSurname': 'AD SOYAD',
+      'number': 'NUMARA',
+      'tcNumber': 'TC KİMLİK NO',
+      'phoneNumber': 'TELEFON NO',
+      'multipleChoice': 'TEST',
+      'image': 'RESİM'
+    };
+    
+    setManualTitle(defaultTitles[type] || 'BAŞLIK');
   }, [type]);
   
   // Elemanın gerçek yüksekliğini ayarlamak için
@@ -53,40 +41,30 @@ const OptikElement = memo(function OptikElement({
   
   // İlk yükleme ve boyut değişiminde hesaplanmış boyutu güncelle
   useEffect(() => {
-    // Izgara tabanlı ayarlanmış boyut hesaplama
     const gridSize = 20;
     const adjustedWidth = Math.ceil(size.width / gridSize) * gridSize;
-    
-    // Elemanın içindeki satır sayısına göre hesaplanan minimum yükseklik
     let calculatedHeight;
     
     if (type === 'multipleChoice') {
       // Her soru satırı 20px + başlık yüksekliği (30px)
-      const visibleRows = Math.min(rows, 20); // Maksimum 20 satır gösterilecek
-      calculatedHeight = (visibleRows * 20) + 30; // Başlık yüksekliği için ek 30px
+      const visibleRows = Math.min(rows, 20);
+      calculatedHeight = (visibleRows * 20) + 30;
     } else if (type === 'nameSurname') {
       // 30px başlık + 30px el yazı alanı + 26 * 20px karakter alanı (A-Z)
-      calculatedHeight = 30 + 30 + (26 * 20); 
-      // Ad soyad için yüksekliği sabit tut
+      calculatedHeight = 30 + 30 + (26 * 20);
     } else if (type === 'number' || type === 'tcNumber' || type === 'phoneNumber') {
       // 30px başlık + 30px el yazı alanı + 10 * 20px karakter alanı (0-9)
-      calculatedHeight = 30 + 30 + (10 * 20); 
-      // Numara, TC Kimlik ve Telefon için yüksekliği sabit tut
+      calculatedHeight = 30 + 30 + (10 * 20);
     } else if (type === 'image') {
-      // Resim elemanları için yükseklik
       calculatedHeight = Math.ceil(size.height / gridSize) * gridSize;
     } else {
-      // Varsayılan yükseklik hesaplama
       calculatedHeight = Math.ceil(size.height / gridSize) * gridSize;
     }
     
-    // Ad Soyad, Numara, TC Kimlik ve Telefon için yüksekliği sabit tut, diğer elemanlar için kullanıcı seçimine göre ayarla
-    let finalHeight;
-    if (type === 'nameSurname' || type === 'number' || type === 'tcNumber' || type === 'phoneNumber') {
-      finalHeight = calculatedHeight; // Sabit yükseklik
-    } else {
-      finalHeight = Math.max(calculatedHeight, size.height); // Kullanıcı seçimi veya hesaplanan minimum
-    }
+    // Sabit boyutlu elemanlar vs kullanıcı seçimi
+    const finalHeight = ['nameSurname', 'number', 'tcNumber', 'phoneNumber'].includes(type)
+      ? calculatedHeight 
+      : Math.max(calculatedHeight, size.height);
     
     setAdjustedSize({
       width: adjustedWidth,
@@ -110,22 +88,24 @@ const OptikElement = memo(function OptikElement({
     }
   };
 
+  // Bubble içeriği güncellendiğinde
+  const handleBubbleContentUpdate = (rowCol, value) => {
+    if (onBubbleContentUpdate) {
+      onBubbleContentUpdate(rowCol, value);
+    }
+  };
+
   // Manuel girilen başlığı güncelle
   const handleTitleChange = (e) => {
     setManualTitle(e.target.value);
   };
 
-  // Tüm grid hücreleri tam 20px olacak
-  const gridSize = 20;
-  
   // Pozisyon ve boyutu grid'e göre ayarla
-  // Kesin grid sınırlarına yerleştirmek için tam grid çizgilerine hizala
+  const gridSize = 20;
   const adjustedPosition = {
     x: Math.floor(position.x / gridSize) * gridSize,
     y: Math.floor(position.y / gridSize) * gridSize
   };
-  
-  const characters = getCharacterSet();
 
   return (
     <div 
@@ -163,7 +143,6 @@ const OptikElement = memo(function OptikElement({
                 display: 'block'
               }} 
               onError={(e) => {
-                console.error("Image error in OptikElement:", e);
                 e.target.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M20.4 14.5L16 10 4 20"/></svg>';
                 e.target.style.padding = '20px';
                 e.target.style.opacity = '0.5';
@@ -175,9 +154,11 @@ const OptikElement = memo(function OptikElement({
           <BubbleGrid 
             rows={rows} 
             cols={cols}
-            characters={characters}
             type={type}
             startNumber={startNumber}
+            isEditable={isActive}
+            customValues={customBubbleValues}
+            onContentUpdate={handleBubbleContentUpdate}
           />
         )}
       </div>

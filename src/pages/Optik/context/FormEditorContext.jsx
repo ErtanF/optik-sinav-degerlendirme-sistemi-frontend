@@ -8,14 +8,63 @@ export const useFormEditor = () => useContext(FormEditorContext);
 export const FormEditorProvider = ({ children }) => {
   const [pageElements, setPageElements] = useState([]);
   const [activeElementId, setActiveElementId] = useState(null);
-  const [selectedTool, setSelectedTool] = useState(null); // Seçilen araç: null, 'nameSurname', 'number', 'multipleChoice', 'image'
-  const [isCreating, setIsCreating] = useState(false); // Alan oluşturma işlemi devam ediyor mu?
-  const [tempImageData, setTempImageData] = useState(null); // Geçici resim verisi için state
-  const fileInputRef = useRef(null); // Resim yükleme inputu için ref
+  const [selectedTool, setSelectedTool] = useState(null); 
+  const [isCreating, setIsCreating] = useState(false);
+  const [tempImageData, setTempImageData] = useState(null);
+  const fileInputRef = useRef(null);
   
   // Grid boyutları
-  const gridSizeRef = useRef(20); // Piksel olarak grid boyutu - tüm hesaplamalar bu değere göre yapılır
+  const gridSizeRef = useRef(20);
   
+  // Bubble içeriklerini saklamak için yeni state
+  // Formatı: { elementId: { "row-col": "özelleştirilmiş değer" } }
+  const [customBubbleValues, setCustomBubbleValues] = useState({});
+  
+  // Bubble içeriğini güncelleme fonksiyonu
+  const updateBubbleContent = useCallback((elementId, rowCol, value) => {
+    setCustomBubbleValues(prev => {
+      const elementValues = prev[elementId] || {};
+      
+      // Debug log ekleyelim
+      console.log(`updateBubbleContent: Element ${elementId}, rowCol ${rowCol}, value "${value}"`);
+      
+      // Özel boş durumu kontrolü
+      if (value === '') {
+        // Boş değer için özel durumu ele alıyoruz - önemli: tamamen silmek yerine boş değeri saklıyoruz
+        const newElementValues = { ...elementValues };
+        // Boş değeri açıkça kaydet
+        newElementValues[rowCol] = '';
+        
+        const newValues = { ...prev };
+        newValues[elementId] = newElementValues;
+        
+        // Boş değerleri saydır (debug)
+        const emptyCount = Object.values(newElementValues).filter(v => v === '').length;
+        console.log(`Element ${elementId} now has ${emptyCount} empty values`);
+        
+        return newValues;
+      }
+      
+      // Değer dolu ise, element ve değeri ekle/güncelle
+      return {
+        ...prev,
+        [elementId]: {
+          ...elementValues,
+          [rowCol]: value.trim()
+        }
+      };
+    });
+  }, []);
+
+  const handleBubbleContentUpdate = (rowCol, value) => {
+    if (onBubbleContentUpdate) {
+      onBubbleContentUpdate(rowCol, value);
+      
+      // Değişiklik yapıldığını konsola yaz (debug)
+      console.log(`Bubble ${rowCol} updated to: "${value}"`);
+    }
+  };
+
   // Eleman güncelleme
   const updateElement = useCallback((uniqueId, updates) => {
     setPageElements(prev => prev.map(el => 
@@ -29,55 +78,48 @@ export const FormEditorProvider = ({ children }) => {
     
     switch (type) {
       case 'nameSurname':
-        // Ad soyad için varsayılan: 10 sütun genişliğinde, 26 satır (A-Z harfleri) + başlık ve yazı alanı
         return {
           width: 10 * gridSize,
-          height: (26 * gridSize) + 60, // 30px başlık + 30px el yazı alanı
+          height: (26 * gridSize) + 60,
           rows: 26,
           cols: 10
         };
       case 'number':
-        // Numara alanı için varsayılan: 6 sütun genişliğinde, 10 satır (0-9 rakamları) + başlık ve yazı alanı
         return {
           width: 6 * gridSize,
-          height: (10 * gridSize) + 60, // 30px başlık + 30px el yazı alanı
+          height: (10 * gridSize) + 60,
           rows: 10,
           cols: 6
         };
       case 'tcNumber':
-        // TC Kimlik No için sabit: 11 sütun (11 hane), 10 satır (0-9 rakamları) + başlık ve yazı alanı
         return {
           width: 11 * gridSize,
-          height: (10 * gridSize) + 60, // 30px başlık + 30px el yazı alanı
+          height: (10 * gridSize) + 60,
           rows: 10,
           cols: 11
         };
       case 'phoneNumber':
-        // Telefon No için sabit: 10 sütun (10 hane), 10 satır (0-9 rakamları) + başlık ve yazı alanı
         return {
           width: 10 * gridSize,
-          height: (10 * gridSize) + 60, // 30px başlık + 30px el yazı alanı
+          height: (10 * gridSize) + 60,
           rows: 10,
           cols: 10
         };
       case 'multipleChoice':
-        // Çoktan seçmeli için varsayılan: 5 sütun (A-E) + 1 sütun (soru numarası) ve 20 satır (20 soru)
         return {
-          width: (5 + 1) * gridSize, // 5 şık + soru numarası sütunu
-          height: (20 * gridSize) + 30, // 20 soru + 30px başlık
+          width: (5 + 1) * gridSize,
+          height: (20 * gridSize) + 30,
           rows: 20,
           cols: 5
         };
       case 'image':
-        // Resimler için varsayılan boyut
         return {
-          width: 10 * gridSize, // 200px genişlik
-          height: 10 * gridSize, // 200px yükseklik
+          width: 10 * gridSize,
+          height: 10 * gridSize,
           rows: 10,
           cols: 10
         };
       default:
-        // Varsayılan boyut
         return {
           width: 5 * gridSize,
           height: 5 * gridSize,
@@ -92,7 +134,6 @@ export const FormEditorProvider = ({ children }) => {
     const file = event.target.files[0];
     if (!file) return;
 
-    // Dosya tipini kontrol et
     if (!file.type.startsWith('image/')) {
       alert('Lütfen geçerli bir resim dosyası seçin.');
       if (fileInputRef.current) {
@@ -101,16 +142,11 @@ export const FormEditorProvider = ({ children }) => {
       return;
     }
 
-    console.log("Image file selected:", file.name, file.type, file.size);
-    
     const reader = new FileReader();
     reader.onload = (e) => {
-      // Resim dosyasını Base64 formatında al
       const imageData = e.target.result;
-      console.log("Image loaded, data length:", imageData.length);
       setTempImageData(imageData);
       
-      // File input değerini sıfırla (aynı dosyayı tekrar seçebilmek için)
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -130,17 +166,13 @@ export const FormEditorProvider = ({ children }) => {
     
     const gridSize = gridSizeRef.current;
     
-    // Pozisyonu grid'e hizala
     const alignedX = Math.floor(position.x / gridSize) * gridSize;
     const alignedY = Math.floor(position.y / gridSize) * gridSize;
     
-    // Varsayılan boyutları al
     const defaultSize = getDefaultElementSize('image');
     
-    // Benzersiz ID oluştur
     const uniqueId = `image-${Date.now()}`;
     
-    // Yeni element objesi oluştur
     const newElement = {
       type: 'image',
       uniqueId,
@@ -149,22 +181,16 @@ export const FormEditorProvider = ({ children }) => {
         width: defaultSize.width,
         height: defaultSize.height
       },
-      content: tempImageData, // Resim verisi
+      content: tempImageData,
       title: 'Resim'
     };
     
-    console.log("Creating image element:", uniqueId);
-    
-    // Element listesine ekle
     setPageElements(prev => [...prev, newElement]);
     
-    // Geçici resim verisini temizle
     setTempImageData(null);
     
-    // Araç seçimini sıfırla
     setSelectedTool(null);
     
-    // Yeni eklenen resmi aktif element yap
     setActiveElementId(uniqueId);
     
     return uniqueId;
@@ -174,7 +200,6 @@ export const FormEditorProvider = ({ children }) => {
   const addElementAtPosition = useCallback((type, position) => {
     if (!type) return null;
     
-    // Eğer resim ekleme ise ve geçici resim verisi yoksa, dosya seçim penceresini aç
     if (type === 'image') {
       if (!tempImageData) {
         if (fileInputRef.current) {
@@ -182,24 +207,19 @@ export const FormEditorProvider = ({ children }) => {
         }
         return null;
       } else {
-        // Eğer geçici resim verisi varsa, resmi oluştur
         return createImageElement(position);
       }
     }
     
     const gridSize = gridSizeRef.current;
     
-    // Pozisyonu grid'e hizala
     const alignedX = Math.floor(position.x / gridSize) * gridSize;
     const alignedY = Math.floor(position.y / gridSize) * gridSize;
     
-    // Varsayılan boyutları al
     const defaultSize = getDefaultElementSize(type);
     
-    // Benzersiz ID oluştur
     const uniqueId = `${type}-${Date.now()}`;
     
-    // Yeni element objesi oluştur
     const newElement = {
       type,
       uniqueId,
@@ -210,19 +230,24 @@ export const FormEditorProvider = ({ children }) => {
       },
       rows: defaultSize.rows,
       cols: defaultSize.cols,
-      startNumber: 1 // Varsayılan başlangıç soru numarası
+      startNumber: 1
     };
     
-    // Element listesine ekle
     setPageElements(prev => [...prev, newElement]);
     
-    // Eklenen elementin ID'sini döndür (başka işlemler için kullanılabilir)
     return uniqueId;
   }, [getDefaultElementSize, tempImageData, createImageElement]);
   
   // Eleman silme
   const removeElement = useCallback((uniqueId) => {
     setPageElements(prev => prev.filter(el => el.uniqueId !== uniqueId));
+    
+    // Özelleştirilmiş bubble değerlerini de temizle
+    setCustomBubbleValues(prev => {
+      const newValues = { ...prev };
+      delete newValues[uniqueId];
+      return newValues;
+    });
     
     if (activeElementId === uniqueId) {
       setActiveElementId(null);
@@ -233,14 +258,11 @@ export const FormEditorProvider = ({ children }) => {
   const handleCanvasClick = useCallback((position) => {
     if (!selectedTool) return;
     
-    // Elemanı ekle
     const newElementId = addElementAtPosition(selectedTool, position);
     
-    // Yeni oluşturulan elemanı seç (özelliklerini düzenlemeye hazır olması için)
     if (newElementId) {
       setActiveElementId(newElementId);
       
-      // Seçili aracı sıfırla (tek bir eleman eklensin diye) - resim için bu işlem createImageElement içinde yapılıyor
       if (selectedTool !== 'image' || tempImageData) {
         setSelectedTool(null);
       }
@@ -258,16 +280,31 @@ export const FormEditorProvider = ({ children }) => {
   const selectTool = useCallback((tool) => {
     setSelectedTool(tool);
     
-    // Resim aracı seçildiğinde dosya seçimini aç
     if (tool === 'image' && fileInputRef.current) {
       fileInputRef.current.click();
     }
     
-    // Aktif elemandan çık
     setActiveElementId(null);
     
-    // Eleman oluşturma modu
     setIsCreating(!!tool);
+  }, []);
+
+  // Form verilerini kaydetme ve geri yükleme için
+  const getFormStateForSave = useCallback(() => {
+    return {
+      pageElements,
+      customBubbleValues
+    };
+  }, [pageElements, customBubbleValues]);
+  
+  const loadFormState = useCallback((formState) => {
+    if (formState.pageElements) {
+      setPageElements(formState.pageElements);
+    }
+    
+    if (formState.customBubbleValues) {
+      setCustomBubbleValues(formState.customBubbleValues);
+    }
   }, []);
 
   // Context değeri
@@ -278,6 +315,8 @@ export const FormEditorProvider = ({ children }) => {
     isCreating,
     tempImageData,
     gridSize: gridSizeRef.current,
+    customBubbleValues,
+    updateBubbleContent,
     setActiveElement,
     updateElement,
     removeElement,
@@ -285,7 +324,9 @@ export const FormEditorProvider = ({ children }) => {
     handleCanvasClick,
     addElementAtPosition,
     handleImageUpload,
-    fileInputRef
+    fileInputRef,
+    getFormStateForSave,
+    loadFormState
   };
 
   return (

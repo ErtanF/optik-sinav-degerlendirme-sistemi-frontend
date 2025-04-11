@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, memo } from 'react';
+import React, { useRef, memo } from 'react';
 import styles from './A4Container.module.css';
 import OptikElement from './elements/OptikElement';
 import { useFormEditor } from '../context/FormEditorContext';
@@ -9,7 +9,8 @@ const A4Container = memo(function A4Container() {
     activeElementId,
     selectedTool,
     isCreating,
-    gridSize,
+    customBubbleValues,
+    updateBubbleContent,
     setActiveElement,
     removeElement,
     handleCanvasClick
@@ -19,26 +20,26 @@ const A4Container = memo(function A4Container() {
   
   // A4 sayfasına tıklandığında
   const handleContainerClick = (e) => {
-    // Bir eleman üzerine tıklandıysa işlem yapma
-    if (e.target !== containerRef.current && !e.target.classList.contains(styles.gridLines)) {
-      return;
+    // Doğrudan container'a veya grid çizgilerine tıklandığında işlem yap
+    if (e.target === containerRef.current || e.target.classList.contains(styles.gridLines)) {
+      // Seçili bir araç varsa, elemanı ekle
+      if (selectedTool) {
+        const rect = containerRef.current.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        handleCanvasClick({ x, y });
+        e.preventDefault();
+      } else {
+        // Boş alana tıklandığında aktif elemanı temizle
+        setActiveElement(null);
+      }
     }
-    
-    // Seçili bir araç varsa, elemanı ekle
-    if (selectedTool) {
-      const rect = containerRef.current.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      
-      console.log(`Clicking at position: (${x}, ${y}) with tool: ${selectedTool}`);
-      
-      // Tıklanan pozisyonda eleman oluştur
-      handleCanvasClick({ x, y });
-      e.preventDefault();
-    } else {
-      // Boş alana tıklandığında aktif elemanı temizle
-      setActiveElement(null);
-    }
+  };
+  
+  // Bubble içeriğini güncelleme
+  const handleBubbleContentUpdate = (elementId, rowCol, value) => {
+    updateBubbleContent(elementId, rowCol, value);
   };
   
   return (
@@ -49,9 +50,10 @@ const A4Container = memo(function A4Container() {
         className={`${styles.container} ${selectedTool ? styles.toolSelected : ''}`}
         onClick={handleContainerClick}
       >
+        {/* Izgara çizgileri */}
         <div className={styles.gridLines}></div>
         
-        {/* Mevcut Optik Elemanlar */}
+        {/* Optik Elemanlar */}
         {pageElements.map(element => (
           <OptikElement
             key={element.uniqueId}
@@ -65,10 +67,14 @@ const A4Container = memo(function A4Container() {
             onActivate={() => setActiveElement(element.uniqueId)}
             onRemove={() => removeElement(element.uniqueId)}
             startNumber={element.startNumber || 1}
+            customBubbleValues={customBubbleValues[element.uniqueId] || {}}
+            onBubbleContentUpdate={(rowCol, value) => 
+              handleBubbleContentUpdate(element.uniqueId, rowCol, value)
+            }
           />
         ))}
         
-        {/* Pointer-cursor gösterge alanı - sadece seçim modu aktifken */}
+        {/* İmleç gösterge alanı - sadece seçim modu aktifken */}
         {selectedTool && !isCreating && (
           <div className={styles.cursorGuide} />
         )}

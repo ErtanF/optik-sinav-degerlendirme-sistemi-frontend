@@ -2,200 +2,159 @@ import React, { useRef, useEffect } from 'react';
 import html2canvas from 'html2canvas';
 import BubbleGrid from './elements/BubbleGrid';
 
-const FormRenderer = ({ pageElements, onRender, visible = false, showGrid = false }) => {
+const FormRenderer = ({ 
+  pageElements, 
+  onRender, 
+  visible = false, 
+  showGrid = false,
+  customBubbleValues = {}
+}) => {
   const containerRef = useRef(null);
   
+  // Form görüntüsünü oluştur
   useEffect(() => {
     if (containerRef.current && onRender) {
-      // Daha uzun bir gecikme ekleyerek tüm elemanların yüklenmesini sağla
       const timer = setTimeout(() => {
-        // Sayfanın scroll pozisyonunu kaydet
-        const scrollX = window.scrollX;
-        const scrollY = window.scrollY;
+        const scrollPos = { x: window.scrollX, y: window.scrollY };
         
         html2canvas(containerRef.current, {
           backgroundColor: 'white',
-          scale: 2, // Yüksek kalite için
+          scale: 2,
           useCORS: true,
           logging: false, 
           allowTaint: true,
-          scrollX: -window.scrollX,
-          scrollY: -window.scrollY,
+          scrollX: -scrollPos.x,
+          scrollY: -scrollPos.y,
           windowWidth: 595, // A4 genişliği (72 dpi'da piksel olarak)
           windowHeight: 842, // A4 yüksekliği (72 dpi'da piksel olarak)
           ignoreElements: (element) => {
-            // Kenar çizgileri gibi render'a dahil edilmemesi gereken elemanları yoksay
             return element.classList && 
                    (element.classList.contains('gridLines') || 
                     element.classList.contains('resize-handle') ||
                     element.classList.contains('removeButton'));
           }
         }).then(canvas => {
-          // Scroll pozisyonunu geri yükle
-          window.scrollTo(scrollX, scrollY);
+          window.scrollTo(scrollPos.x, scrollPos.y);
           onRender(canvas.toDataURL('image/png'));
         }).catch(error => {
           console.error("Render hatası:", error);
         });
-      }, 500); // Daha uzun gecikme süresi
+      }, 500);
       
       return () => clearTimeout(timer);
     }
-  }, [pageElements, onRender]);
+  }, [pageElements, onRender, customBubbleValues]);
+
+  // Bir elemanın özelleştirilmiş bubble değerlerini al
+  const getElementBubbleValues = (elementId) => {
+    return customBubbleValues[elementId] || {};
+  };
+
+  // Optik eleman başlığını belirle
+  const getElementHeader = (type) => {
+    switch(type) {
+      case 'nameSurname': return 'AD SOYAD';
+      case 'number': return 'NUMARA';
+      case 'tcNumber': return 'TC KİMLİK NO';
+      case 'phoneNumber': return 'TELEFON NO';
+      case 'multipleChoice': return 'TEST';
+      default: return 'FORM ELEMANI';
+    }
+  };
+
+  // Eleman içeriğini render et
+  const renderElementContent = (element) => {
+    if (element.type === 'image') {
+      return (
+        <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <img 
+            src={element.content} 
+            alt="Form Image" 
+            style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} 
+          />
+        </div>
+      );
+    } 
+    
+    if (element.type === 'text' || element.type === 'field') {
+      return (
+        <div style={{ 
+          width: '100%', height: '100%', display: 'flex', 
+          alignItems: 'center', justifyContent: 'center', 
+          textAlign: 'center', padding: '8px'
+        }}>
+          {element.content || 'Metin alanı'}
+        </div>
+      );
+    } 
+    
+    if (['nameSurname', 'number', 'tcNumber', 'phoneNumber', 'multipleChoice'].includes(element.type)) {
+      const headerTitle = getElementHeader(element.type);
+      const elementBubbleValues = getElementBubbleValues(element.uniqueId);
+      
+      return (
+        <div style={{ 
+          width: '100%', height: '100%', position: 'relative', 
+          display: 'flex', flexDirection: 'column', overflow: 'hidden'
+        }}>
+          <div style={{ 
+            backgroundColor: '#f8f8f8', padding: '4px', textAlign: 'center',
+            borderBottom: '1px solid #ddd', fontWeight: 'bold', fontSize: '14px',
+            height: '20px', display: 'flex', alignItems: 'center',
+            justifyContent: 'center', minHeight: '20px', maxHeight: '20px',
+            flexShrink: 0
+          }}>
+            {headerTitle}
+          </div>
+          <div style={{ padding: 0, flex: '1 1 auto', overflow: 'hidden', display: 'flex' }}>
+            <div style={{ width: '100%', height: '100%', overflow: 'hidden' }}>
+              <BubbleGrid 
+                rows={element.rows || 20} 
+                cols={element.cols || 5}
+                type={element.type}
+                startNumber={element.startNumber || 1}
+                isEditable={false}
+                customValues={elementBubbleValues}
+              />
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
+    // Bilinmeyen eleman tipleri
+    return (
+      <div style={{ 
+        width: '100%', height: '100%', display: 'flex', 
+        alignItems: 'center', justifyContent: 'center', 
+        backgroundColor: '#f5f5f5', padding: '10px'
+      }}>
+        Eleman: {element.title || 'Bilinmeyen eleman'}
+      </div>
+    );
+  };
 
   // Elemanları render et
   const renderElements = () => {
-    return pageElements.map(element => {
-      // Element stilini tanımla
-      const style = {
-        position: 'absolute',
-        left: `${element.position?.x || 0}px`,
-        top: `${element.position?.y || 0}px`,
-        width: `${element.size?.width || 100}px`,
-        height: `${element.size?.height || 100}px`,
-        boxSizing: 'border-box',
-        backgroundColor: 'white',
-        border: '1px solid rgba(0, 0, 0, 0.1)',
-        borderRadius: '4px',
-        overflow: 'hidden'
-      };
-      
-      // Element tipine göre içeriği render et
-      let content;
-      
-      if (element.type === 'image') {
-        // Resim türü elemanlar
-        content = (
-          <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <img 
-              src={element.content} 
-              alt="Form Image" 
-              style={{ 
-                maxWidth: '100%', 
-                maxHeight: '100%', 
-                objectFit: 'contain'
-              }} 
-            />
-          </div>
-        );
-      } else if (element.type === 'text' || element.type === 'field') {
-        // Metin türü elemanlar
-        content = (
-          <div style={{ 
-            width: '100%', 
-            height: '100%', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            textAlign: 'center',
-            padding: '8px'
-          }}>
-            {element.content || 'Metin alanı'}
-          </div>
-        );
-      } else if (element.type === 'nameSurname' || 
-                element.type === 'number' || 
-                element.type === 'tcNumber' || 
-                element.type === 'phoneNumber' || 
-                element.type === 'multipleChoice') {
-        
-        // Başlık belirleme
-        let headerTitle = '';
-        switch(element.type) {
-          case 'nameSurname':
-            headerTitle = 'AD SOYAD';
-            break;
-          case 'number':
-            headerTitle = 'NUMARA';
-            break;
-          case 'tcNumber':
-            headerTitle = 'TC KİMLİK NO';
-            break;
-          case 'phoneNumber':
-            headerTitle = 'TELEFON NO';
-            break;
-          case 'multipleChoice':
-            headerTitle = 'TEST';
-            break;
-          default:
-            headerTitle = 'FORM ELEMANI';
-        }
-        
-        // Başlık ve içerik yüksekliği hesaplama
-        // Çoktan seçmeli için başlık alanını daha kompakt yap
-        const isMultipleChoice = element.type === 'multipleChoice';
-        const headerHeight = isMultipleChoice ? '20px' : '20px';
-        const headerPadding = isMultipleChoice ? '4px' : '4px';
-        const headerFontSize = isMultipleChoice ? '14px' : '14px';
-        
-        // Optik form elemanları - Özellikle çoktan seçmeli sorular
-        content = (
-          <div style={{ 
-            width: '100%', 
-            height: '100%', 
-            position: 'relative', 
-            display: 'flex', 
-            flexDirection: 'column',
-            overflow: 'hidden'
-          }}>
-            <div style={{ 
-              backgroundColor: '#f8f8f8', 
-              padding: headerPadding, 
-              textAlign: 'center',
-              borderBottom: '1px solid #ddd',
-              fontWeight: 'bold',
-              fontSize: headerFontSize,
-              height: headerHeight,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              minHeight: headerHeight,
-              maxHeight: headerHeight,
-              flexShrink: 0
-            }}>
-              {headerTitle}
-            </div>
-            <div style={{ 
-              padding: 0, 
-              flex: '1 1 auto', 
-              overflow: 'hidden',
-              display: 'flex'
-            }}>
-              {/* BubbleGrid için iç içe geçmiş div, genişlik/yükseklik 100% */}
-              <div style={{ width: '100%', height: '100%', overflow: 'hidden' }}>
-                <BubbleGrid 
-                  rows={element.rows || 20} 
-                  cols={element.cols || 5}
-                  type={element.type}
-                  startNumber={element.startNumber || 1}
-                />
-              </div>
-            </div>
-          </div>
-        );
-      } else {
-        // Bilinmeyen eleman tipleri
-        content = (
-          <div style={{ 
-            width: '100%', 
-            height: '100%', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            backgroundColor: '#f5f5f5',
-            padding: '10px'
-          }}>
-            Eleman: {element.title || 'Bilinmeyen eleman'}
-          </div>
-        );
-      }
-      
-      return (
-        <div key={element.uniqueId} style={style}>
-          {content}
-        </div>
-      );
-    });
+    return pageElements.map(element => (
+      <div 
+        key={element.uniqueId} 
+        style={{
+          position: 'absolute',
+          left: `${element.position?.x || 0}px`,
+          top: `${element.position?.y || 0}px`,
+          width: `${element.size?.width || 100}px`,
+          height: `${element.size?.height || 100}px`,
+          boxSizing: 'border-box',
+          backgroundColor: 'white',
+          border: '1px solid rgba(0, 0, 0, 0.1)',
+          borderRadius: '4px',
+          overflow: 'hidden'
+        }}
+      >
+        {renderElementContent(element)}
+      </div>
+    ));
   };
 
   return (
@@ -203,8 +162,8 @@ const FormRenderer = ({ pageElements, onRender, visible = false, showGrid = fals
       ref={containerRef} 
       style={{ 
         position: 'relative', 
-        width: '210mm',  // A4 genişliği
-        height: '297mm', // A4 yüksekliği
+        width: '210mm',
+        height: '297mm',
         backgroundColor: 'white',
         overflow: 'hidden',
         display: visible ? 'block' : 'none',
@@ -214,16 +173,11 @@ const FormRenderer = ({ pageElements, onRender, visible = false, showGrid = fals
         pageBreakInside: 'avoid'
       }}
     >
-      {/* Grid çizgileri - showGrid parametresine göre göster/gizle */}
       {showGrid && (
         <div 
           className="gridLines"
           style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
+            position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
             backgroundSize: '20px 20px',
             backgroundImage: `
               linear-gradient(to right, rgba(230, 230, 230, 0.5) 1px, transparent 1px),
@@ -235,7 +189,6 @@ const FormRenderer = ({ pageElements, onRender, visible = false, showGrid = fals
         />
       )}
       
-      {/* Tüm elemanları render et */}
       {renderElements()}
     </div>
   );
