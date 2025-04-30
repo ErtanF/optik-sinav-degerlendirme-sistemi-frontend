@@ -112,61 +112,70 @@ export const FormEditorProvider = ({ children }) => {
   }, [constrainToSafeZone]);
 
   // Varsayılan eleman boyutlarını belirle
-  const getDefaultElementSize = useCallback((type) => {
-    const gridSize = gridSizeRef.current;
-    
-    switch (type) {
-      case 'nameSurname':
-        return {
-          width: 10 * gridSize,
-          height: (26 * gridSize) + 60,
-          rows: 26,
-          cols: 10
-        };
-      case 'number':
-        return {
-          width: 6 * gridSize,
-          height: (10 * gridSize) + 60,
-          rows: 10,
-          cols: 6
-        };
-      case 'tcNumber':
-        return {
-          width: 11 * gridSize,
-          height: (10 * gridSize) + 60,
-          rows: 10,
-          cols: 11
-        };
-      case 'phoneNumber':
-        return {
-          width: 10 * gridSize,
-          height: (10 * gridSize) + 60,
-          rows: 10,
-          cols: 10
-        };
-      case 'multipleChoice':
-        return {
-          width: (5 + 1) * gridSize,
-          height: (20 * gridSize) + 30,
-          rows: 20,
-          cols: 5
-        };
-      case 'image':
-        return {
-          width: 10 * gridSize,
-          height: 10 * gridSize,
-          rows: 10,
-          cols: 10
-        };
-      default:
-        return {
-          width: 5 * gridSize,
-          height: 5 * gridSize,
-          rows: 5,
-          cols: 5
-        };
-    }
-  }, []);
+  // src/pages/Optik/context/FormEditorContext.jsx - getDefaultElementSize fonksiyonuna ekle
+const getDefaultElementSize = useCallback((type) => {
+  const gridSize = gridSizeRef.current;
+  
+  switch (type) {
+    case 'nameSurname':
+      return {
+        width: 10 * gridSize,
+        height: (26 * gridSize) + 60,
+        rows: 26,
+        cols: 10
+      };
+    case 'number':
+      return {
+        width: 6 * gridSize,
+        height: (10 * gridSize) + 60,
+        rows: 10,
+        cols: 6
+      };
+    case 'tcNumber':
+      return {
+        width: 11 * gridSize,
+        height: (10 * gridSize) + 60,
+        rows: 10,
+        cols: 11
+      };
+    case 'phoneNumber':
+      return {
+        width: 10 * gridSize,
+        height: (10 * gridSize) + 60,
+        rows: 10,
+        cols: 10
+      };
+    case 'multipleChoice':
+      return {
+        width: (5 + 1) * gridSize,
+        height: (20 * gridSize) + 30,
+        rows: 20,
+        cols: 5
+      };
+    // Yeni eklenen Kitapçık Kodu elemanı
+    case 'bookletCode':
+      return {
+        width: 5 * gridSize,
+        height: 2 * gridSize, // Tek satır + başlık yüksekliği
+        rows: 1, // Tek satır
+        cols: 5  // Varsayılan 5 karakter (A,B,C,D,E)
+      };
+    case 'image':
+      return {
+        width: 10 * gridSize,
+        height: 10 * gridSize,
+        rows: 10,
+        cols: 10
+      };
+    default:
+      return {
+        width: 5 * gridSize,
+        height: 5 * gridSize,
+        rows: 5,
+        cols: 5
+      };
+  }
+}, []);
 
   // Resim yükleme işlemi
   const handleImageUpload = useCallback((event) => {

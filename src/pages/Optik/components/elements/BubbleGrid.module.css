@@ -212,3 +212,13 @@
   box-sizing: border-box;
   flex-shrink: 0; /* Sıkıştırma */
 }
+/* src/pages/Optik/components/elements/BubbleGrid.module.css - eklenecek stil */
+.bookletCodeRow {
+  display: flex;
+  height: 20px;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  justify-content: center;
+}

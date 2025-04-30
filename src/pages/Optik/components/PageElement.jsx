@@ -217,11 +217,12 @@ const PageElement = memo(function PageElement({
         {element.type && (
           <div className={styles.optikElementLabel}>
             {element.type === 'nameSurname' ? 'Ad Soyad Alanı' : 
-             element.type === 'number' ? 'Numara Alanı' : 
-             element.type === 'tcNumber' ? 'TC Kimlik No' : 
-             element.type === 'phoneNumber' ? 'Telefon No' : 
-             element.type === 'multipleChoice' ? 'Çoktan Seçmeli Test' : 
-             element.title || 'Eleman'}
+           element.type === 'number' ? 'Numara Alanı' : 
+           element.type === 'tcNumber' ? 'TC Kimlik No' : 
+           element.type === 'phoneNumber' ? 'Telefon No' : 
+           element.type === 'multipleChoice' ? 'Çoktan Seçmeli Test' : 
+           element.type === 'bookletCode' ? 'Kitapçık Kodu' :
+           element.title || 'Eleman'}
           </div>
         )}
       </div>

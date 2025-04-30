@@ -154,6 +154,19 @@ const ElementPropertiesPanel = () => {
         size: { ...activeElement.size, width: (newCols + 1) * 20 }
       });
     } 
+    else if (activeElement.type === 'bookletCode') {
+      // Kitapçık kodu için özel ölçeklendirme
+      maxCols = 5;
+      newCols = Math.min(maxCols, Math.max(1, newCols));
+      
+      updateElement(activeElementId, {
+        cols: newCols,
+        size: { 
+          ...activeElement.size, 
+          width: newCols * 20 // Her şıkkın tam olarak 20px genişliği olur
+        }
+      });
+    }
     else if (activeElement.type === 'nameSurname' || activeElement.type === 'number') {
       maxCols = activeElement.type === 'number' ? 15 : 26;
       newCols = Math.min(maxCols, Math.max(1, newCols));
@@ -332,6 +345,24 @@ const ElementPropertiesPanel = () => {
           </InfoBox>
         </>
       )}
+      {activeElement.type === 'bookletCode' && (
+  <div className={styles.propertySection}>
+    <h4 className={styles.sectionTitle}>Kitapçık Türü Ayarları</h4>
+    
+    <QuantityControl 
+      label="Şık Sayısı:"
+      value={properties.cols}
+      onDecrease={() => handleColsChange(-1)}
+      onIncrease={() => handleColsChange(1)}
+      min={1}
+      max={5}
+    />
+    
+    <InfoBox title="Mevcut Şıklar:">
+      {renderChoiceItems()}
+    </InfoBox>
+  </div>
+)}
       
       {/* Ad Soyad veya Numara ayarları */}
       {(activeElement.type === 'nameSurname' || activeElement.type === 'number') && (

@@ -38,6 +38,12 @@ const FormElementsSidebar = memo(function FormElementsSidebar() {
       icon: '📝'
     },
     {
+    id: 'bookletCode',
+    title: 'Kitapçık Kodu',
+    description: 'Tek satır kitapçık kodlama alanı (A,B,C,...)',
+    icon: '📚'
+  },
+    {
       id: 'image',
       title: 'Resim Ekle',
       description: 'Cihazınızdan resim yükleyin',

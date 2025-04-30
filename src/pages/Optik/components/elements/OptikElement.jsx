@@ -27,6 +27,7 @@ const OptikElement = memo(function OptikElement({
       'tcNumber': 'TC KİMLİK NO',
       'phoneNumber': 'TELEFON NO',
       'multipleChoice': 'TEST',
+      'bookletCode': 'KİTAPÇIK',
       'image': 'RESİM'
     };
     

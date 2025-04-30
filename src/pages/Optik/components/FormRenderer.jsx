@@ -60,6 +60,7 @@ const FormRenderer = ({
       case 'tcNumber': return 'TC KİMLİK NO';
       case 'phoneNumber': return 'TELEFON NO';
       case 'multipleChoice': return 'TEST';
+      case 'bookletCode': return 'KİTAPÇIK';
       default: return 'FORM ELEMANI';
     }
   };
@@ -90,7 +91,7 @@ const FormRenderer = ({
       );
     } 
     
-    if (['nameSurname', 'number', 'tcNumber', 'phoneNumber', 'multipleChoice'].includes(element.type)) {
+    if (['nameSurname', 'number', 'tcNumber', 'phoneNumber', 'multipleChoice', 'bookletCode'].includes(element.type)) {
       const headerTitle = getElementHeader(element.type);
       const elementBubbleValues = getElementBubbleValues(element.uniqueId);
       
