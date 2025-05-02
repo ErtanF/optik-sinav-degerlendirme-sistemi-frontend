@@ -152,6 +152,13 @@ const getDefaultElementSize = useCallback((type) => {
         rows: 20,
         cols: 5
       };
+      case 'textArea':
+        return {
+          width: 15 * gridSize,
+          height: 6 * gridSize,
+          rows: 0,
+          cols: 0
+        };
     // Yeni eklenen Kitapçık Kodu elemanı
     case 'bookletCode':
       return {
@@ -264,51 +271,53 @@ case 'classBranch':
   }, [tempImageData, getDefaultElementSize, constrainToSafeZone]);
 
   // Yeni eleman ekleme - Tek tıklama ile
-  const addElementAtPosition = useCallback((type, position) => {
-    if (!type) return null;
-    
-    if (type === 'image') {
-      if (!tempImageData) {
-        if (fileInputRef.current) {
-          fileInputRef.current.click();
-        }
-        return null;
-      } else {
-        return createImageElement(position);
+  // Yeni eleman ekleme - Tek tıklama ile
+const addElementAtPosition = useCallback((type, position) => {
+  if (!type) return null;
+  
+  if (type === 'image') {
+    if (!tempImageData) {
+      if (fileInputRef.current) {
+        fileInputRef.current.click();
       }
+      return null;
+    } else {
+      return createImageElement(position);
     }
-    
-    const gridSize = gridSizeRef.current;
-    const defaultSize = getDefaultElementSize(type);
-    
-    // Pozisyonu grid'e ve güvenli alana sığdır
-    const constrainedPosition = constrainToSafeZone(
-      { 
-        x: Math.floor(position.x / gridSize) * gridSize,
-        y: Math.floor(position.y / gridSize) * gridSize 
-      },
-      defaultSize
-    );
-    
-    const uniqueId = `${type}-${Date.now()}`;
-    
-    const newElement = {
-      type,
-      uniqueId,
-      position: constrainedPosition,
-      size: {
-        width: defaultSize.width,
-        height: defaultSize.height
-      },
-      rows: defaultSize.rows,
-      cols: defaultSize.cols,
-      startNumber: 1
-    };
-    
-    setPageElements(prev => [...prev, newElement]);
-    
-    return uniqueId;
-  }, [getDefaultElementSize, tempImageData, createImageElement, constrainToSafeZone]);
+  }
+  
+  const gridSize = gridSizeRef.current;
+  const defaultSize = getDefaultElementSize(type);
+  
+  // Pozisyonu grid'e ve güvenli alana sığdır
+  const constrainedPosition = constrainToSafeZone(
+    { 
+      x: Math.floor(position.x / gridSize) * gridSize,
+      y: Math.floor(position.y / gridSize) * gridSize 
+    },
+    defaultSize
+  );
+  
+  const uniqueId = `${type}-${Date.now()}`;
+  
+  const newElement = {
+    type,
+    uniqueId,
+    position: constrainedPosition,
+    size: {
+      width: defaultSize.width,
+      height: defaultSize.height
+    },
+    rows: defaultSize.rows,
+    cols: defaultSize.cols,
+    startNumber: 1,
+    content: type === 'textArea' ? '' : undefined // Yazı alanı için boş içerik
+  };
+  
+  setPageElements(prev => [...prev, newElement]);
+  
+  return uniqueId;
+}, [getDefaultElementSize, tempImageData, createImageElement, constrainToSafeZone]);"q  q2"
   
   // Eleman silme
   const removeElement = useCallback((uniqueId) => {

@@ -118,6 +118,7 @@ const ElementPropertiesPanel = () => {
       'tcNumber': 'TC Kimlik No Özellikleri',
       'phoneNumber': 'Telefon No Özellikleri',
       'multipleChoice': 'Çoktan Seçmeli Test Özellikleri',
+      'textArea': 'Yazı Alanı Özellikleri',
       'image': 'Resim Özellikleri'
     };
     return titles[activeElement.type] || 'Eleman Özellikleri';
@@ -210,7 +211,8 @@ const ElementPropertiesPanel = () => {
   };
   
   const handleSizeChange = (dimension, e) => {
-    if (activeElement.type !== 'image') return;
+    // textArea tipinde elemanlar için güncelleme yapılabilir
+    if (activeElement.type !== 'image' && activeElement.type !== 'textArea') return;
     
     const value = parseInt(e.target.value) || 0;
     const gridSize = 20;
@@ -311,7 +313,31 @@ const ElementPropertiesPanel = () => {
           </div>
         </>
       )}
-
+      {activeElement.type === 'textArea' && (
+  <div className={styles.propertySection}>
+    <h4 className={styles.sectionTitle}>Yazı Alanı Ayarları</h4>
+    <InputControl 
+      label="Genişlik:" 
+      value={properties.width}
+      onChange={(e) => handleSizeChange('width', e)}
+      min={20}
+      step={20}
+    />
+    <InputControl 
+      label="Yükseklik:" 
+      value={properties.height}
+      onChange={(e) => handleSizeChange('height', e)}
+      min={20}
+      step={20}
+    />
+    
+    <div className={styles.helpText}>
+      İpucu: Yazı alanına metin eklemek için alanı seçin ve içine çift tıklayın. 
+      Düzenleme modundayken dışarıya tıklayarak veya CTRL+Enter tuşlarına basarak 
+      değişiklikleri kaydedebilirsiniz. ESC tuşu ile değişiklikleri iptal edebilirsiniz.
+    </div>
+  </div>
+)}
       {/* Çoktan seçmeli test ayarları */}
       {activeElement.type === 'multipleChoice' && (
         <>

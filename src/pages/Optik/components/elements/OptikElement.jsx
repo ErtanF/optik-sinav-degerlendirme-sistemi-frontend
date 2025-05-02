@@ -1,5 +1,6 @@
 import React, { memo, useState, useEffect } from 'react';
 import BubbleGrid from './BubbleGrid';
+import TextArea from './TextArea';
 import styles from './OptikElement.module.css';
 
 const OptikElement = memo(function OptikElement({ 
@@ -15,7 +16,8 @@ const OptikElement = memo(function OptikElement({
   startNumber = 1,
   customBubbleValues = {},
   onBubbleContentUpdate,
-  onTitleChange
+  onTitleChange,
+  onContentUpdate
 }) {
   // Manuel başlık için state
   const [manualTitle, setManualTitle] = useState('');
@@ -28,9 +30,10 @@ const OptikElement = memo(function OptikElement({
       'tcNumber': 'TC KİMLİK NO',
       'phoneNumber': 'TELEFON NO',
       'multipleChoice': 'TEST',
-      'bookletCode': 'KİTAPÇIK TÜRÜ',
+      'bookletCode': 'KİTAPÇIK',
       'classNumber': 'SINIF',
       'classBranch': 'ŞUBE',
+      'textArea': '', // Yazı alanı için boş başlık
       'image': 'RESİM'
     };
     
@@ -66,8 +69,8 @@ const OptikElement = memo(function OptikElement({
     } else if (type === 'number' || type === 'tcNumber' || type === 'phoneNumber') {
       // 30px başlık + 30px el yazı alanı + 10 * 20px karakter alanı (0-9)
       calculatedHeight = 30 + 30 + (10 * 20);
-    }
-     else if (type === 'image') {
+    } else if (type === 'textArea' || type === 'image') {
+      // Yazı alanı ve resim için boyut korunur
       calculatedHeight = Math.ceil(size.height / gridSize) * gridSize;
     } else {
       calculatedHeight = Math.ceil(size.height / gridSize) * gridSize;
@@ -84,26 +87,17 @@ const OptikElement = memo(function OptikElement({
     });
   }, [size, rows, cols, type]);
   
-  // Alan türüne göre kodlanabilir karakterleri belirle
-  const getCharacterSet = () => {
-    switch (type) {
-      case 'nameSurname':
-        return Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i)); // A'dan Z'ye harfler
-      case 'number':
-      case 'tcNumber':
-      case 'phoneNumber':
-        return ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']; // 0'dan 9'a rakamlar
-      case 'multipleChoice':
-        return ['A', 'B', 'C', 'D', 'E']; // A'dan E'ye şıklar
-      default:
-        return [];
-    }
-  };
-
   // Bubble içeriği güncellendiğinde
   const handleBubbleContentUpdate = (rowCol, value) => {
     if (onBubbleContentUpdate) {
       onBubbleContentUpdate(rowCol, value);
+    }
+  };
+
+  // Metin içeriği güncellendiğinde
+  const handleTextContentUpdate = (newContent) => {
+    if (onContentUpdate) {
+      onContentUpdate(newContent);
     }
   };
 
@@ -124,6 +118,9 @@ const OptikElement = memo(function OptikElement({
     y: Math.floor(position.y / gridSize) * gridSize
   };
 
+  // Yazı alanı elemanı için başlık input'unu gösterme
+  const showHeaderInput = type !== 'textArea';
+
   return (
     <div 
       className={`${styles.optikElement} ${isActive ? styles.active : ''}`}
@@ -132,20 +129,26 @@ const OptikElement = memo(function OptikElement({
         left: `${adjustedPosition.x}px`,
         top: `${adjustedPosition.y}px`,
         width: `${adjustedSize.width}px`,
-        height: `${adjustedSize.height}px`,
+        height: `${adjustedSize.height}px`
       }}
       data-element-type={type}
     >
-      {/* Manuel başlık giriş alanı */}
-      <input
-        type="text"
-        className={styles.manualHeaderInput}
-        value={manualTitle}
-        onChange={handleTitleChange}
-        placeholder="Form Başlığı"
-      />
+      {/* Manuel başlık giriş alanı - textArea için gösterme */}
+      {showHeaderInput && (
+        <input
+          type="text"
+          className={styles.manualHeaderInput}
+          value={manualTitle}
+          onChange={handleTitleChange}
+          placeholder="Form Başlığı"
+        />
+      )}
+      
       {/* Eleman içeriği */}
-      <div className={styles.optikContent}>
+      <div 
+        className={styles.optikContent}
+        style={!showHeaderInput ? { height: '100%' } : {}}
+      >
         {type === 'image' ? (
           // Resim elemanı için
           <div className={styles.imageContent}>
@@ -165,6 +168,13 @@ const OptikElement = memo(function OptikElement({
               }}
             />
           </div>
+        ) : type === 'textArea' ? (
+          // Yazı alanı elemanı için
+          <TextArea 
+            content={content}
+            isEditable={isActive}
+            onContentUpdate={handleTextContentUpdate}
+          />
         ) : (
           // Diğer optik elemanlar için
           <BubbleGrid 

@@ -68,6 +68,8 @@ const FormRenderer = ({
   };
 
   // Eleman içeriğini render et
+  // FormRenderer.jsx içinde renderElementContent fonksiyonuna ekleme
+
   const renderElementContent = (element) => {
     if (element.type === 'image') {
       return (
@@ -80,6 +82,22 @@ const FormRenderer = ({
         </div>
       );
     } 
+    
+    // Yazı alanı elemanı için - başlık olmadan
+    if (element.type === 'textArea') {
+      return (
+        <div style={{ 
+          width: '100%', height: '100%', display: 'flex', 
+          alignItems: 'flex-start', justifyContent: 'flex-start', 
+          overflow: 'hidden', padding: '10px', boxSizing: 'border-box',
+          whiteSpace: 'pre-wrap', textAlign: 'left', wordBreak: 'break-word',
+          backgroundColor: 'transparent', border: 'none', borderRadius: '4px',
+          fontSize: '14px', lineHeight: '1.5'
+        }}>
+          {element.content || ''}
+        </div>
+      );
+    }
     
     if (element.type === 'text' || element.type === 'field') {
       return (

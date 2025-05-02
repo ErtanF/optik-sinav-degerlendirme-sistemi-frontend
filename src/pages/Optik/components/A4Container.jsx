@@ -12,6 +12,7 @@ const A4Container = memo(function A4Container() {
     isCreating,
     customBubbleValues,
     updateBubbleContent,
+    updateElement,
     setActiveElement,
     removeElement,
     handleCanvasClick,
@@ -43,6 +44,16 @@ const A4Container = memo(function A4Container() {
   // Bubble içeriğini güncelleme
   const handleBubbleContentUpdate = (elementId, rowCol, value) => {
     updateBubbleContent(elementId, rowCol, value);
+  };
+  
+  // Yazı alanı içeriğini güncelleme
+  const handleContentUpdate = (elementId, content) => {
+    updateElement(elementId, { content });
+  };
+  
+  // Element başlığını güncelleme
+  const handleTitleChange = (elementId, title) => {
+    updateElement(elementId, { title });
   };
   
   return (
@@ -80,6 +91,12 @@ const A4Container = memo(function A4Container() {
             customBubbleValues={customBubbleValues[element.uniqueId] || {}}
             onBubbleContentUpdate={(rowCol, value) => 
               handleBubbleContentUpdate(element.uniqueId, rowCol, value)
+            }
+            onContentUpdate={(content) => 
+              handleContentUpdate(element.uniqueId, content)
+            }
+            onTitleChange={(title) => 
+              handleTitleChange(element.uniqueId, title)
             }
           />
         ))}

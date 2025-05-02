@@ -38,30 +38,36 @@ const FormElementsSidebar = memo(function FormElementsSidebar() {
       icon: '📝'
     },
     {
-    id: 'bookletCode',
-    title: 'Kitapçık Kodu',
-    description: 'Tek satır kitapçık kodlama alanı (A,B,C,...)',
-    icon: '📚'
-  },
-  {
-    id: 'classNumber',
-    title: 'Sınıf',
-    description: 'Rakamlar (1-12) ile sınıf kodlama alanı',
-    icon: '🏫'
-  },
-  {
-    id: 'classBranch',
-    title: 'Şube',
-    description: 'Harfler (A-Z) ile şube kodlama alanı',
-    icon: '🔤'
-  },
+      id: 'bookletCode',
+      title: 'Kitapçık Kodu',
+      description: 'Tek satır kitapçık kodlama alanı (A,B,C,...)',
+      icon: '📚'
+    },
+    {
+      id: 'classNumber',
+      title: 'Sınıf',
+      description: 'Rakamlar (1-12) ile sınıf kodlama alanı',
+      icon: '🏫'
+    },
+    {
+      id: 'classBranch',
+      title: 'Şube',
+      description: 'Harfler (A-Z) ile şube kodlama alanı',
+      icon: '🔤'
+    },
+    // Yazı alanı elemanı eklendi
+    {
+      id: 'textArea',
+      title: 'Yazı Alanı',
+      description: 'Düzenlenebilir metin alanı',
+      icon: '✏️'
+    },
     {
       id: 'image',
       title: 'Resim Ekle',
       description: 'Cihazınızdan resim yükleyin',
       icon: '🖼️'
     }
-    /* Diğer elemanlar buraya eklenebilir */
   ];
   
   // Tool seçme işlevi

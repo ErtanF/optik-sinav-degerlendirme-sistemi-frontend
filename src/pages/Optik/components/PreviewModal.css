@@ -71,6 +71,17 @@
   flex-shrink: 0;
 }
 
+/* Yazı alanları için stil değişiklikleri */
+[data-element-type="textArea"] {
+  background-color: transparent !important;
+  border: none !important;
+}
+
+[data-element-type="textArea"] > div {
+  background-color: transparent !important;
+  border: none !important;
+}
+
 @media print {
   .preview-modal-overlay, .preview-modal-header, .preview-modal-footer {
     display: none;
