@@ -160,6 +160,20 @@ const getDefaultElementSize = useCallback((type) => {
         rows: 1, // Tek satır
         cols: 5  // Varsayılan 5 karakter (A,B,C,D,E)
       };
+      case 'classNumber':
+  return {
+    width: 3 * gridSize,
+    height: (12 * gridSize) + 60, // Ad Soyad gibi +60 ekleyerek
+    rows: 12,
+    cols: 1
+  };
+case 'classBranch':
+  return {
+    width: 3 * gridSize,
+    height: (26 * gridSize) + 60, // Ad Soyad gibi +60 ekleyerek
+    rows: 26,
+    cols: 1
+  };
     case 'image':
       return {
         width: 10 * gridSize,

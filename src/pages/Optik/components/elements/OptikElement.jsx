@@ -14,7 +14,8 @@ const OptikElement = memo(function OptikElement({
   onRemove,
   startNumber = 1,
   customBubbleValues = {},
-  onBubbleContentUpdate
+  onBubbleContentUpdate,
+  onTitleChange
 }) {
   // Manuel başlık için state
   const [manualTitle, setManualTitle] = useState('');
@@ -27,12 +28,19 @@ const OptikElement = memo(function OptikElement({
       'tcNumber': 'TC KİMLİK NO',
       'phoneNumber': 'TELEFON NO',
       'multipleChoice': 'TEST',
-      'bookletCode': 'KİTAPÇIK',
+      'bookletCode': 'KİTAPÇIK TÜRÜ',
+      'classNumber': 'SINIF',
+      'classBranch': 'ŞUBE',
       'image': 'RESİM'
     };
     
     setManualTitle(defaultTitles[type] || 'BAŞLIK');
-  }, [type]);
+    
+    // Başlık değerini element özelliklerine ekle, bu sayede FormRenderer bu değeri kullanabilir
+    if (onTitleChange) {
+      onTitleChange(defaultTitles[type] || 'BAŞLIK');
+    }
+  }, [type, onTitleChange]);
   
   // Elemanın gerçek yüksekliğini ayarlamak için
   const [adjustedSize, setAdjustedSize] = useState({
@@ -50,20 +58,23 @@ const OptikElement = memo(function OptikElement({
       // Her soru satırı 20px + başlık yüksekliği (30px)
       const visibleRows = Math.min(rows, 20);
       calculatedHeight = (visibleRows * 20) + 30;
-    } else if (type === 'nameSurname') {
-      // 30px başlık + 30px el yazı alanı + 26 * 20px karakter alanı (A-Z)
-      calculatedHeight = 30 + 30 + (26 * 20);
+    } else if (type === 'nameSurname' || type === 'classBranch' || type === 'classNumber') {
+      // Tüm dikey elemanlara aynı yükseklik hesaplama mantığı
+      const rowCount = type === 'nameSurname' || type === 'classBranch' ? 26 :
+                    type === 'classNumber' ? 12 : 10;
+      calculatedHeight = 30 + 30 + (rowCount * 20); // başlık + yazı alanı + satırlar
     } else if (type === 'number' || type === 'tcNumber' || type === 'phoneNumber') {
       // 30px başlık + 30px el yazı alanı + 10 * 20px karakter alanı (0-9)
       calculatedHeight = 30 + 30 + (10 * 20);
-    } else if (type === 'image') {
+    }
+     else if (type === 'image') {
       calculatedHeight = Math.ceil(size.height / gridSize) * gridSize;
     } else {
       calculatedHeight = Math.ceil(size.height / gridSize) * gridSize;
     }
     
     // Sabit boyutlu elemanlar vs kullanıcı seçimi
-    const finalHeight = ['nameSurname', 'number', 'tcNumber', 'phoneNumber'].includes(type)
+    const finalHeight = ['nameSurname', 'number', 'tcNumber', 'phoneNumber', 'classNumber', 'classBranch'].includes(type)
       ? calculatedHeight 
       : Math.max(calculatedHeight, size.height);
     
@@ -98,7 +109,12 @@ const OptikElement = memo(function OptikElement({
 
   // Manuel girilen başlığı güncelle
   const handleTitleChange = (e) => {
-    setManualTitle(e.target.value);
+    const newTitle = e.target.value;
+    setManualTitle(newTitle);
+    // Başlık değiştiğinde parent bileşene bildir
+    if (onTitleChange) {
+      onTitleChange(newTitle);
+    }
   };
 
   // Pozisyon ve boyutu grid'e göre ayarla
@@ -128,7 +144,6 @@ const OptikElement = memo(function OptikElement({
         onChange={handleTitleChange}
         placeholder="Form Başlığı"
       />
-      
       {/* Eleman içeriği */}
       <div className={styles.optikContent}>
         {type === 'image' ? (

@@ -43,6 +43,18 @@ const FormElementsSidebar = memo(function FormElementsSidebar() {
     description: 'Tek satır kitapçık kodlama alanı (A,B,C,...)',
     icon: '📚'
   },
+  {
+    id: 'classNumber',
+    title: 'Sınıf',
+    description: 'Rakamlar (1-12) ile sınıf kodlama alanı',
+    icon: '🏫'
+  },
+  {
+    id: 'classBranch',
+    title: 'Şube',
+    description: 'Harfler (A-Z) ile şube kodlama alanı',
+    icon: '🔤'
+  },
     {
       id: 'image',
       title: 'Resim Ekle',

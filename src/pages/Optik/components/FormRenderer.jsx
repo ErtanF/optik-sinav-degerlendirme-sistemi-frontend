@@ -3,6 +3,7 @@ import html2canvas from 'html2canvas';
 import BubbleGrid from './elements/BubbleGrid';
 import CornerMarks from './CornerMarks';
 
+
 const FormRenderer = ({ 
   pageElements, 
   onRender, 
@@ -61,6 +62,8 @@ const FormRenderer = ({
       case 'phoneNumber': return 'TELEFON NO';
       case 'multipleChoice': return 'TEST';
       case 'bookletCode': return 'KİTAPÇIK';
+      case 'classNumber': return 'SINIF';
+      case 'classBranch': return 'ŞUBE';
       default: return 'FORM ELEMANI';
     }
   };
@@ -91,8 +94,10 @@ const FormRenderer = ({
       );
     } 
     
-    if (['nameSurname', 'number', 'tcNumber', 'phoneNumber', 'multipleChoice', 'bookletCode'].includes(element.type)) {
-      const headerTitle = getElementHeader(element.type);
+    if (['nameSurname', 'number', 'tcNumber', 'phoneNumber', 'multipleChoice', 'bookletCode', 'classNumber', 'classBranch'].includes(element.type)) {
+      // Sabit getElementHeader fonksiyonu yerine element.title değerini kullan
+      // Eğer title yoksa, varsayılan başlığı göster
+      const headerTitle = element.title || getElementHeader(element.type);
       const elementBubbleValues = getElementBubbleValues(element.uniqueId);
       
       return (

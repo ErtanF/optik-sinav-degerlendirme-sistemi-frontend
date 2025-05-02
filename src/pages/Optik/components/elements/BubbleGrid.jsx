@@ -11,7 +11,8 @@ const BubbleGrid = memo(function BubbleGrid({
   onContentUpdate = null
 }) {
   // Dikey düzen kontrolü
-  const isVertical = type === 'nameSurname' || type === 'number' || type === 'tcNumber' || type === 'phoneNumber';
+  const isVertical = type === 'nameSurname' || type === 'number' || type === 'tcNumber' || type === 'phoneNumber'|| 
+  type === 'classNumber' || type === 'classBranch';
   
   // Düzenleme state'leri
   const [editingBubble, setEditingBubble] = useState(null);
@@ -261,10 +262,18 @@ const renderHorizontalGrid = () => {
   // Ad Soyad ve Numara alanları için dikey layout
   const renderVerticalGrid = () => {
     const columnCount = cols;
-    const allCharacters = type === 'nameSurname' 
-      ? Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i))  // A-Z
-      : ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];  // 0-9
+    let allCharacters = [];
     
+    // Eleman tipine göre karakterleri belirle
+    if (type === 'nameSurname' || type === 'classBranch') {
+      allCharacters = Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i)); // A-Z
+    } else if (type === 'classNumber') {
+      allCharacters = Array.from({ length: 12 }, (_, i) => String(i + 1)); // 1-12
+    } else {
+      allCharacters = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']; // 0-9
+    }
+    
+    // Özel kodu kaldırıp TÜM eleman tipleri için aynı dikey grid kodunu kullanıyoruz
     return (
       <div className={styles.verticalGridNew}>
         {/* El ile yazı alanı */}

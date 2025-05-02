@@ -140,7 +140,8 @@ const ElementPropertiesPanel = () => {
   };
   
   const handleColsChange = (increment) => {
-    if (activeElement.type === 'tcNumber' || activeElement.type === 'phoneNumber') return;
+    if (activeElement.type === 'tcNumber' || activeElement.type === 'phoneNumber' || activeElement.type === 'classNumber' || 
+      activeElement.type === 'classBranch') return;
     
     let newCols = properties.cols + increment;
     let maxCols = 26;

@@ -38,7 +38,14 @@
   flex: 1;
   min-height: 600px; /* Minimum yükseklik belirledik */
   height: auto; /* auto değerine değiştirdik */
-  overflow: visible; /* overflow'ı visible olarak değiştirdik */
+  overflow: visible;
+  align-items: start; /* overflow'ı visible olarak değiştirdik */
+}
+.a4-wrapper-fixed {
+  position: sticky;
+  top: 20px; /* Üstten mesafe */
+  max-height: calc(100vh - 150px); /* Görünür alanda kalacak maksimum yükseklik */
+  overflow: auto;
 }
 
 /* Yazdırma için stil düzenlemeleri */
