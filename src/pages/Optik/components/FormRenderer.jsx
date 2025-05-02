@@ -3,7 +3,6 @@ import html2canvas from 'html2canvas';
 import BubbleGrid from './elements/BubbleGrid';
 import CornerMarks from './CornerMarks';
 
-
 const FormRenderer = ({ 
   pageElements, 
   onRender, 
@@ -95,8 +94,6 @@ const FormRenderer = ({
     } 
     
     if (['nameSurname', 'number', 'tcNumber', 'phoneNumber', 'multipleChoice', 'bookletCode', 'classNumber', 'classBranch'].includes(element.type)) {
-      // Sabit getElementHeader fonksiyonu yerine element.title değerini kullan
-      // Eğer title yoksa, varsayılan başlığı göster
       const headerTitle = element.title || getElementHeader(element.type);
       const elementBubbleValues = getElementBubbleValues(element.uniqueId);
       

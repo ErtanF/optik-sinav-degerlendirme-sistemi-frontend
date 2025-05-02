@@ -186,48 +186,47 @@ const BubbleGrid = memo(function BubbleGrid({
   };
 
   // Çoktan seçmeli sorular için yatay layout
-  // src/pages/Optik/components/elements/BubbleGrid.jsx - renderHorizontalGrid fonksiyonunu güncelleme
-const renderHorizontalGrid = () => {
-  const availableChoices = ['A', 'B', 'C', 'D', 'E'];
-  const displayedCols = Math.min(5, cols);
+  const renderHorizontalGrid = () => {
+    const availableChoices = ['A', 'B', 'C', 'D', 'E'];
+    const displayedCols = Math.min(5, cols);
 
-  // Kitapçık kodu elemanı için özel düzen
-  if (type === 'bookletCode') {
+    // Kitapçık kodu elemanı için özel düzen
+    if (type === 'bookletCode') {
+      return (
+        <div className={styles.horizontalGrid}>
+          <div className={styles.questionRow}>
+            {/* Soru numarası kısmını boş bırak */}
+            <div className={styles.emptyCell}></div>
+            <div className={styles.choices}>
+              {availableChoices.slice(0, displayedCols).map((char, colIndex) => (
+                <div key={`choice-0-${colIndex}`} className={styles.choiceContainer}>
+                  {renderBubble(0, colIndex, char)}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Normal çoktan seçmeli için mevcut düzen
     return (
       <div className={styles.horizontalGrid}>
-        <div className={styles.questionRow}>
-          {/* Soru numarası kısmını boş bırak */}
-          <div className={styles.emptyCell}></div>
-          <div className={styles.choices}>
-            {availableChoices.slice(0, displayedCols).map((char, colIndex) => (
-              <div key={`choice-0-${colIndex}`} className={styles.choiceContainer}>
-                {renderBubble(0, colIndex, char)}
-              </div>
-            ))}
+        {Array.from({ length: rows }).map((_, rowIndex) => (
+          <div key={`question-${rowIndex}`} className={styles.questionRow}>
+            <div className={styles.questionNumber}>{startNumber + rowIndex}</div>
+            <div className={styles.choices}>
+              {availableChoices.slice(0, displayedCols).map((char, colIndex) => (
+                <div key={`choice-${rowIndex}-${colIndex}`} className={styles.choiceContainer}>
+                  {renderBubble(rowIndex, colIndex, char)}
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        ))}
       </div>
     );
-  }
-
-  // Normal çoktan seçmeli için mevcut düzen
-  return (
-    <div className={styles.horizontalGrid}>
-      {Array.from({ length: rows }).map((_, rowIndex) => (
-        <div key={`question-${rowIndex}`} className={styles.questionRow}>
-          <div className={styles.questionNumber}>{startNumber + rowIndex}</div>
-          <div className={styles.choices}>
-            {availableChoices.slice(0, displayedCols).map((char, colIndex) => (
-              <div key={`choice-${rowIndex}-${colIndex}`} className={styles.choiceContainer}>
-                {renderBubble(rowIndex, colIndex, char)}
-              </div>
-            ))}
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-};;
+  };
   
   // TC Kimlik ve Telefon No için özel dikey düzen
   const renderIdPhoneGrid = () => {
@@ -236,7 +235,7 @@ const renderHorizontalGrid = () => {
     
     return (
       <div className={styles.idPhoneGrid}>
-        {/* El ile yazı alanı */}
+        {/* El ile yazı alanı - sadece stillendirme için kullanılacak boş bir alan */}
         <div className={styles.manualWriteArea}>
           {Array.from({ length: columnCount }).map((_, colIndex) => (
             <div key={`write-${colIndex}`} className={styles.writeCell} />
@@ -273,10 +272,9 @@ const renderHorizontalGrid = () => {
       allCharacters = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']; // 0-9
     }
     
-    // Özel kodu kaldırıp TÜM eleman tipleri için aynı dikey grid kodunu kullanıyoruz
     return (
       <div className={styles.verticalGridNew}>
-        {/* El ile yazı alanı */}
+        {/* El ile yazı alanı - sadece CSS ile stillendirilmiş boş bir alan */}
         <div className={styles.manualWriteArea}>
           {Array.from({ length: columnCount }).map((_, colIndex) => (
             <div key={`write-${colIndex}`} className={styles.writeCell} />

@@ -1,4 +1,4 @@
-/* Düzenleme için gerekli yeni stiller BubbleGrid.module.css dosyasına eklenecek */
+/* Bubble Grid CSS */
 
 /* Bubble düzenleme için stiller */
 .bubble.editing {
@@ -57,7 +57,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 2px; /* Merkez hizalama için dairenin kenarlarında eşit boşluk */
+  margin: 2px;
   box-sizing: border-box;
 }
 
@@ -74,22 +74,22 @@
   padding: 0;
   width: 100%;
   box-sizing: border-box;
-  height: 100%; /* Kapsayıcı yüksekliğini doldur */
-  overflow: hidden; /* Taşan içeriği gizle - kaydırma çubuğunu kaldır */
+  height: 100%;
+  overflow: hidden;
 }
 
 .questionRow {
   display: flex;
-  height: 20px; /* Tam 1 grid yüksekliği */
+  height: 20px;
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  flex-shrink: 0; /* Satırları sıkıştırma */
+  flex-shrink: 0;
 }
 
 .questionNumber {
-  width: 20px; /* Tam 1 grid genişliği */
-  height: 20px; /* Tam 1 grid yüksekliği */
+  width: 20px;
+  height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -97,7 +97,7 @@
   font-weight: bold;
   color: #666;
   box-sizing: border-box;
-  flex-shrink: 0; /* Sıkıştırma */
+  flex-shrink: 0;
 }
 
 .choices {
@@ -105,29 +105,29 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  flex-shrink: 0; /* Sıkıştırma */
+  flex-shrink: 0;
 }
 
 .choiceContainer {
-  width: 20px; /* Tam 1 grid genişliği */
-  height: 20px; /* Tam 1 grid yüksekliği */
+  width: 20px;
+  height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
   padding: 0;
   margin: 0;
-  flex-shrink: 0; /* Sıkıştırma */
+  flex-shrink: 0;
 }
 
-/* DİKEY (Ad-Soyad, Numara) YENİ TASARIM - Her SÜTUN bir harf/rakam için */
+/* DİKEY (Ad-Soyad, Numara) YENİ TASARIM */
 .verticalGridNew {
   display: flex;
   flex-direction: column;
   padding: 0;
   width: 100%;
   box-sizing: border-box;
-  overflow: hidden; /* Taşan içeriği gizle */
+  overflow: hidden;
 }
 
 /* TC Kimlik ve Telefon No için Dikey Düzen */
@@ -157,7 +157,7 @@
 
 .digitCell {
   width: 100%;
-  height: 20px; /* Tam 1 grid yüksekliği */
+  height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -165,15 +165,15 @@
   flex-shrink: 0;
 }
 
-/* El ile yazı yazılacak alan */
+/* El ile yazı yazılacak alan - ÖNEMLİ DEĞİŞİKLİK: Sadece görsel bir boşluk */
 .manualWriteArea {
   display: flex;
-  height: 20px; /* El ile yazılacak alan yüksekliği - 1 grid */
+  height: 20px; /* Daha yüksek bir alan yapıldı */
   padding: 0;
   box-sizing: border-box;
   border-bottom: 1px solid #ddd;
   background-color: #f9f9f9;
-  flex-shrink: 0; /* Sıkıştırma */
+  flex-shrink: 0;
 }
 
 .writeCell {
@@ -181,6 +181,13 @@
   height: 100%;
   border-right: 1px solid #eee;
   box-sizing: border-box;
+  position: relative;
+}
+
+/* Kullanıcıya bu alanın el ile doldurulacağını belirtmek için eklenen stil */
+/* Yatay çizgi kaldırıldı */
+.writeCell::after {
+  content: none;
 }
 
 .writeCell:last-child {
@@ -191,28 +198,28 @@
 .columnContainer {
   display: flex;
   width: 100%;
-  overflow: hidden; /* Taşan içeriği gizle */
-  flex: 1; /* Kalan alanı doldur */
+  overflow: hidden;
+  flex: 1;
 }
 
 .bubbleColumn {
   flex: 1;
   display: flex;
-  flex-direction: column; /* Dikey yerleşim - yukarıdan aşağıya A-Z veya 0-9 */
+  flex-direction: column;
   box-sizing: border-box;
-  overflow: hidden; /* Taşan içeriği gizle */
+  overflow: hidden;
 }
 
 .bubbleCell {
   width: 100%;
-  height: 20px; /* Tam 1 grid yüksekliği */
+  height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
-  flex-shrink: 0; /* Sıkıştırma */
+  flex-shrink: 0;
 }
-/* src/pages/Optik/components/elements/BubbleGrid.module.css - eklenecek stil */
+
 .bookletCodeRow {
   display: flex;
   height: 20px;
@@ -221,4 +228,19 @@
   box-sizing: border-box;
   flex-shrink: 0;
   justify-content: center;
+}
+
+/* Yazdırma için ek stiller */
+@media print {
+  .manualWriteArea {
+    height: 25px;
+    background-color: white;
+    border-bottom: 1px solid #aaa;
+  }
+  
+  .writeCell::after {
+    bottom: 2px;
+    height: 1px;
+    background-color: #555;
+  }
 }
