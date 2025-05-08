@@ -134,8 +134,7 @@ const Register = () => {
   
   return (
     <div className="register-page">
-      <h2 className="auth-title">Kayıt Ol</h2>
-      
+
       {errors.general && (
         <div className="error-alert">{errors.general}</div>
       )}

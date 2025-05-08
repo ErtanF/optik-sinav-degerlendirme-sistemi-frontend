@@ -1,46 +1,91 @@
 /* Auth Layout Styles */
 .auth-layout {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    background-color: var(--background-color);
-  }
-  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--accent-color-lightest) 0%, var(--background-color) 100%);
+  padding: 1.5rem;
+}
+
+.auth-container {
+  background-color: var(--background-color-light);
+  border-radius: 8px;
+  box-shadow: var(--shadow-md);
+  width: 100%;
+  max-width: 450px;
+  padding: 2.5rem;
+  border-top: 4px solid var(--primary-color);
+}
+
+.auth-logo {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.auth-logo h1 {
+  color: var(--primary-color-dark);
+  font-size: 1.75rem;
+  margin: 0;
+}
+
+.auth-title {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: var(--primary-color);
+  font-size: 1.5rem;
+}
+
+.auth-form {
+  margin-bottom: 1.5rem;
+}
+
+.auth-links {
+  margin-top: 1.5rem;
+  text-align: center;
+  font-size: 0.875rem;
+}
+
+.auth-link {
+  color: var(--secondary-color);
+  text-decoration: none;
+  transition: color 0.2s ease-in-out;
+}
+
+.auth-link:hover {
+  color: var(--secondary-color-dark);
+  text-decoration: underline;
+}
+
+.form-actions {
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  margin: 1.5rem 0;
+  color: var(--text-color-light);
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+  flex: 1;
+  border-bottom: 1px solid var(--accent-color-lighter);
+}
+
+.auth-divider span {
+  padding: 0 0.75rem;
+  font-size: 0.875rem;
+}
+
+/* Responsif tasarım için */
+@media (max-width: 480px) {
   .auth-container {
-    background-color: var(--background-color-light);
-    border-radius: 8px;
-    box-shadow: var(--shadow-md);
-    width: 100%;
-    max-width: 450px;
-    padding: 2rem;
+    padding: 1.5rem;
   }
-  
-  .auth-logo {
-    text-align: center;
-    margin-bottom: 2rem;
-  }
-  
-  .auth-title {
-    text-align: center;
-    margin-bottom: 1.5rem;
-    color: var(--primary-color);
-  }
-  
-  .auth-form {
-    margin-bottom: 1rem;
-  }
-  
-  .auth-links {
-    margin-top: 1rem;
-    text-align: center;
-    font-size: 0.875rem;
-  }
-  
-  .auth-link {
-    color: var(--primary-color);
-  }
-  
-  .form-actions {
-    margin-top: 1.5rem;
-  }
+}
