@@ -71,7 +71,7 @@ const InfoBox = ({ title, children }) => (
 const ElementPropertiesPanel = () => {
   const { 
     activeElementId, pageElements, updateElement, fileInputRef,
-    handleImageUpload, isWithinSafeZone
+     isWithinSafeZone
   } = useFormEditor();
   
   // Aktif eleman

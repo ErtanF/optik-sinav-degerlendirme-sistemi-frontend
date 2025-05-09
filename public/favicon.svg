@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500">
+  <!-- Arka plan -->
+  <rect width="800" height="500" fill="#ffffff"/>
+  
+  <!-- Gradient ve filtre tanımlamaları -->
+  <defs>
+    <linearGradient id="mainGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3949ab" />
+      <stop offset="70%" stop-color="#1a237e" />
+      <stop offset="100%" stop-color="#0d1654" />
+    </linearGradient>
+    <linearGradient id="turkishRedGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f44336" />
+      <stop offset="100%" stop-color="#b71c1c" />
+    </linearGradient>
+    <linearGradient id="glowGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.1)" />
+      <stop offset="100%" stop-color="rgba(255,255,255,0.05)" />
+    </linearGradient>
+    <linearGradient id="scanlineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="rgba(255,255,255,0)" />
+      <stop offset="50%" stop-color="rgba(255,255,255,0.9)" />
+      <stop offset="100%" stop-color="rgba(255,255,255,0)" />
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="6" stdDeviation="12" flood-color="#000000" flood-opacity="0.15"/>
+    </filter>
+    <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+  
+  <!-- Ana logo konteyner - Ortalanmış -->
+  <g transform="translate(250, 80)">
+    <!-- Ana daire - Daha yüksek görünümlü 3D efekti -->
+    <circle cx="150" cy="150" r="140" fill="#f5f5f5" filter="url(#shadow)"/>
+    <circle cx="150" cy="150" r="125" fill="url(#mainGradient)"/>
+    
+    <!-- İç daire ve parlaması - Derinlik etkisi artırıldı -->
+    <circle cx="150" cy="150" r="95" fill="#0d1654"/>
+    <circle cx="150" cy="150" r="85" fill="url(#glowGradient)"/>
+    
+    <!-- Yıldız motifi - Türk bayrağı anımsatması (daha şık) -->
+    <path d="M150,70 L165,115 L125,87 L175,87 L135,115 Z" fill="url(#turkishRedGradient)" filter="url(#softGlow)"/>
+    
+    <!-- Optik form tarama alanı - Daha teknolojik görünüm -->
+    <rect x="100" y="130" width="100" height="70" rx="5" ry="5" fill="#0a1144" opacity="0.7"/>
+    
+    <!-- Tarama ışığı animasyonu -->
+    <rect x="100" y="150" width="100" height="3" fill="url(#scanlineGradient)" opacity="0.8"/>
+    
+    <!-- Optik form daireleri - Daha dinamik dizilim -->
+    <g opacity="0.9">
+      <!-- Diagonal daireler sırası - Yenilikçi tasarım -->
+      <circle cx="115" cy="145" r="7" fill="#ffffff" stroke="#ffffff" stroke-width="1"/>
+      <circle cx="135" cy="145" r="7" fill="#ffffff" stroke="#ffffff" stroke-width="1"/>
+      <circle cx="155" cy="145" r="7" fill="#ffffff" stroke="#ffffff" stroke-width="1"/>
+      <circle cx="175" cy="145" r="7" fill="#ffffff" stroke="#ffffff" stroke-width="1"/>
+      
+      <circle cx="115" cy="165" r="7" fill="#ffffff" stroke="#ffffff" stroke-width="1"/>
+      <circle cx="135" cy="165" r="7" fill="url(#turkishRedGradient)" stroke="#ffffff" stroke-width="1"/>
+      <circle cx="155" cy="165" r="7" fill="#ffffff" stroke="#ffffff" stroke-width="1"/>
+      <circle cx="175" cy="165" r="7" fill="url(#turkishRedGradient)" stroke="#ffffff" stroke-width="1"/>
+      
+      <circle cx="115" cy="185" r="7" fill="url(#turkishRedGradient)" stroke="#ffffff" stroke-width="1"/>
+      <circle cx="135" cy="185" r="7" fill="#ffffff" stroke="#ffffff" stroke-width="1"/>
+      <circle cx="155" cy="185" r="7" fill="url(#turkishRedGradient)" stroke="#ffffff" stroke-width="1"/>
+      <circle cx="175" cy="185" r="7" fill="#ffffff" stroke="#ffffff" stroke-width="1"/>
+    </g>
+    
+    <!-- Modern dekoratif elemanlar - 3D boyutsal hissi -->
+    <circle cx="210" cy="90" r="15" fill="url(#turkishRedGradient)" opacity="0.7" filter="url(#softGlow)"/>
+    <circle cx="90" cy="210" r="12" fill="url(#turkishRedGradient)" opacity="0.5" filter="url(#softGlow)"/>
+    
+    <!-- Aksan çizgileri -->
+    <path d="M30,150 C50,100 100,70 150,70" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-opacity="0.3" stroke-dasharray="1,3"/>
+    <path d="M150,230 C200,230 240,200 270,150" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-opacity="0.3" stroke-dasharray="1,3"/>
+  </g>
+  
+  <!-- Şirket adı ve slogan - Modernize edilmiş tipografi -->
+  <g transform="translate(400, 370)" text-anchor="middle">
+    <text x="0" y="0" 
+          font-family="'Montserrat', Arial, sans-serif" 
+          font-size="66" 
+          font-weight="800" 
+          fill="#1a237e"
+          letter-spacing="1px">
+      <tspan fill="#3949ab" style="letter-spacing: -1px;">OP</tspan><tspan fill="#e53935">TÜRK</tspan>
+    </text>
+    
+    <text x="0" y="40" 
+          font-family="'Montserrat', Arial, sans-serif" 
+          font-size="18" 
+          font-weight="600" 
+          fill="#546e7a"
+          letter-spacing="2px">
+      AKILLI OPTİK FORM ÇÖZÜMLERİ
+    </text>
+  </g>
+  
+  <!-- Modern minimalist dekoratif elemanlar -->
+  <line x1="270" y1="420" x2="530" y2="420" stroke="#e0e0e0" stroke-width="1.5"/>
+  <circle cx="270" cy="420" r="3" fill="#e53935"/>
+  <circle cx="530" cy="420" r="3" fill="#e53935"/>
+</svg>

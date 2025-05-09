@@ -12,7 +12,7 @@ import optikApi from '../../api/optik';
 // FormEditor Context'ine erişmek için wrapper bileşen
 const OptikOlusturmaContent = () => {
   const navigate = useNavigate();
-  const { pageElements, customBubbleValues, getFormStateForSave } = useFormEditor();
+  const { pageElements, customBubbleValues} = useFormEditor();
   
   // State değişkenleri
   const [formTitle, setFormTitle] = useState('Yeni Optik Form');

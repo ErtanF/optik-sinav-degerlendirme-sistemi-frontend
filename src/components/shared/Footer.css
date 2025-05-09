@@ -1,27 +1,203 @@
-/* Footer Styles */
 .footer {
-  background-color: #e0e0e0;
-  padding: 6px 0; /* Yüksekliği azaltmak için padding değerini düşürdüm */
-  margin-top: auto;
-  font-size: 0.8rem; /* Daha küçük font boyutu */
-  line-height: 1.2; /* Satır yüksekliğini azalttım */
+  background-color: var(--primary-color-dark, #0a375a);
+  color: rgba(255, 255, 255, 0.85);
+  padding: 2rem 1.5rem 1.5rem; /* padding azaltıldı */
+  width: 100%;
+  position: relative;
 }
 
 .footer-container {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   width: 100%;
-  text-align: center;
-  color: #666;
 }
 
 .footer-content {
-  text-align: center;
-  font-size: 0.8rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 1.5rem; /* gap azaltıldı */
+  margin-bottom: 1.25rem; /* margin azaltıldı */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 1.25rem; /* padding azaltıldı */
 }
 
-@media (max-width: 768px) {
+.footer-brand {
+  flex: 1;
+  min-width: 180px;
+}
+
+.footer-logo {
+  width: 32px; /* logo küçültüldü */
+  height: 32px; /* logo küçültüldü */
+  border-radius: 6px;
+  margin-bottom: 0.5rem; /* margin azaltıldı */
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.footer-title {
+  font-size: 1rem; /* font küçültüldü */
+  font-weight: 600;
+  margin: 0 0 0.75rem; /* margin azaltıldı */
+  color: white;
+  letter-spacing: 0.5px;
+}
+
+.footer-links-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.75rem; /* gap azaltıldı */
+  justify-content: flex-end;
+  flex: 2;
+}
+
+.footer-links-column {
+  min-width: 120px; /* genişlik azaltıldı */
+}
+
+.footer-links-column h4 {
+  font-size: 0.9rem; /* font küçültüldü */
+  margin: 0 0 0.75rem; /* margin azaltıldı */
+  font-weight: 600;
+  color: white;
+  letter-spacing: 0.5px;
+}
+
+.footer-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem; /* gap azaltıldı */
+}
+
+.footer-nav a {
+  color: rgba(255, 255, 255, 0.75);
+  text-decoration: none;
+  font-size: 0.85rem; /* font küçültüldü */
+  transition: all 0.2s ease;
+  position: relative;
+  width: fit-content;
+}
+
+.footer-nav a:hover {
+  color: white;
+}
+
+.footer-nav a:hover::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+.footer-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 1rem 0 0.25rem; /* padding azaltıldı */
+}
+
+.copyright {
+  font-size: 0.8rem; /* font küçültüldü */
+  opacity: 0.75;
+  margin: 0;
+}
+
+.footer-social {
+  display: flex;
+  gap: 0.75rem; /* gap azaltıldı */
+  align-items: center;
+}
+
+.footer-social a {
+  color: rgba(255, 255, 255, 0.75);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px; /* boyut küçültüldü */
+  height: 32px; /* boyut küçültüldü */
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.footer-social a:hover {
+  color: white;
+  background-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+/* Dark mode optimization */
+@media (prefers-color-scheme: dark) {
   .footer {
-    padding: 5px 0;
+    background-color: var(--dark-color, #0d1117);
   }
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .footer-content {
+    flex-direction: column;
+    gap: 2rem;
+  }
+  
+  .footer-links-container {
+    flex-direction: column;
+    gap: 2rem;
+  }
+  
+  .footer-links-column {
+    width: 100%;
+  }
+  
+  .footer-bottom {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  
+  .copyright {
+    margin-bottom: 1rem;
+  }
+}
+
+/* Animation for smooth interactions */
+@keyframes linkHover {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.footer-nav a:hover {
+  animation: linkHover 0.3s ease;
+}
+
+/* Accessibility improvements */
+.footer-nav a:focus,
+.footer-social a:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+  border-radius: 4px;
+}
+
+/* Container shadow for depth */
+.footer::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: 0;
+  width: 100%;
+  height: 10px;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.05), transparent);
+  pointer-events: none;
 }

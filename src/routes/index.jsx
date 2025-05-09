@@ -11,6 +11,8 @@ import OptikOlusturma from '../pages/Optik/OptikOlusturma';
 import OptikFormlarim from '../pages/Optik/OptikFormlarim';
 import OptikDetay from '../pages/Optik/OptikDetay';
 import NotFound from '../pages/NotFound';
+import TeacherApprovalsPage from '../pages/TeacherApprovalsPage';
+
 
 // PrivateRoute bileşeni
 const PrivateRoute = ({ children }) => {
@@ -57,6 +59,10 @@ const routes = (isAuthenticated) => [
       {
         path: '*',
         element: <NotFound />
+      },
+      {
+        path: 'teacher-approvals',
+        element: <PrivateRoute><TeacherApprovalsPage /></PrivateRoute>
       }
     ]
   },
