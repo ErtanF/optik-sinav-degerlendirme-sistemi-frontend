@@ -1,6 +1,7 @@
 import { Navigate } from 'react-router-dom';
 import MainLayout from '../components/layouts/MainLayout';
 import AuthLayout from '../components/layouts/AuthLayout';
+import { useAuth } from '../hooks/useAuth';
 
 // Sayfa bileşenleri
 import Login from '../pages/Auth/Login';
@@ -12,33 +13,37 @@ import OptikFormlarim from '../pages/Optik/OptikFormlarim';
 import OptikDetay from '../pages/Optik/OptikDetay';
 import NotFound from '../pages/NotFound';
 import TeacherApprovalsPage from '../pages/TeacherApprovalsPage';
+import Profile from '../pages/Profile/Profile';
 
 
 // PrivateRoute bileşeni
 const PrivateRoute = ({ children }) => {
-  const isAuth = localStorage.getItem('token');
-  if (!isAuth) {
+  const { isAuthenticated, loading } = useAuth();
+  if (loading) return null; // veya bir loading spinner dönebilir
+  if (!isAuthenticated) {
     return <Navigate to="/login" />;
   }
   return children;
 };
 
 // PublicRoute bileşeni (auth sayfaları için)
-const PublicRoute = ({ children, isAuthenticated }) => {
+const PublicRoute = ({ children }) => {
+  const { isAuthenticated, loading } = useAuth();
+  if (loading) return null; // veya bir loading spinner dönebilir
   if (isAuthenticated) {
     return <Navigate to="/dashboard" />;
   }
   return children;
 };
 
-const routes = (isAuthenticated) => [
+const routes = () => [
   {
     path: '/',
     element: <MainLayout />,
     children: [
       {
         path: '/',
-        element: isAuthenticated ? <Navigate to="/dashboard" /> : <Navigate to="/login" />
+        element: <PrivateRoute><Navigate to="/dashboard" /></PrivateRoute>
       },
       {
         path: 'dashboard',
@@ -63,6 +68,10 @@ const routes = (isAuthenticated) => [
       {
         path: 'teacher-approvals',
         element: <PrivateRoute><TeacherApprovalsPage /></PrivateRoute>
+      },
+      {
+        path: 'profile',
+        element: <PrivateRoute><Profile /></PrivateRoute>
       }
     ]
   },
@@ -72,15 +81,15 @@ const routes = (isAuthenticated) => [
     children: [
       {
         path: 'login',
-        element: <PublicRoute isAuthenticated={isAuthenticated}><Login /></PublicRoute>
+        element: <PublicRoute><Login /></PublicRoute>
       },
       {
         path: 'register',
-        element: <PublicRoute isAuthenticated={isAuthenticated}><Register /></PublicRoute>
+        element: <PublicRoute><Register /></PublicRoute>
       },
       {
         path: 'forgotpassword',
-        element: <PublicRoute isAuthenticated={isAuthenticated}><ForgotPassword /></PublicRoute>
+        element: <PublicRoute><ForgotPassword /></PublicRoute>
       }
     ]
   }
