@@ -6,9 +6,9 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100%;
   width: 100%;
-  overflow: auto; /* Taşan içeriği kaydırma çubuğuyla göster */
+  height: auto; /* height: 100% yerine auto kullanın */
+  overflow: hidden; /* overflow: auto yerine visible kullanın */
 }
 
 .container {
