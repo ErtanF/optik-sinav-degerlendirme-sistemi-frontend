@@ -197,33 +197,65 @@ const FormRenderer = ({
       }}
     >
       {/* Sol kenarda dikdörtgen noktalar - grid genişliğinde */}
+<div 
+  className="dotColumn"
+  style={{
+    position: 'absolute',
+    left: '20px',  
+    top: '0',
+    width: '20px',
+    height: '100%',
+    pointerEvents: 'none'
+  }}
+>
+  {/* İlk 3 satırı atlayarak 4. satırdan başla */}
+  {Array.from({ length: Math.floor((297 * 3.78 - 20) / 20) }).map((_, index) => {
+    // İlk 3 satırı atla
+    if (index < 3) return null;
+    
+    return (
       <div 
-        className="dotColumn"
+        key={index} 
         style={{
           position: 'absolute',
-          left: '20px',  // Soldan ilk sütun olacak şekilde konumlandırma - bir grid sola alındı
-          top: '0',
-          width: '20px',
-          height: '100%',
-          pointerEvents: 'none'
+          top: `${(index * 20) + 10}px`, 
+          left: '0',                     
+          width: '20px',                  
+          height: '5px',                  
+          backgroundColor: '#000',
+          borderRadius: '0'               
         }}
-      >
-        {/* İlk noktayı 10px aşağıdan başlat, son noktayı dahil etme */}
-        {Array.from({ length: Math.floor((297 * 3.78 - 20) / 20) }).map((_, index) => (
-          <div 
-            key={index} 
-            style={{
-              position: 'absolute',
-              top: `${(index * 20) + 10}px`, // 10px aşağıdan başla
-              left: '0',                      // Sol kenara hizala
-              width: '20px',                  // Grid genişliğinde (20px)
-              height: '5px',                  // Yüksekliği 5px
-              backgroundColor: '#000',
-              borderRadius: '0'               // Dikdörtgen şekil
-            }}
-          ></div>
-        ))}
-      </div>
+      ></div>
+    );
+  })}
+  
+  {/* Sağındaki sütunun 2. satırına büyük nokta */}
+  <div 
+    style={{
+      position: 'absolute',
+      top: '45px',   // 2. satır pozisyonu (10px + 20px*2)
+      left: '25px',  // Sağdaki sütun (20px + 20px)
+      width: '12px', 
+      height: '12px',
+      backgroundColor: '#000',
+      borderRadius: '50%', // Yuvarlak nokta
+      zIndex: '10'
+    }}
+  ></div>
+  <div 
+    style={{
+      position: 'absolute',
+      top: '45px',   // 2. satır pozisyonu (10px + 20px*2)
+      left: '45px',  // Sağdaki sütun (20px + 20px)
+      width: '12px', 
+      height: '12px',
+      backgroundColor: '#000',
+      borderRadius: '50%', // Yuvarlak nokta
+      zIndex: '10'
+    }}
+  ></div>
+</div>
+
       
       {showGrid && (
         <div 

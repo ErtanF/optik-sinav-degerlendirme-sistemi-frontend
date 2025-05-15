@@ -62,22 +62,56 @@ const A4Container = memo(function A4Container() {
 
   // Elle hesaplayarak her bir noktayı grid hizasında oluştur
   // İlk noktayı 10px aşağıdan başlat, son noktayı dahil etme
-  for (let i = 10; i < a4Height - gridSize; i += gridSize) {
-    dots.push(
-      <div 
-        key={i} 
-        className={styles.dot} 
-        style={{ 
-          position: 'absolute', 
-          top: `${i}px`,
-          width: `${gridSize}px`, // Grid genişliğinde (20px)
-          height: '5px',          // Yükseklik aynı (5px)
-          left: '0',              // Sol kenara hizala
-          borderRadius: '0'       // Dikdörtgen şekil için
-        }}
-      />
-    );
-  }
+  for (let i = 10 + (gridSize * 3); i < a4Height - gridSize; i += gridSize) {
+  dots.push(
+    <div 
+      key={i} 
+      className={styles.dot} 
+      style={{ 
+        position: 'absolute', 
+        top: `${i}px`,
+        width: `${gridSize}px`,
+        height: '5px',
+        left: '0',
+        borderRadius: '0'
+      }}
+    />
+  );
+}
+
+  // Sağındaki sütunun 2. satırına büyük nokta ekle
+  dots.push(
+    <div 
+      key="specialDot"
+      style={{ 
+        position: 'absolute', 
+        top: '45px',
+        left: '25px',
+        width: '12px',
+        height: '12px',
+        backgroundColor: '#000',
+        borderRadius: '50%',
+        zIndex: '10'
+      }}
+    />
+    
+  );
+  dots.push(
+    <div 
+      key="specialDot"
+      style={{ 
+        position: 'absolute', 
+        top: '45px',
+        left: '45px',
+        width: '12px',
+        height: '12px',
+        backgroundColor: '#000',
+        borderRadius: '50%',
+        zIndex: '10'
+      }}
+    />
+    
+  );
   
   return (
     <div className={styles.wrapper}>
