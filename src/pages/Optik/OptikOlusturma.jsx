@@ -88,7 +88,7 @@ const OptikOlusturmaContent = () => {
       await optikApi.createForm(formData);
       
       // Başarıyla kaydetme ve yönlendirme
-      navigate('/dashboard', { 
+      navigate('/', { 
         state: { message: 'Form başarıyla kaydedildi.' } 
       });
     } catch (error) {
@@ -154,7 +154,7 @@ const OptikOlusturmaContent = () => {
           >
             Önizle ve Kaydet
           </Button>
-          <Link to="/dashboard">
+          <Link to="/">
             <Button variant="outline">Dashboard'a Dön</Button>
           </Link>
         </div>

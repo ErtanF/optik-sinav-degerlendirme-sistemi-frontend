@@ -14,6 +14,8 @@ import OptikDetay from '../pages/Optik/OptikDetay';
 import NotFound from '../pages/NotFound';
 import TeacherApprovalsPage from '../pages/TeacherApprovalsPage';
 import Profile from '../pages/Profile/Profile';
+import Faq from '../pages/Faq';
+import Contact from '../pages/Contact';
 
 
 // PrivateRoute bileşeni
@@ -31,7 +33,7 @@ const PublicRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
   if (loading) return null; // veya bir loading spinner dönebilir
   if (isAuthenticated) {
-    return <Navigate to="/dashboard" />;
+    return <Navigate to="/" />;
   }
   return children;
 };
@@ -43,10 +45,6 @@ const routes = () => [
     children: [
       {
         path: '/',
-        element: <PrivateRoute><Navigate to="/dashboard" /></PrivateRoute>
-      },
-      {
-        path: 'dashboard',
         element: <PrivateRoute><Dashboard /></PrivateRoute>
       },
       {
@@ -68,10 +66,17 @@ const routes = () => [
       {
         path: 'teacher-approvals',
         element: <PrivateRoute><TeacherApprovalsPage /></PrivateRoute>
-      },
-      {
+      },      {
         path: 'profile',
         element: <PrivateRoute><Profile /></PrivateRoute>
+      },
+      {
+        path: 'faq',
+        element: <Faq />
+      },
+      {
+        path: 'contact',
+        element: <Contact />
       }
     ]
   },

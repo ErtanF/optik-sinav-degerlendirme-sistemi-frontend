@@ -80,7 +80,7 @@ const OptikFormlarim = () => {
           <Link to="/optik-olustur">
             <Button variant="primary">Yeni Optik Oluştur</Button>
           </Link>
-          <Link to="/dashboard">
+          <Link to="/">
             <Button variant="outline">Dashboard'a Dön</Button>
           </Link>
         </div>

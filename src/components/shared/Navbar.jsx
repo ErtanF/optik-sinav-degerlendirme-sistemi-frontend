@@ -100,8 +100,10 @@ const Navbar = () => {
     const date = new Date(dateString);
     return date.toLocaleDateString('tr-TR');
   };
-
   const isActive = (path) => {
+    if (path === '/') {
+      return location.pathname === '/' ? 'active' : '';
+    }
     return location.pathname === path ? 'active' : '';
   };
   
@@ -118,7 +120,6 @@ const Navbar = () => {
         <div className="navbar-menu">
           {isAuthenticated ? (
             <>
-              <Link to="/dashboard" className={`navbar-item ${isActive('/dashboard')}`}>Dashboard</Link>
               <Link to="/optik-olustur" className={`navbar-item ${isActive('/optik-olustur')}`}>Optik Oluştur</Link>
               <Link to="/optik-formlarim" className={`navbar-item ${isActive('/optik-formlarim')}`}>Optik Formlarım</Link>
               

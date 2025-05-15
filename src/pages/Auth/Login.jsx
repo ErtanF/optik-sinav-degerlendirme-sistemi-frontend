@@ -71,11 +71,9 @@ const Login = () => {
         const response = await authApi.login({
           email: formData.email,
           password: formData.password
-        });
-
-        // Başarılı login
+        });        // Başarılı login
         login(response.user, response.token);
-        navigate('/dashboard');
+        navigate('/');
       } catch (error) {
         setErrors({
           ...errors,
