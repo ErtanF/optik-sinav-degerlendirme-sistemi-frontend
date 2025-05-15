@@ -1,7 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import html2canvas from 'html2canvas';
 import BubbleGrid from './elements/BubbleGrid';
-import CornerMarks from './CornerMarks';
 
 const FormRenderer = ({ 
   pageElements, 
@@ -33,7 +32,7 @@ const FormRenderer = ({
                    (element.classList.contains('gridLines') || 
                     element.classList.contains('resize-handle') ||
                     element.classList.contains('removeButton') ||
-                    element.classList.contains('safeZoneBorder')); // Güvenli alan çizgisini yazdırma
+                    element.classList.contains('dotColumn')); // Nokta sütunu gizleme - yazdırmada görünmesin
           }
         }).then(canvas => {
           window.scrollTo(scrollPos.x, scrollPos.y);
@@ -68,8 +67,6 @@ const FormRenderer = ({
   };
 
   // Eleman içeriğini render et
-  // FormRenderer.jsx içinde renderElementContent fonksiyonuna ekleme
-
   const renderElementContent = (element) => {
     if (element.type === 'image') {
       return (
@@ -180,6 +177,9 @@ const FormRenderer = ({
     ));
   };
 
+  // Sayfa yüksekliğine göre nokta sayısını belirle
+  const rowCount = 40; // Uygun nokta sayısı
+
   return (
     <div 
       ref={containerRef} 
@@ -196,12 +196,34 @@ const FormRenderer = ({
         pageBreakInside: 'avoid'
       }}
     >
-      {/* Köşe kalibrasyon işaretleri - her zaman göster */}
-      <CornerMarks
-        safeZoneMargin={20}
-        safeZonePadding={10}
-        isVisible={true}
-      />
+      {/* Sol kenarda dikdörtgen noktalar - grid genişliğinde */}
+      <div 
+        className="dotColumn"
+        style={{
+          position: 'absolute',
+          left: '20px',  // Soldan ilk sütun olacak şekilde konumlandırma - bir grid sola alındı
+          top: '0',
+          width: '20px',
+          height: '100%',
+          pointerEvents: 'none'
+        }}
+      >
+        {/* İlk noktayı 10px aşağıdan başlat, son noktayı dahil etme */}
+        {Array.from({ length: Math.floor((297 * 3.78 - 20) / 20) }).map((_, index) => (
+          <div 
+            key={index} 
+            style={{
+              position: 'absolute',
+              top: `${(index * 20) + 10}px`, // 10px aşağıdan başla
+              left: '0',                      // Sol kenara hizala
+              width: '20px',                  // Grid genişliğinde (20px)
+              height: '5px',                  // Yüksekliği 5px
+              backgroundColor: '#000',
+              borderRadius: '0'               // Dikdörtgen şekil
+            }}
+          ></div>
+        ))}
+      </div>
       
       {showGrid && (
         <div 
@@ -210,11 +232,12 @@ const FormRenderer = ({
             position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
             backgroundSize: '20px 20px',
             backgroundImage: `
-              linear-gradient(to right, rgba(230, 230, 230, 0.5) 1px, transparent 1px),
-              linear-gradient(to bottom, rgba(230, 230, 230, 0.5) 1px, transparent 1px)
+              linear-gradient(to right, rgba(0, 0, 0, 0.07) 1px, transparent 1px),
+              linear-gradient(to bottom, rgba(0, 0, 0, 0.07) 1px, transparent 1px)
             `,
             zIndex: 0,
-            pointerEvents: 'none'
+            pointerEvents: 'none',
+            opacity: 0.8
           }}
         />
       )}

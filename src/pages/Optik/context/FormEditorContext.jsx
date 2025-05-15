@@ -33,34 +33,23 @@ export const FormEditorProvider = ({ children }) => {
   
   // Pozisyonun güvenli alan içinde olup olmadığını kontrol et
   const isWithinSafeZone = useCallback((position, size) => {
-    const bounds = getSafeZoneBounds();
-    
-    // Elemanın kenarlarının sınırlar içinde olup olmadığını kontrol et
-    return (
-      position.x >= bounds.left &&
-      position.y >= bounds.top &&
-      position.x + size.width <= bounds.right &&
-      position.y + size.height <= bounds.bottom
-    );
-  }, [getSafeZoneBounds]);
+  // Güvenli alan kontrolünü kaldırıyoruz - her zaman true dönecek
+  return true;
+}, []);
   
-  // Pozisyonu güvenli alan içine sığdır
   const constrainToSafeZone = useCallback((position, size) => {
-    const bounds = getSafeZoneBounds();
     const gridSize = gridSizeRef.current;
     
-    // X koordinatını sınırla
-    let x = Math.max(bounds.left, position.x);
-    x = Math.min(x, bounds.right - size.width);
-    x = Math.floor(x / gridSize) * gridSize; // Grid'e hizala
+    // Sadece grid'e hizalama yapılıyor, sınırlama yapılmıyor
+    let x = Math.floor(position.x / gridSize) * gridSize;
+    let y = Math.floor(position.y / gridSize) * gridSize;
     
-    // Y koordinatını sınırla
-    let y = Math.max(bounds.top, position.y);
-    y = Math.min(y, bounds.bottom - size.height);
-    y = Math.floor(y / gridSize) * gridSize; // Grid'e hizala
+    // Negatif değerleri önle
+    x = Math.max(0, x);
+    y = Math.max(0, y);
     
     return { x, y };
-  }, [getSafeZoneBounds]);
+  }, []);
   
   // Bubble içeriklerini saklamak için state
   const [customBubbleValues, setCustomBubbleValues] = useState({});

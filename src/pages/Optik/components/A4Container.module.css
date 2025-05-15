@@ -1,3 +1,4 @@
+
 .wrapper {
   background-color: var(--background-color);
   border-radius: 8px;
@@ -24,7 +25,7 @@
   cursor: default;
 }
 
-
+/* Izgara çizgilerini daha görünür hale getir */
 .gridLines {
   position: absolute;
   top: 0;
@@ -33,17 +34,30 @@
   bottom: 0;
   background-size: 20px 20px;
   background-image:
-    linear-gradient(to right, rgba(0, 0, 0, 0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+    linear-gradient(to right, rgba(0, 0, 0, 0.07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.07) 1px, transparent 1px);
   pointer-events: none;
+  opacity: 0.8; /* Daha görünür olması için opaklığı artıralım */
 }
 
-.selectionArea {
+/* Sol kenardaki nokta sütunu */
+.dotColumn {
   position: absolute;
-  background-color: rgba(63, 81, 181, 0.15);
-  border: 2px dashed var(--primary-color);
-  pointer-events: none;
-  z-index: 10;
+  left: 20px; /* Soldan ikinci sütun olacak şekilde konumlandırma */
+  top: 0;
+  bottom: 0;
+  width: 20px; /* Grid genişliği */
+  height: 100%;
+  pointer-events: none; /* Tıklamaları engelleme */
+}
+
+/* Dikdörtgen noktalar (artık "dot" ismi tam olarak uygun olmasa da) */
+.dot {
+  width: 20px; /* Grid genişliği */
+  height: 5px;
+  background-color: #000;
+  border-radius: 0; /* Dikdörtgen şekil */
+  /* Nokta konumu artık JavaScript ile tam olarak yerleştirilecek */
 }
 
 .cursorGuide {
@@ -62,18 +76,7 @@
   cursor: crosshair;
 }
 
-/* Hover helpers */
-.gridCell {
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  border: 1px dashed rgba(0, 0, 0, 0.1);
-  background-color: rgba(63, 81, 181, 0.05);
-  pointer-events: none;
-  z-index: 2;
-}
-
-/* Optik eleman yazdırma için stilleri */
+/* Yazdırma için stilleri */
 @media print {
   .wrapper {
     padding: 0;
@@ -86,7 +89,12 @@
     margin: 0;
   }
   
-  .gridLines, .selectionArea, .cursorGuide {
+  .gridLines {
     display: none;
+  }
+  
+  /* Yazdırma sırasında noktaları göster */
+  .dotColumn {
+    display: block;
   }
 }

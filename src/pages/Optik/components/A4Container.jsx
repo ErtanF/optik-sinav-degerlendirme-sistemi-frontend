@@ -1,7 +1,6 @@
 import React, { useRef, memo } from 'react';
 import styles from './A4Container.module.css';
 import OptikElement from './elements/OptikElement';
-import CornerMarks from './CornerMarks';
 import { useFormEditor } from '../context/FormEditorContext';
 
 const A4Container = memo(function A4Container() {
@@ -16,8 +15,6 @@ const A4Container = memo(function A4Container() {
     setActiveElement,
     removeElement,
     handleCanvasClick,
-    safeZoneMargin,
-    safeZonePadding
   } = useFormEditor();
   
   const containerRef = useRef(null);
@@ -55,6 +52,32 @@ const A4Container = memo(function A4Container() {
   const handleTitleChange = (elementId, title) => {
     updateElement(elementId, { title });
   };
+
+  // Grid çizgileri her 20px'de bir olduğu için, noktalarda da aynı grid hizalamasını kullanacağız
+  // Her bir grid çizgisine denk gelen nokta oluşturacağız
+  // Toplam nokta sayısı (A4 kağıdının yüksekliği / grid boyutu)
+  const gridSize = 20; // Grid boyutu (piksel)
+  const a4Height = 1122; // A4 kağıdının yaklaşık yüksekliği (piksel)
+  const dots = [];
+
+  // Elle hesaplayarak her bir noktayı grid hizasında oluştur
+  // İlk noktayı 10px aşağıdan başlat, son noktayı dahil etme
+  for (let i = 10; i < a4Height - gridSize; i += gridSize) {
+    dots.push(
+      <div 
+        key={i} 
+        className={styles.dot} 
+        style={{ 
+          position: 'absolute', 
+          top: `${i}px`,
+          width: `${gridSize}px`, // Grid genişliğinde (20px)
+          height: '5px',          // Yükseklik aynı (5px)
+          left: '0',              // Sol kenara hizala
+          borderRadius: '0'       // Dikdörtgen şekil için
+        }}
+      />
+    );
+  }
   
   return (
     <div className={styles.wrapper}>
@@ -64,14 +87,12 @@ const A4Container = memo(function A4Container() {
         className={`${styles.container} ${selectedTool ? styles.toolSelected : ''}`}
         onClick={handleContainerClick}
       >
-        {/* Köşe kalibrasyon işaretleri */}
-        <CornerMarks 
-          safeZoneMargin={safeZoneMargin}
-          safeZonePadding={safeZonePadding}
-          isVisible={true}
-        />
+        {/* Sol kenarda noktalar - bu sefer tam grid hizasında konumlandırıyoruz */}
+        <div className={styles.dotColumn}>
+          {dots}
+        </div>
         
-        {/* Izgara çizgileri */}
+        {/* Izgara çizgileri - daha az belirgin */}
         <div className={styles.gridLines}></div>
         
         {/* Optik Elemanlar */}
@@ -109,5 +130,4 @@ const A4Container = memo(function A4Container() {
     </div>
   );
 });
-
 export default A4Container;
