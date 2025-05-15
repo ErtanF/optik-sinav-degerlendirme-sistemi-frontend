@@ -39,19 +39,24 @@ const Profile = () => {
     fetchUserProfile();
     // eslint-disable-next-line
   }, [currentUser]);
-
   const fetchUserProfile = async () => {
     try {
       setLoading(true);
       const response = await usersApi.getUserProfile();
+      console.log('API Profile Response:', response); // Debug log
+      
+      // response.data içinde kullanıcı bilgileri var
+      const profileData = response.data;
+      
       setUserData({
-        name: response.name,
-        email: response.email,
-        role: response.role,
-        school: response.school
+        name: profileData.name,
+        email: profileData.email,
+        role: profileData.role,
+        school: profileData.school
       });
+      
       // Context ve localStorage'ı da güncelle
-      login(response, localStorage.getItem('token'));
+      login(profileData, localStorage.getItem('token'));
       errorShownRef.current = false;
     } catch (error) {
       if (!errorShownRef.current && !currentUser) {
@@ -66,6 +71,9 @@ const Profile = () => {
 
   const handleProfileChange = (e) => {
     const { name, value } = e.target;
+    // Email alanı değişikliğini engelle (readonly olduğu için buraya gelmemeli)
+    if (name === 'email') return;
+
     setUserData({
       ...userData,
       [name]: value
@@ -106,6 +114,7 @@ const Profile = () => {
     if (Object.keys(formErrors).length === 0) {
       try {
         setSaving(true);
+        // userData içerisinde email alanı da bulunduğu için ayrıca eklemeye gerek yok
         const updated = await usersApi.updateUserProfile(userData);
         toast.success('Profil bilgileriniz başarıyla güncellendi.');
         // Sadece güncellenen kullanıcıyı context ve localStorage'a yaz
@@ -191,11 +200,16 @@ const Profile = () => {
               <div className="info-item">
                 <span className="info-label">Kullanıcı Rolü:</span>
                 <span className="info-value">{getRoleName(userData.role)}</span>
-              </div>
-              {userData.school && (
+              </div>              {userData.school && (
                 <div className="info-item">
                   <span className="info-label">Okul:</span>
-                  <span className="info-value">{userData.school.name}</span>
+                  <span className="info-value">
+                    {typeof userData.school === 'object' && userData.school !== null 
+                      ? userData.school.name 
+                      : typeof userData.school === 'string' 
+                        ? userData.school 
+                        : 'Okul bilgisi bulunamadı'}
+                  </span>
                 </div>
               )}
             </div>
@@ -211,8 +225,7 @@ const Profile = () => {
               error={errors.name}
               required
             />
-            
-            <Input
+              <Input
               type="email"
               label="E-posta"
               id="email"
@@ -221,6 +234,8 @@ const Profile = () => {
               onChange={handleProfileChange}
               placeholder="E-posta adresinizi girin"
               error={errors.email}
+              disabled={true}
+              readOnly={true}
               required
             />
             

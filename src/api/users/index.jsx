@@ -17,15 +17,26 @@ const usersApi = {
     // Backend'de şimdilik işlem yapmadan, sadece frontend'de listeden kaldırılacak
     return Promise.resolve({ success: true });
   },
-
   // Kullanıcı profilini getir
   getUserProfile: async () => {
-    return apiClient.get('/user/profile');
+    try {
+      const response = await apiClient.get('/user/profile');
+      return response;
+    } catch (error) {
+      console.error('API error in getUserProfile:', error);
+      throw error;
+    }
   },
 
   // Kullanıcı profilini güncelle
   updateUserProfile: async (userData) => {
-    return apiClient.put('/user/profile', userData);
+    try {
+      const response = await apiClient.put('/user/profile', userData);
+      return response;
+    } catch (error) {
+      console.error('API error in updateUserProfile:', error);
+      throw error;
+    }
   },
 
   // Şifre değiştir

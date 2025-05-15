@@ -29,7 +29,15 @@ const Register = () => {
       try {
         setLoading(true);
         const schoolsData = await schoolApi.getAllSchools();
-        setSchools(schoolsData.data || []);
+        console.log('Schools data from API:', schoolsData); // Debug logging
+        
+        // Ensuring we have the correct data structure
+        if (schoolsData && schoolsData.data && Array.isArray(schoolsData.data)) {
+          setSchools(schoolsData.data);
+        } else {
+          console.error('Schools data is not in expected format:', schoolsData);
+          setSchools([]);
+        }
       } catch (error) {
         setErrors({
           ...errors,
@@ -177,10 +185,8 @@ const Register = () => {
             className={`input-field ${errors.schoolId ? 'input-error' : ''}`}
             disabled={loading || schools.length === 0}
             required
-          >
-            <option value="">Okul Seçin</option>
-            {schools.map(school => (
-              <option key={school._id} value={school._id}>
+          >            <option value="">Okul Seçin</option>            {Array.isArray(schools) && schools.map((school, index) => (
+              <option key={school._id || school.id || index} value={school._id || school.id}>
                 {school.name}
               </option>
             ))}
