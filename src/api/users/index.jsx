@@ -17,6 +17,18 @@ const usersApi = {
     // Backend'de şimdilik işlem yapmadan, sadece frontend'de listeden kaldırılacak
     return Promise.resolve({ success: true });
   },
+  
+  // Okul bilgisini getir
+  getSchoolById: async (schoolId) => {
+    try {
+      const response = await apiClient.get(`/school/${schoolId}`);
+      return response;
+    } catch (error) {
+      console.error('API error in getSchoolById:', error);
+      throw error;
+    }
+  },
+  
   // Kullanıcı profilini getir
   getUserProfile: async () => {
     try {

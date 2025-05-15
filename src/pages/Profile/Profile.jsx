@@ -4,6 +4,8 @@ import { toast } from 'react-toastify';
 import usersApi from '../../api/users';
 import Input from '../../components/ui/Input/Input';
 import Button from '../../components/ui/Button/Button';
+import LoadingSpinner from '../../components/ui/LoadingSpinner';
+import ProfileCard from '../../components/ui/ProfileCard';
 import './Profile.css';
 import { validateProfileForm, validatePasswordForm } from '../../utils/validators';
 
@@ -39,14 +41,26 @@ const Profile = () => {
     fetchUserProfile();
     // eslint-disable-next-line
   }, [currentUser]);
+
   const fetchUserProfile = async () => {
     try {
       setLoading(true);
       const response = await usersApi.getUserProfile();
-      console.log('API Profile Response:', response); // Debug log
       
       // response.data içinde kullanıcı bilgileri var
       const profileData = response.data;
+      
+      // Eğer okul bir ID ise, okul bilgilerini çek
+      if (profileData.school && typeof profileData.school === 'string') {
+        try {
+          const schoolResponse = await usersApi.getSchoolById(profileData.school);
+          if (schoolResponse.data) {
+            profileData.school = schoolResponse.data;
+          }
+        } catch (err) {
+          console.error('Okul bilgisi çekilemedi:', err);
+        }
+      }
       
       setUserData({
         name: profileData.name,
@@ -162,11 +176,28 @@ const Profile = () => {
     return roleNames[role] || role;
   };
 
+  // Okul bilgisini formatlama
+  const getSchoolDisplay = (school) => {
+    if (!school) return 'Okul atanmamış';
+    
+    if (typeof school === 'object' && school !== null) {
+      // Okul bir nesne ve içinde name varsa
+      return school.name || 'Okul bilgisi eksik';
+    }
+    
+    // Okul bir ID ise (string)
+    if (typeof school === 'string') {
+      return school;
+    }
+    
+    return 'Okul bilgisi bulunamadı';
+  };
+
   if (loading) {
     return (
       <div className="profile-container">
         <div className="profile-loading">
-          <div className="spinner"></div>
+          <LoadingSpinner size="medium" />
           <p>Profil bilgileri yükleniyor...</p>
         </div>
       </div>
@@ -196,23 +227,17 @@ const Profile = () => {
       <div className="profile-content">
         {activeTab === 'profile' ? (
           <form onSubmit={handleProfileSubmit} className="profile-form">
-            <div className="profile-info">
-              <div className="info-item">
-                <span className="info-label">Kullanıcı Rolü:</span>
-                <span className="info-value">{getRoleName(userData.role)}</span>
-              </div>              {userData.school && (
-                <div className="info-item">
-                  <span className="info-label">Okul:</span>
-                  <span className="info-value">
-                    {typeof userData.school === 'object' && userData.school !== null 
-                      ? userData.school.name 
-                      : typeof userData.school === 'string' 
-                        ? userData.school 
-                        : 'Okul bilgisi bulunamadı'}
-                  </span>
-                </div>
-              )}
-            </div>
+            <ProfileCard 
+              label="Kullanıcı Rolü" 
+              value={getRoleName(userData.role)} 
+            />
+            
+            {userData.school && (
+              <ProfileCard 
+                label="Okul" 
+                value={getSchoolDisplay(userData.school)} 
+              />
+            )}
 
             <Input
               type="text"
@@ -225,7 +250,7 @@ const Profile = () => {
               error={errors.name}
               required
             />
-              <Input
+            <Input
               type="email"
               label="E-posta"
               id="email"
@@ -251,41 +276,47 @@ const Profile = () => {
           </form>
         ) : (
           <form onSubmit={handlePasswordSubmit} className="profile-form">
-            <Input
-              type="password"
-              label="Mevcut Şifre"
-              id="currentPassword"
-              name="currentPassword"
-              value={passwordData.currentPassword}
-              onChange={handlePasswordChange}
-              placeholder="Mevcut şifrenizi girin"
-              error={errors.currentPassword}
-              required
-            />
+            <div className="password-info">
+              <p className="password-info-text">Şifrenizi değiştirmek için önce mevcut şifrenizi, ardından yeni şifrenizi girmeniz gerekmektedir.</p>
+            </div>
             
-            <Input
-              type="password"
-              label="Yeni Şifre"
-              id="newPassword"
-              name="newPassword"
-              value={passwordData.newPassword}
-              onChange={handlePasswordChange}
-              placeholder="Yeni şifrenizi girin"
-              error={errors.newPassword}
-              required
-            />
-            
-            <Input
-              type="password"
-              label="Yeni Şifre Tekrarı"
-              id="confirmPassword"
-              name="confirmPassword"
-              value={passwordData.confirmPassword}
-              onChange={handlePasswordChange}
-              placeholder="Yeni şifrenizi tekrar girin"
-              error={errors.confirmPassword}
-              required
-            />
+            <div className="password-fields">
+              <Input
+                type="password"
+                label="Mevcut Şifre"
+                id="currentPassword"
+                name="currentPassword"
+                value={passwordData.currentPassword}
+                onChange={handlePasswordChange}
+                placeholder="Mevcut şifrenizi girin"
+                error={errors.currentPassword}
+                required
+              />
+              
+              <Input
+                type="password"
+                label="Yeni Şifre"
+                id="newPassword"
+                name="newPassword"
+                value={passwordData.newPassword}
+                onChange={handlePasswordChange}
+                placeholder="Yeni şifrenizi girin"
+                error={errors.newPassword}
+                required
+              />
+              
+              <Input
+                type="password"
+                label="Yeni Şifre Tekrarı"
+                id="confirmPassword"
+                name="confirmPassword"
+                value={passwordData.confirmPassword}
+                onChange={handlePasswordChange}
+                placeholder="Yeni şifrenizi tekrar girin"
+                error={errors.confirmPassword}
+                required
+              />
+            </div>
             
             <div className="form-actions">
               <Button
