@@ -163,8 +163,12 @@ const OptikOlusturmaContent = () => {
       {error && <div className="error-alert">{error}</div>}
       
       <div className="optik-creator-container">
-        <LeftSidebar />
-        <A4Container />
+       <div className="sidebar-container">
+      <LeftSidebar />
+    </div>
+        <div className="a4-container-wrapper">
+      <A4Container />
+    </div>
       </div>
       
       {/* Görünmez renderer - form görüntüsü oluşturmak için */}

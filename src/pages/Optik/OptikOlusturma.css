@@ -3,13 +3,9 @@
   max-width: 1400px;
   margin: 0 auto;
   padding: 1rem;
-  /* 100vh değil, daha yüksek bir değer kullanıyoruz */
-  min-height: calc(100vh - 60px); /* Footer yüksekliği için alan bırakma */
-  height: auto; /* auto değerine değiştirdik */
+  height: auto; /* Auto height */
   display: flex;
   flex-direction: column;
-  overflow: visible; /* overflow'ı hidden'dan visible'a değiştirdik */
-  padding-bottom: 50px; /* Footer için ek boşluk */
 }
 
 .page-header {
@@ -32,14 +28,27 @@
 
 /* Ana düzen: sol sidebar ve sağ A4 kağıdı */
 .optik-creator-container {
-  display: grid;
-  grid-template-columns: 250px 1fr;
+  display: flex;
   gap: 2rem;
   flex: 1;
-  min-height: 600px; /* Minimum yükseklik belirledik */
-  height: auto; /* auto değerine değiştirdik */
-  overflow: visible;
-  align-items: start; /* overflow'ı visible olarak değiştirdik */
+  position: relative;
+}
+
+.sidebar-container {
+  width: 250px;
+  max-height: 700px; /* Sabit bir yükseklik */
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+.a4-container-wrapper {
+  flex: 1;
+  position: sticky;
+  top: 100px; /* Navbar'dan sonra yerleştir */
+  height: auto;
+  display: flex;
+  justify-content: center;
+  overflow: visible; /* Scroll'u kaldır */
 }
 .a4-wrapper-fixed {
   position: sticky;
