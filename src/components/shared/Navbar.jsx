@@ -6,6 +6,38 @@ import favicon from '../../assets/favicon.jpg';
 import usersApi from '../../api/users';
 import { useAuth } from '../../hooks/useAuth';
 
+// Custom hook for scroll progress
+const useScrollProgress = () => {
+  useEffect(() => {
+    const handleScroll = () => {
+      const docHeight = Math.max(
+        document.body.scrollHeight, 
+        document.body.offsetHeight, 
+        document.documentElement.clientHeight, 
+        document.documentElement.scrollHeight, 
+        document.documentElement.offsetHeight
+      );
+      const windowHeight = window.innerHeight;
+      const scrollTop = window.scrollY;
+      
+      // Calculate the scroll percentage
+      const scrollPercent = (scrollTop / (docHeight - windowHeight)) * 100;
+      
+      // Update the CSS variable for the progress bar
+      document.documentElement.style.setProperty('--scroll', scrollPercent);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    
+    // Initial call to set the correct value
+    handleScroll();
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+};
+
 const Navbar = () => {
   const { isAuthenticated, currentUser, logout } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -13,11 +45,14 @@ const Navbar = () => {
   const [pendingTeachers, setPendingTeachers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [actionInProgress, setActionInProgress] = useState(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   
   const navigate = useNavigate();
   const location = useLocation();
   const dropdownRef = useRef(null);
   const notificationRef = useRef(null);
+  const mobileMenuRef = useRef(null);
   
   const canApproveTeachers = currentUser?.role === 'admin' || currentUser?.role === 'superadmin';
 
@@ -28,6 +63,13 @@ const Navbar = () => {
       }
       if (notificationRef.current && !notificationRef.current.contains(event.target)) {
         setNotificationsOpen(false);
+      }
+      if (
+        mobileMenuRef.current &&
+        !mobileMenuRef.current.contains(event.target) &&
+        !event.target.classList.contains('mobile-menu-toggle')
+      ) {
+        setMobileMenuOpen(false);
       }
     };
 
@@ -42,6 +84,29 @@ const Navbar = () => {
       fetchPendingTeachers();
     }
   }, [isAuthenticated, canApproveTeachers]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY;
+      if (scrollPosition > 20) {
+        setScrolled(true);
+      } else {
+        setScrolled(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+
+    // Initial check
+    handleScroll();
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
+  // Add scroll progress indicator
+  useScrollProgress();
 
   const fetchPendingTeachers = async () => {
     try {
@@ -66,6 +131,10 @@ const Navbar = () => {
   
   const toggleNotifications = () => {
     setNotificationsOpen(!notificationsOpen);
+  };
+
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen(!mobileMenuOpen);
   };
 
   const handleApprove = async (teacherId) => {
@@ -100,6 +169,7 @@ const Navbar = () => {
     const date = new Date(dateString);
     return date.toLocaleDateString('tr-TR');
   };
+  
   const isActive = (path) => {
     if (path === '/') {
       return location.pathname === '/' ? 'active' : '';
@@ -107,37 +177,208 @@ const Navbar = () => {
     return location.pathname === path ? 'active' : '';
   };
   
+  // Function to handle link navigation with scroll to top
+  const handleNavigate = (to, event) => {
+    event.preventDefault();
+    navigate(to);
+    window.scrollTo(0, 0);
+    
+    // Close mobile menu if open
+    if (mobileMenuOpen) {
+      setMobileMenuOpen(false);
+    }
+  };
 
   return (
-    <nav className="navbar" aria-label="Ana navigasyon">
+    <nav className={`navbar ${scrolled ? 'scrolled' : ''}`} aria-label="Ana navigasyon">
       <div className="navbar-container">
         <div className="navbar-logo">
-          <Link to="/" aria-label="Ana sayfaya git">
-            <img src={favicon} alt="Optik Sınav Sistemi Logo" className="navbar-logo-image" />
+          <Link to="/" aria-label="Ana sayfaya git" onClick={(e) => handleNavigate('/', e)}>
+            <img src={favicon || '/placeholder.svg'} alt="Optik Sınav Sistemi Logo" className="navbar-logo-image" />
             <span className="navbar-logo-text">Optik Sınav Sistemi</span>
           </Link>
+          
+          <button
+            className="mobile-menu-toggle"
+            onClick={toggleMobileMenu}
+            aria-label={mobileMenuOpen ? 'Menüyü kapat' : 'Menüyü aç'}
+            aria-expanded={mobileMenuOpen}
+          >
+            <span className={`hamburger-icon ${mobileMenuOpen ? 'open' : ''}`}>
+              <span></span>
+              <span></span>
+              <span></span>
+            </span>
+          </button>
         </div>
-        <div className="navbar-menu">
+        
+        <div className={`navbar-menu ${mobileMenuOpen ? 'mobile-open' : ''}`} ref={mobileMenuRef}>
           {isAuthenticated ? (
             <>
-              <Link to="/optik-olustur" className={`navbar-item ${isActive('/optik-olustur')}`}>Optik Oluştur</Link>
-              <Link to="/optik-formlarim" className={`navbar-item ${isActive('/optik-formlarim')}`}>Optik Formlarım</Link>
-              {canApproveTeachers && (
-                <Link to="/approved-teachers" className={`navbar-item ${isActive('/approved-teachers')}`}>Onaylı Öğretmenler</Link>
-              )}
-              
-              {canApproveTeachers && (
-                <div className="navbar-item notification-container" ref={notificationRef}>
-                  <button 
-                    onClick={toggleNotifications} 
-                    className="notification-trigger"
-                    aria-label="Bildirimler"
-                    aria-haspopup="true"
-                    aria-expanded={notificationsOpen}
+              <div className="navbar-links">
+                <Link 
+                  to="/optik-olustur" 
+                  className={`navbar-item ${isActive('/optik-olustur')}`}
+                  onClick={(e) => handleNavigate('/optik-olustur', e)}
+                >
+                  <span className="navbar-item-text">Optik Oluştur</span>
+                </Link>
+                <Link 
+                  to="/optik-formlarim" 
+                  className={`navbar-item ${isActive('/optik-formlarim')}`}
+                  onClick={(e) => handleNavigate('/optik-formlarim', e)}
+                >
+                  <span className="navbar-item-text">Optik Formlarım</span>
+                </Link>
+                {canApproveTeachers && (
+                  <Link 
+                    to="/approved-teachers" 
+                    className={`navbar-item ${isActive('/approved-teachers')}`}
+                    onClick={(e) => handleNavigate('/approved-teachers', e)}
                   >
+                    <span className="navbar-item-text">Onaylı Öğretmenler</span>
+                  </Link>
+                )}
+              </div>
+              
+              <div className="navbar-actions">
+                {canApproveTeachers && (
+                  <div className="navbar-item notification-container" ref={notificationRef}>
+                    <button 
+                      onClick={toggleNotifications} 
+                      className="notification-trigger"
+                      aria-label="Bildirimler"
+                      aria-haspopup="true"
+                      aria-expanded={notificationsOpen}
+                    >
+                      <svg 
+                        xmlns="http://www.w3.org/2000/svg" 
+                        className="notification-bell-icon" 
+                        width="20" 
+                        height="20" 
+                        viewBox="0 0 24 24" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        strokeWidth="2" 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round"
+                      >
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                      </svg>
+                      {pendingTeachers.length > 0 && (
+                        <span className="notification-badge">{pendingTeachers.length}</span>
+                      )}
+                    </button>
+                    
+                    {notificationsOpen && (
+                      <div className="notification-dropdown">
+                        <div className="notification-header">
+                          <h3>Onay Bekleyen Öğretmenler</h3>
+                          <button 
+                            className="refresh-button" 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              fetchPendingTeachers();
+                            }}
+                            aria-label="Bildirimleri yenile"
+                          >
+                            <svg 
+                              xmlns="http://www.w3.org/2000/svg" 
+                              width="16" 
+                              height="16" 
+                              viewBox="0 0 24 24" 
+                              fill="none" 
+                              stroke="currentColor" 
+                              strokeWidth="2" 
+                              strokeLinecap="round" 
+                              strokeLinejoin="round"
+                            >
+                              <path d="M23 4v6h-6"></path>
+                              <path d="M1 20v-6h6"></path>
+                              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                            </svg>
+                          </button>
+                        </div>
+                        
+                        {loading ? (
+                          <div className="notification-loading">
+                            <div className="loading-spinner-small"></div>
+                            <p>Yükleniyor...</p>
+                          </div>
+                        ) : pendingTeachers.length === 0 ? (
+                          <div className="notification-empty">
+                            <p>Onay bekleyen öğretmen bulunmuyor.</p>
+                          </div>
+                        ) : (
+                          <>
+                            <div className="notification-list">
+                              {pendingTeachers.map(teacher => (
+                                <div key={teacher._id} className="notification-item">
+                                  <div className="notification-item-content">
+                                    <p className="notification-title">{teacher.name}</p>
+                                    <p className="notification-date">{formatDate(teacher.createdAt)}</p>
+                                  </div>
+                                  <div className="notification-item-actions">
+                                    <button 
+                                      className="approve-button" 
+                                      onClick={() => handleApprove(teacher._id)}
+                                      disabled={actionInProgress === teacher._id}
+                                    >
+                                      Onayla
+                                    </button>
+                                    <button 
+                                      className="reject-button" 
+                                      onClick={() => handleReject(teacher._id)}
+                                      disabled={actionInProgress === teacher._id}
+                                    >
+                                      Reddet
+                                    </button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                            <div className="notification-footer">
+                              <Link 
+                                to="/teacher-approvals" 
+                                className="view-all-link" 
+                                onClick={(e) => {
+                                  setNotificationsOpen(false);
+                                  handleNavigate('/teacher-approvals', e);
+                                }}
+                              >
+                                Tümünü Görüntüle
+                              </Link>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                <div className="navbar-item user-dropdown" ref={dropdownRef}>
+                  <span 
+                    onClick={toggleDropdown} 
+                    className="dropdown-trigger" 
+                    tabIndex="0"
+                    onKeyDown={(e) => e.key === 'Enter' && toggleDropdown()}
+                    aria-haspopup="true"
+                    aria-expanded={dropdownOpen}
+                  >
+                    <div className="user-info">
+                      <span className="user-name">{currentUser?.name || 'Kullanıcı'}</span>
+                      {currentUser?.role && (
+                        <span className="user-role">
+                          {currentUser.role === 'superadmin' ? 'Süper Admin' : 
+                           currentUser.role === 'admin' ? 'Okul Yöneticisi' : 'Öğretmen'}
+                        </span>
+                      )}
+                    </div>
+                    
                     <svg 
                       xmlns="http://www.w3.org/2000/svg" 
-                      className="notification-bell-icon" 
+                      className="user-avatar-icon" 
                       width="20" 
                       height="20" 
                       viewBox="0 0 24 24" 
@@ -147,141 +388,109 @@ const Navbar = () => {
                       strokeLinecap="round" 
                       strokeLinejoin="round"
                     >
-                      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-                      <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                      <circle cx="12" cy="7" r="4"></circle>
                     </svg>
-                    {pendingTeachers.length > 0 && (
-                      <span className="notification-badge">{pendingTeachers.length}</span>
-                    )}
-                  </button>
-                  
-                  {notificationsOpen && (
-                    <div className="notification-dropdown">
-                      <div className="notification-header">
-                        <h3>Onay Bekleyen Öğretmenler</h3>
-                        <button 
-                          className="refresh-button" 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            fetchPendingTeachers();
-                          }}
-                          aria-label="Bildirimleri yenile"
+                  </span>
+                  {dropdownOpen && (
+                    <div className="dropdown-content" role="menu">
+                      <Link 
+                        to="/profile" 
+                        role="menuitem" 
+                        tabIndex="0"
+                        onClick={(e) => handleNavigate('/profile', e)}
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="dropdown-icon"
                         >
-                          <svg 
-                            xmlns="http://www.w3.org/2000/svg" 
-                            width="16" 
-                            height="16" 
-                            viewBox="0 0 24 24" 
-                            fill="none" 
-                            stroke="currentColor" 
-                            strokeWidth="2" 
-                            strokeLinecap="round" 
-                            strokeLinejoin="round"
-                          >
-                            <path d="M23 4v6h-6"></path>
-                            <path d="M1 20v-6h6"></path>
-                            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
-                          </svg>
-                        </button>
-                      </div>
-                      
-                      {loading ? (
-                        <div className="notification-loading">
-                          <div className="loading-spinner-small"></div>
-                          <p>Yükleniyor...</p>
-                        </div>
-                      ) : pendingTeachers.length === 0 ? (
-                        <div className="notification-empty">
-                          <p>Onay bekleyen öğretmen bulunmuyor.</p>
-                        </div>
-                      ) : (
-                        <>
-                          <div className="notification-list">
-                            {pendingTeachers.map(teacher => (
-                              <div key={teacher._id} className="notification-item">
-                                <div className="notification-item-content">
-                                  <p className="notification-title">{teacher.name}</p>
-                                  <p className="notification-date">{formatDate(teacher.createdAt)}</p>
-                                </div>
-                                <div className="notification-item-actions">
-                                  <button 
-                                    className="approve-button" 
-                                    onClick={() => handleApprove(teacher._id)}
-                                    disabled={actionInProgress === teacher._id}
-                                  >
-                                    Onayla
-                                  </button>
-                                  <button 
-                                    className="reject-button" 
-                                    onClick={() => handleReject(teacher._id)}
-                                    disabled={actionInProgress === teacher._id}
-                                  >
-                                    Reddet
-                                  </button>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                          <div className="notification-footer">
-                            <Link to="/teacher-approvals" className="view-all-link" onClick={() => setNotificationsOpen(false)}>
-                              Tümünü Görüntüle
-                            </Link>
-                          </div>
-                        </>
-                      )}
+                          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                          <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                        Profil
+                      </Link>
+                      <button onClick={handleLogout} role="menuitem" tabIndex="0">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="dropdown-icon"
+                        >
+                          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                          <polyline points="16 17 21 12 16 7"></polyline>
+                          <line x1="21" y1="12" x2="9" y2="12"></line>
+                        </svg>
+                        Çıkış Yap
+                      </button>
                     </div>
                   )}
                 </div>
-              )}
-              
-              <div className="navbar-item user-dropdown" ref={dropdownRef}>
-                <span 
-                  onClick={toggleDropdown} 
-                  className="dropdown-trigger" 
-                  tabIndex="0"
-                  onKeyDown={(e) => e.key === 'Enter' && toggleDropdown()}
-                  aria-haspopup="true"
-                  aria-expanded={dropdownOpen}
-                >
-                  <div className="user-info">
-                    {currentUser?.name || 'Kullanıcı'} 
-                    {currentUser?.role && (
-                      <span className="user-role">
-                        ({currentUser.role === 'superadmin' ? 'Süper Admin' : 
-                           currentUser.role === 'admin' ? 'Okul Yöneticisi' : 'Öğretmen'})
-                      </span>
-                    )}
-                  </div>
-                  
-                  <svg 
-                    xmlns="http://www.w3.org/2000/svg" 
-                    className="user-avatar-icon" 
-                    width="20" 
-                    height="20" 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    strokeWidth="2" 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round"
-                  >
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="12" cy="7" r="4"></circle>
-                  </svg>
-                </span>
-                {dropdownOpen && (
-                  <div className="dropdown-content" role="menu">
-                    <Link to="/profile" role="menuitem" tabIndex="0">Profil</Link>
-                    <button onClick={handleLogout} role="menuitem" tabIndex="0">Çıkış Yap</button>
-                  </div>
-                )}
               </div>
             </>
           ) : (
-            <>
-              <Link to="/login" className={`navbar-item ${isActive('/login')}`}>Giriş Yap</Link>
-              <Link to="/register" className={`navbar-item ${isActive('/register')}`}>Kayıt Ol</Link>
-            </>
+            <div className="navbar-auth">
+              <Link 
+                to="/login" 
+                className={`auth-button login-button ${isActive('/login')}`}
+                onClick={(e) => handleNavigate('/login', e)}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="auth-icon"
+                >
+                  <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                  <polyline points="10 17 15 12 10 7"></polyline>
+                  <line x1="15" y1="12" x2="3" y2="12"></line>
+                </svg>
+                Giriş Yap
+              </Link>
+              <Link 
+                to="/register" 
+                className={`auth-button register-button ${isActive('/register')}`}
+                onClick={(e) => handleNavigate('/register', e)}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="auth-icon"
+                >
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="8.5" cy="7" r="4"></circle>
+                  <line x1="20" y1="8" x2="20" y2="14"></line>
+                  <line x1="23" y1="11" x2="17" y2="11"></line>
+                </svg>
+                Kayıt Ol
+              </Link>
+            </div>
           )}
         </div>
       </div>
