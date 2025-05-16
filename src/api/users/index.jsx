@@ -13,9 +13,9 @@ const usersApi = {
   },
   
   // Öğretmen reddetme (sadece UI'dan kaldırma - backend'de değişiklik yok)
-  rejectTeacherLocally: () => {
+  rejectTeacherLocally: async (teacherId) => {
     // Backend'de şimdilik işlem yapmadan, sadece frontend'de listeden kaldırılacak
-    return Promise.resolve({ success: true });
+    return Promise.resolve({ success: true, teacherId });
   },
   
   // Okul bilgisini getir
@@ -54,6 +54,11 @@ const usersApi = {
   // Şifre değiştir
   changePassword: async (passwordData) => {
     return apiClient.put('/user/change-password', passwordData);
+  },
+
+  // Okul müdürünün okulundaki onaylanmış öğretmenleri getir
+  getApprovedTeachersBySchool: async () => {
+    return apiClient.get('/user/getApprovedTeachersBySchool');
   }
 };
 

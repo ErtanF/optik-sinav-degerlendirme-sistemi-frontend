@@ -16,7 +16,7 @@ import TeacherApprovalsPage from '../pages/TeacherApprovalsPage';
 import Profile from '../pages/Profile/Profile';
 import Faq from '../pages/Faq';
 import Contact from '../pages/Contact';
-
+import ApprovedTeachersPage from '../pages/ApprovedTeachersPage';
 
 // PrivateRoute bileşeni
 const PrivateRoute = ({ children }) => {
@@ -66,7 +66,12 @@ const routes = () => [
       {
         path: 'teacher-approvals',
         element: <PrivateRoute><TeacherApprovalsPage /></PrivateRoute>
-      },      {
+      },
+      {
+        path: 'approved-teachers',
+        element: <PrivateRoute><ApprovedTeachersPage /></PrivateRoute>
+      },
+      {
         path: 'profile',
         element: <PrivateRoute><Profile /></PrivateRoute>
       },

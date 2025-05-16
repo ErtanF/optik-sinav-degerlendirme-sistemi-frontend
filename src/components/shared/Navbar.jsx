@@ -122,6 +122,9 @@ const Navbar = () => {
             <>
               <Link to="/optik-olustur" className={`navbar-item ${isActive('/optik-olustur')}`}>Optik Oluştur</Link>
               <Link to="/optik-formlarim" className={`navbar-item ${isActive('/optik-formlarim')}`}>Optik Formlarım</Link>
+              {canApproveTeachers && (
+                <Link to="/approved-teachers" className={`navbar-item ${isActive('/approved-teachers')}`}>Onaylı Öğretmenler</Link>
+              )}
               
               {canApproveTeachers && (
                 <div className="navbar-item notification-container" ref={notificationRef}>
