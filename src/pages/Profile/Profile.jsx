@@ -128,11 +128,45 @@ const Profile = () => {
     if (Object.keys(formErrors).length === 0) {
       try {
         setSaving(true);
-        // userData içerisinde email alanı da bulunduğu için ayrıca eklemeye gerek yok
-        const updated = await usersApi.updateUserProfile(userData);
+        // userData might contain school as an object. API likely expects ID or handles it.
+        // The response from updateUserProfile is assumed to have school as an ID.
+        const updatedResponse = await usersApi.updateUserProfile(userData);
+        let profileDataAfterUpdate = updatedResponse.data;
+
+        // If school is an ID in the response, fetch the full school object
+        if (profileDataAfterUpdate.school && typeof profileDataAfterUpdate.school === 'string') {
+          const schoolIdToFetch = profileDataAfterUpdate.school;
+          try {
+            const schoolApiResponse = await usersApi.getSchoolById(schoolIdToFetch);
+            // Ensure schoolApiResponse.data is a valid school object with a name
+            if (schoolApiResponse.data && typeof schoolApiResponse.data === 'object' && schoolApiResponse.data.name) {
+              profileDataAfterUpdate.school = schoolApiResponse.data; // Replace ID with school object
+            } else {
+              // If lookup returns invalid data or no name, school remains an ID.
+              console.warn(`Could not fully resolve school details for ID: ${schoolIdToFetch} after profile update. Displaying ID.`);
+              // profileDataAfterUpdate.school remains the ID string in this case.
+            }
+          } catch (fetchSchoolError) {
+            console.error(`Error fetching school details for ID ${schoolIdToFetch} after profile update:`, fetchSchoolError);
+            const errorDetail = fetchSchoolError.response?.data?.message || fetchSchoolError.message || 'Bilinmeyen bir hata oluştu.';
+            toast.error(`Okul detayları alınamadı: ${errorDetail}`);
+            // School remains an ID in profileDataAfterUpdate.school on error.
+          }
+        }
+
         toast.success('Profil bilgileriniz başarıyla güncellendi.');
-        // Sadece güncellenen kullanıcıyı context ve localStorage'a yaz
-        login(updated.data, localStorage.getItem('token'));
+        // login is called with profileDataAfterUpdate, where school is now an object (if fetch succeeded) or an ID (if fetch failed).
+        login(profileDataAfterUpdate, localStorage.getItem('token'));
+        
+        // The useEffect hook that depends on [currentUser] will update the local userData state.
+        // Optionally, to make the local state update more immediate:
+        // setUserData(prev => ({
+        //   ...prev,
+        //   name: profileDataAfterUpdate.name,
+        //   email: profileDataAfterUpdate.email,
+        //   role: profileDataAfterUpdate.role,
+        //   school: profileDataAfterUpdate.school,
+        // }));
       } catch (error) {
         showApiError(error, 'Profil güncellenirken bir hata oluştu.');
       } finally {
