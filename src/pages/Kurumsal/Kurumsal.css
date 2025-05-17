@@ -1,0 +1,515 @@
+.kurumsal-page-container {
+  max-width: 1000px;
+  margin: 2rem auto 4rem;
+  padding: 0 1.5rem;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.kurumsal-header {
+  margin-bottom: 2.5rem;
+  text-align: center;
+}
+
+.kurumsal-header h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--primary-color, #0a375a);
+  margin-bottom: 1rem;
+}
+
+.kurumsal-divider {
+  height: 4px;
+  width: 80px;
+  background: linear-gradient(to right, var(--primary-color, #0a375a), var(--accent-color, #2ecc71));
+  margin: 0 auto;
+  border-radius: 2px;
+}
+
+.kurumsal-content {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--text-color, #333);
+}
+
+.kurumsal-section {
+  margin-bottom: 3rem;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.kurumsal-section h2 {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--primary-color, #0a375a);
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.kurumsal-section h3 {
+  font-size: 1.4rem;
+  font-weight: 500;
+  color: var(--secondary-color, #2c3e50);
+  margin-bottom: 1rem;
+}
+
+.kurumsal-section p {
+  margin-bottom: 1.25rem;
+}
+
+.kurumsal-section ul,
+.kurumsal-section ol {
+  margin-bottom: 1.5rem;
+  padding-left: 1.5rem;
+}
+
+.kurumsal-section li {
+  margin-bottom: 0.75rem;
+}
+
+.kurumsal-section a {
+  color: var(--accent-color, #2ecc71);
+  text-decoration: none;
+  transition: color 0.2s ease;
+  position: relative;
+  font-weight: 500;
+}
+
+.kurumsal-section a:hover {
+  color: var(--accent-color-dark, #27ae60);
+}
+
+.kurumsal-section a::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 1px;
+  bottom: -2px;
+  left: 0;
+  background-color: var(--accent-color, #2ecc71);
+  opacity: 0.6;
+  transform: scaleX(0);
+  transform-origin: bottom right;
+  transition: transform 0.3s ease;
+}
+
+.kurumsal-section a:hover::after {
+  transform: scaleX(1);
+  transform-origin: bottom left;
+}
+
+.last-updated {
+  font-size: 0.9rem;
+  color: #6c757d;
+  font-style: italic;
+  margin-bottom: 1.5rem;
+}
+
+.policy-intro {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  margin-bottom: 2rem;
+}
+
+.policy-subsection {
+  margin-bottom: 2rem;
+  padding-left: 1rem;
+  border-left: 3px solid rgba(var(--primary-color-rgb, 10, 55, 90), 0.1);
+}
+
+.contact-details {
+  background-color: rgba(var(--primary-color-rgb, 10, 55, 90), 0.05);
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-top: 1.5rem;
+}
+
+.contact-details p {
+  margin-bottom: 0.5rem;
+}
+
+.contact-email {
+  margin-left: 0.5rem;
+}
+
+/* Team section styles */
+.team-members {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  margin-top: 1.5rem;
+}
+
+/* Career page styles */
+.benefits-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.benefit-item {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.benefit-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+}
+
+.benefit-icon {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.benefit-item h3 {
+  font-size: 1.2rem;
+  margin-bottom: 0.75rem;
+}
+
+.benefit-item p {
+  font-size: 0.9rem;
+  color: #495057;
+  margin: 0;
+}
+
+/* Job listings */
+.job-listings {
+  margin-top: 2rem;
+}
+
+.job-listing {
+  margin-bottom: 1.25rem;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.job-header {
+  padding: 1.25rem 1.5rem;
+  background-color: white;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.job-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: var(--primary-color, #0a375a);
+}
+
+.job-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.job-meta span {
+  font-size: 0.85rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-weight: 500;
+}
+
+.job-department {
+  background-color: rgba(var(--primary-color-rgb, 10, 55, 90), 0.1);
+  color: var(--primary-color, #0a375a);
+}
+
+.job-location {
+  background-color: rgba(var(--accent-color-rgb, 46, 204, 113), 0.1);
+  color: var(--accent-color-dark, #27ae60);
+}
+
+.job-type {
+  background-color: rgba(var(--secondary-color-rgb, 44, 62, 80), 0.1);
+  color: var(--secondary-color, #2c3e50);
+}
+
+.job-toggle {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--primary-color, #0a375a);
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+}
+
+.job-toggle:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.job-details {
+  padding: 0 1.5rem 1.5rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.job-details h4 {
+  font-size: 1.1rem;
+  margin: 1.5rem 0 0.75rem;
+  color: var(--secondary-color, #2c3e50);
+}
+
+.job-details p {
+  margin-bottom: 1.5rem;
+}
+
+.job-details ul {
+  margin-bottom: 1.5rem;
+}
+
+.apply-button {
+  background-color: var(--accent-color, #2ecc71);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.apply-button:hover {
+  background-color: var(--accent-color-dark, #27ae60);
+}
+
+/* Values list */
+.kurumsal-values-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.kurumsal-values-list li {
+  margin-bottom: 1.5rem;
+  padding: 1.25rem;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+}
+
+.value-title {
+  display: block;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--primary-color, #0a375a);
+  margin-bottom: 0.5rem;
+}
+
+.value-desc {
+  color: #495057;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .kurumsal-header h1 {
+    font-size: 2rem;
+  }
+  
+  .kurumsal-section h2 {
+    font-size: 1.6rem;
+  }
+  
+  .kurumsal-section h3 {
+    font-size: 1.3rem;
+  }
+  
+  .benefits-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .kurumsal-header h1 {
+    font-size: 1.75rem;
+  }
+  
+  .job-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .job-meta {
+    margin-top: 0.5rem;
+  }
+}
+
+/* Dark mode styles */
+@media (prefers-color-scheme: dark) {
+  .kurumsal-section {
+    color: rgba(255, 255, 255, 0.87);
+  }
+  
+  .kurumsal-header h1 {
+    color: rgba(255, 255, 255, 0.95);
+  }
+  
+  .kurumsal-section h2 {
+    color: rgba(255, 255, 255, 0.9);
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .kurumsal-section h3 {
+    color: rgba(255, 255, 255, 0.85);
+  }
+  
+  .policy-subsection {
+    border-left-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .benefit-item,
+  .job-header,
+  .kurumsal-values-list li {
+    background-color: rgba(255, 255, 255, 0.03);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  .job-listing {
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .job-department {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.9);
+  }
+  
+  .job-location {
+    background-color: rgba(46, 204, 113, 0.15);
+    color: rgba(46, 204, 113, 0.9);
+  }
+  
+  .job-type {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.85);
+  }
+  
+  .job-toggle {
+    color: rgba(255, 255, 255, 0.85);
+  }
+  
+  .job-toggle:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+  
+  .contact-details {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+  
+  .benefit-item p,
+  .value-desc {
+    color: rgba(255, 255, 255, 0.7);
+  }
+}
+
+/* Modern fade-in animation for page loading */
+.page-loaded {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Modern section animations */
+.section-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Modern list item styling for values */
+.value-item {
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.value-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(to bottom, var(--primary-color, #0a375a), var(--accent-color, #2ecc71));
+}
+
+.value-item:hover {
+  transform: scale(1.02);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+/* Modern accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  .kurumsal-page-container,
+  .kurumsal-section,
+  .value-item {
+    transition: none;
+    transform: none;
+    animation: none;
+  }
+  
+  .value-item:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+/* Modern responsive improvements */
+@media (min-width: 992px) {
+  .kurumsal-values-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+@media (min-width: 1200px) {
+  .kurumsal-values-list {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Modern container width adjustments */
+@media (min-width: 1440px) {
+  .kurumsal-page-container {
+    max-width: 1200px;
+  }
+}
+
+/* Modern focus styles for improved accessibility */
+.kurumsal-section a:focus-visible {
+  outline: 3px solid var(--accent-color, #2ecc71);
+  outline-offset: 3px;
+}
+
+/* Modern utility classes */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+} 

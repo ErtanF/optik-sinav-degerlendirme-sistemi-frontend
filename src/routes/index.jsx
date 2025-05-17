@@ -19,6 +19,8 @@ import Contact from '../pages/Contact';
 import ApprovedTeachersPage from '../pages/ApprovedTeachersPage';
 import { StudentsList, StudentForm, ExcelImport } from '../pages/Students';
 import { ClassesList, ClassForm, ClassExcelImport, ClassDetail, AddStudentsToClass } from '../pages/Classes';
+// Kurumsal sayfalar
+import { Hakkimizda, Kariyer, GizlilikPolitikasi, KullanimSartlari } from '../pages/Kurumsal';
 
 // PrivateRoute bileşeni
 const PrivateRoute = ({ children }) => {
@@ -102,6 +104,23 @@ const routes = () => [
       {
         path: 'classes/add-students/:id',
         element: <PrivateRoute><AddStudentsToClass /></PrivateRoute>
+      },
+      // Kurumsal Sayfalar
+      {
+        path: 'hakkimizda',
+        element: <Hakkimizda />
+      },
+      {
+        path: 'kariyer',
+        element: <Kariyer />
+      },
+      {
+        path: 'gizlilik',
+        element: <GizlilikPolitikasi />
+      },
+      {
+        path: 'kullanim-sartlari',
+        element: <KullanimSartlari />
       },
       {
         path: '*',
