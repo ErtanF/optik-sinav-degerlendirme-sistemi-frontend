@@ -9,6 +9,7 @@
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   backdrop-filter: blur(10px);
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: padding, background, box-shadow;
 }
 
 /* Add styles for the scrolled state */
@@ -645,6 +646,8 @@
   background: linear-gradient(to right, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.3));
   transition: width 0.2s ease;
   z-index: 1001;
+  transform: translateZ(0);
+  will-change: width;
 }
 
 .navbar.scrolled::after {

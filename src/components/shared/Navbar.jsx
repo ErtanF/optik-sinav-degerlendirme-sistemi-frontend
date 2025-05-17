@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import './Navbar.css';
 import './NotificationBadge.css';
@@ -6,10 +6,23 @@ import favicon from '../../assets/favicon.jpg';
 import usersApi from '../../api/users';
 import { useAuth } from '../../hooks/useAuth';
 
+// Throttle function to limit how often a function can be called
+const throttle = (func, delay) => {
+  let lastCall = 0;
+  return (...args) => {
+    const now = new Date().getTime();
+    if (now - lastCall < delay) {
+      return;
+    }
+    lastCall = now;
+    return func(...args);
+  };
+};
+
 // Custom hook for scroll progress
 const useScrollProgress = () => {
   useEffect(() => {
-    const handleScroll = () => {
+    const calculateScrollPercent = () => {
       const docHeight = Math.max(
         document.body.scrollHeight, 
         document.body.offsetHeight, 
@@ -27,10 +40,13 @@ const useScrollProgress = () => {
       document.documentElement.style.setProperty('--scroll', scrollPercent);
     };
 
+    // Throttle the scroll handler
+    const handleScroll = throttle(calculateScrollPercent, 10);
+
     window.addEventListener('scroll', handleScroll);
     
     // Initial call to set the correct value
-    handleScroll();
+    calculateScrollPercent();
     
     return () => {
       window.removeEventListener('scroll', handleScroll);
@@ -85,25 +101,29 @@ const Navbar = () => {
     }
   }, [isAuthenticated, canApproveTeachers]);
 
+  // Memoize the scroll handler with useCallback to prevent recreation
+  const handleScrollChange = useCallback(() => {
+    const scrollPosition = window.scrollY;
+    setScrolled(scrollPosition > 20);
+  }, []);
+
   useEffect(() => {
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY;
-      if (scrollPosition > 20) {
-        setScrolled(true);
-      } else {
-        setScrolled(false);
-      }
-    };
+    // Throttle the scroll handler to improve performance
+    const throttledHandleScroll = throttle(handleScrollChange, 50);
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', throttledHandleScroll, { passive: true });
 
-    // Initial check
-    handleScroll();
+    // Initial check - important for pages that load already scrolled
+    handleScrollChange();
+
+    // Check scroll position after images and content load
+    window.addEventListener('load', handleScrollChange);
 
     return () => {
-      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('scroll', throttledHandleScroll);
+      window.removeEventListener('load', handleScrollChange);
     };
-  }, []);
+  }, [handleScrollChange]);
 
   // Add scroll progress indicator
   useScrollProgress();
@@ -229,6 +249,20 @@ const Navbar = () => {
                   onClick={(e) => handleNavigate('/optik-formlarim', e)}
                 >
                   <span className="navbar-item-text">Optik Formlarım</span>
+                </Link>
+                <Link 
+                  to="/students" 
+                  className={`navbar-item ${isActive('/students')}`}
+                  onClick={(e) => handleNavigate('/students', e)}
+                >
+                  <span className="navbar-item-text">Öğrenci Yönetimi</span>
+                </Link>
+                <Link 
+                  to="/classes" 
+                  className={`navbar-item ${isActive('/classes')}`}
+                  onClick={(e) => handleNavigate('/classes', e)}
+                >
+                  <span className="navbar-item-text">Sınıf Yönetimi</span>
                 </Link>
                 {canApproveTeachers && (
                   <Link 

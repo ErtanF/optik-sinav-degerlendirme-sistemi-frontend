@@ -17,6 +17,8 @@ import Profile from '../pages/Profile/Profile';
 import Faq from '../pages/Faq';
 import Contact from '../pages/Contact';
 import ApprovedTeachersPage from '../pages/ApprovedTeachersPage';
+import { StudentsList, StudentForm, ExcelImport } from '../pages/Students';
+import { ClassesList, ClassForm, ClassExcelImport, ClassDetail, AddStudentsToClass } from '../pages/Classes';
 
 // PrivateRoute bileşeni
 const PrivateRoute = ({ children }) => {
@@ -58,6 +60,48 @@ const routes = () => [
       {
         path: 'optik/:id',
         element: <PrivateRoute><OptikDetay /></PrivateRoute>
+      },
+      // Öğrenci Yönetimi Sayfaları
+      {
+        path: 'students',
+        element: <PrivateRoute><StudentsList /></PrivateRoute>
+      },
+      {
+        path: 'students/new',
+        element: <PrivateRoute><StudentForm /></PrivateRoute>
+      },
+      {
+        path: 'students/edit/:id',
+        element: <PrivateRoute><StudentForm /></PrivateRoute>
+      },
+      {
+        path: 'students/import',
+        element: <PrivateRoute><ExcelImport /></PrivateRoute>
+      },
+      // Sınıf Yönetimi Sayfaları
+      {
+        path: 'classes',
+        element: <PrivateRoute><ClassesList /></PrivateRoute>
+      },
+      {
+        path: 'classes/new',
+        element: <PrivateRoute><ClassForm /></PrivateRoute>
+      },
+      {
+        path: 'classes/edit/:id',
+        element: <PrivateRoute><ClassForm /></PrivateRoute>
+      },
+      {
+        path: 'classes/import',
+        element: <PrivateRoute><ClassExcelImport /></PrivateRoute>
+      },
+      {
+        path: 'classes/detail/:id',
+        element: <PrivateRoute><ClassDetail /></PrivateRoute>
+      },
+      {
+        path: 'classes/add-students/:id',
+        element: <PrivateRoute><AddStudentsToClass /></PrivateRoute>
       },
       {
         path: '*',

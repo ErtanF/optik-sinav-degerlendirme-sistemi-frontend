@@ -31,6 +31,8 @@ const Footer = () => {
                 <Link to="/" onClick={(e) => handleLinkClick('/', e)}>Ana Sayfa</Link>
                 <Link to="/optik-olustur" onClick={(e) => handleLinkClick('/optik-olustur', e)}>Optik Oluştur</Link>
                 <Link to="/optik-formlarim" onClick={(e) => handleLinkClick('/optik-formlarim', e)}>Optik Formlarım</Link>
+                <Link to="/students" onClick={(e) => handleLinkClick('/students', e)}>Öğrenci Yönetimi</Link>
+                <Link to="/classes" onClick={(e) => handleLinkClick('/classes', e)}>Sınıf Yönetimi</Link>
               </nav>
             </div>
             <div className="footer-links-column">
