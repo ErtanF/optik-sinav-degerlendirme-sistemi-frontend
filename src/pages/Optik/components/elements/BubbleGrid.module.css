@@ -11,6 +11,18 @@
 .bubble.empty .bubbleLabel {
   display: none !important;
 }
+.oddColumn {
+  background-color: rgba(128, 0, 128, 0.1); /* Şeffaf mor renk */
+}
+.digitColumn.oddColumn,
+.bubbleColumn.oddColumn {
+  background-color: rgba(128, 0, 128, 0.1);
+}
+
+/* Çoktan seçmeli için kolon stillerini güncelleme */
+.choiceContainer.oddColumn {
+  background-color: rgba(128, 0, 128, 0.1);
+}
 
 /* Veri niteliği kullanarak erişim için */
 .bubble[data-empty="true"] .bubbleLabel {

@@ -119,30 +119,49 @@ const ElementPropertiesPanel = () => {
       'phoneNumber': 'Telefon No Özellikleri',
       'multipleChoice': 'Çoktan Seçmeli Test Özellikleri',
       'textArea': 'Yazı Alanı Özellikleri',
-      'image': 'Resim Özellikleri'
+      'image': 'Resim Özellikleri',
+      'classNumber': 'Sınıf Alanı Özellikleri',
+      'classBranch': 'Şube Alanı Özellikleri'
     };
     return titles[activeElement.type] || 'Eleman Özellikleri';
   };
   
   // İşlev yöneticileri
   const handleRowsChange = (increment) => {
-    if (activeElement.type !== 'multipleChoice') return;
+    if (activeElement.type !== 'multipleChoice' && activeElement.type !== 'classBranch') return;
     
-    const newRows = Math.max(1, properties.rows + increment);
+    // Eleman tipine göre farklı minimum, maksimum ve hesaplama
+    let newRows, maxRows, minRows, heightCalculation;
+    
+    if (activeElement.type === 'multipleChoice') {
+      minRows = 1;
+      maxRows = 40; // Çoktan seçmeli için makul bir üst sınır
+      newRows = Math.max(minRows, Math.min(maxRows, properties.rows + increment));
+      // Çoktan seçmeli: başlık + satır başına yükseklik
+      heightCalculation = newRows * 20 + 30; 
+    } else if (activeElement.type === 'classBranch') {
+      minRows = 3; // Minimum 3 şube (A, B, C)
+      maxRows = 26; // Maksimum 26 şube (A-Z)
+      newRows = Math.max(minRows, Math.min(maxRows, properties.rows + increment));
+      // Şube: başlık + yazı alanı + harf sayısı * yükseklik
+      heightCalculation = 30 + 30 + (newRows * 20);
+    } else {
+      return; // Diğer eleman tipleri için işlem yok
+    }
+    
     setProperties(prev => ({ ...prev, rows: newRows }));
     
     updateElement(activeElementId, {
       rows: newRows,
       size: {
         ...activeElement.size,
-        height: newRows * 20 + 30 // 30px başlık + satır başına 20px
+        height: heightCalculation
       }
     });
   };
   
   const handleColsChange = (increment) => {
-    if (activeElement.type === 'tcNumber' || activeElement.type === 'phoneNumber' || activeElement.type === 'classNumber' || 
-      activeElement.type === 'classBranch') return;
+    if (activeElement.type === 'tcNumber' || activeElement.type === 'phoneNumber') return;
     
     let newCols = properties.cols + increment;
     let maxCols = 26;
@@ -169,7 +188,8 @@ const ElementPropertiesPanel = () => {
         }
       });
     }
-    else if (activeElement.type === 'nameSurname' || activeElement.type === 'number') {
+    else if (activeElement.type === 'nameSurname' || activeElement.type === 'number' || 
+             activeElement.type === 'classBranch' || activeElement.type === 'classNumber') {
       maxCols = activeElement.type === 'number' ? 15 : 26;
       newCols = Math.min(maxCols, Math.max(1, newCols));
       
@@ -314,30 +334,30 @@ const ElementPropertiesPanel = () => {
         </>
       )}
       {activeElement.type === 'textArea' && (
-  <div className={styles.propertySection}>
-    <h4 className={styles.sectionTitle}>Yazı Alanı Ayarları</h4>
-    <InputControl 
-      label="Genişlik:" 
-      value={properties.width}
-      onChange={(e) => handleSizeChange('width', e)}
-      min={20}
-      step={20}
-    />
-    <InputControl 
-      label="Yükseklik:" 
-      value={properties.height}
-      onChange={(e) => handleSizeChange('height', e)}
-      min={20}
-      step={20}
-    />
-    
-    <div className={styles.helpText}>
-      İpucu: Yazı alanına metin eklemek için alanı seçin ve içine çift tıklayın. 
-      Düzenleme modundayken dışarıya tıklayarak veya CTRL+Enter tuşlarına basarak 
-      değişiklikleri kaydedebilirsiniz. ESC tuşu ile değişiklikleri iptal edebilirsiniz.
-    </div>
-  </div>
-)}
+        <div className={styles.propertySection}>
+          <h4 className={styles.sectionTitle}>Yazı Alanı Ayarları</h4>
+          <InputControl 
+            label="Genişlik:" 
+            value={properties.width}
+            onChange={(e) => handleSizeChange('width', e)}
+            min={20}
+            step={20}
+          />
+          <InputControl 
+            label="Yükseklik:" 
+            value={properties.height}
+            onChange={(e) => handleSizeChange('height', e)}
+            min={20}
+            step={20}
+          />
+          
+          <div className={styles.helpText}>
+            İpucu: Yazı alanına metin eklemek için alanı seçin ve içine çift tıklayın. 
+            Düzenleme modundayken dışarıya tıklayarak veya CTRL+Enter tuşlarına basarak 
+            değişiklikleri kaydedebilirsiniz. ESC tuşu ile değişiklikleri iptal edebilirsiniz.
+          </div>
+        </div>
+      )}
       {/* Çoktan seçmeli test ayarları */}
       {activeElement.type === 'multipleChoice' && (
         <>
@@ -373,23 +393,52 @@ const ElementPropertiesPanel = () => {
         </>
       )}
       {activeElement.type === 'bookletCode' && (
-  <div className={styles.propertySection}>
-    <h4 className={styles.sectionTitle}>Kitapçık Türü Ayarları</h4>
-    
-    <QuantityControl 
-      label="Şık Sayısı:"
-      value={properties.cols}
-      onDecrease={() => handleColsChange(-1)}
-      onIncrease={() => handleColsChange(1)}
-      min={1}
-      max={5}
-    />
-    
-    <InfoBox title="Mevcut Şıklar:">
-      {renderChoiceItems()}
-    </InfoBox>
-  </div>
-)}
+        <div className={styles.propertySection}>
+          <h4 className={styles.sectionTitle}>Kitapçık Türü Ayarları</h4>
+          
+          <QuantityControl 
+            label="Şık Sayısı:"
+            value={properties.cols}
+            onDecrease={() => handleColsChange(-1)}
+            onIncrease={() => handleColsChange(1)}
+            min={1}
+            max={5}
+          />
+          
+          <InfoBox title="Mevcut Şıklar:">
+            {renderChoiceItems()}
+          </InfoBox>
+        </div>
+      )}
+      
+      {/* Şube alanı için basit satır sayısı kontrolü */}
+      {activeElement.type === 'classBranch' && (
+        <div className={styles.propertySection}>
+          <h4 className={styles.sectionTitle}>Şube Alanı Ayarları</h4>
+          
+          <QuantityControl 
+            label="Şube Sayısı (Harf):"
+            value={properties.rows || 26}
+            onDecrease={() => handleRowsChange(-1)}
+            onIncrease={() => handleRowsChange(1)}
+            min={3}  // Minimum 3 şube (A, B, C)
+            max={26} // Maximum 26 şube (A-Z)
+          />
+          
+          <QuantityControl 
+            label="Sütun Sayısı:"
+            value={properties.cols}
+            onDecrease={() => handleColsChange(-1)}
+            onIncrease={() => handleColsChange(1)}
+            min={1}
+            max={10} // Daha fazla sütuna ihtiyaç olmayabilir
+          />
+          
+          <div className={styles.helpText}>
+            İpucu: Şube sayısını azaltarak formu daha kompakt hale getirebilirsiniz. Örneğin sadece 5 şube (A-E) kullanacaksanız, şube sayısını 5'e düşürebilirsiniz.
+          </div>
+        </div>
+      )}
       
       {/* Ad Soyad veya Numara ayarları */}
       {(activeElement.type === 'nameSurname' || activeElement.type === 'number') && (
@@ -400,6 +449,18 @@ const ElementPropertiesPanel = () => {
           onIncrease={() => handleColsChange(1)}
           min={1}
           max={activeElement.type === 'number' ? 15 : undefined}
+        />
+      )}
+      
+      {/* Sınıf numarası için ek ayarlar */}
+      {activeElement.type === 'classNumber' && (
+        <QuantityControl 
+          label="Sütun Sayısı:"
+          value={properties.cols}
+          onDecrease={() => handleColsChange(-1)}
+          onIncrease={() => handleColsChange(1)}
+          min={1}
+          max={5} // Makul bir maximum değer
         />
       )}
       
@@ -420,6 +481,8 @@ const ElementPropertiesPanel = () => {
       <div className={styles.helpText}>
         {activeElement.type === 'multipleChoice' 
           ? 'İpucu: Soru sayısını ve şık sayısını değiştirmek için + ve - butonlarını, konumunu değiştirmek için yön oklarını kullanın.'
+          : activeElement.type === 'classBranch'
+            ? 'İpucu: Şube sayısını değiştirmek için + ve - butonlarını, konumunu değiştirmek için yön oklarını kullanın.'
           : activeElement.type === 'tcNumber' || activeElement.type === 'phoneNumber'
             ? `İpucu: ${activeElement.type === 'tcNumber' ? 'TC Kimlik no alanı sabit 11 hanedir.' : 'Telefon numarası alanı sabit 10 hanedir.'} Konumunu ayarlamak için yön oklarını kullanın.`
             : 'İpucu: Elemanın konumunu değiştirmek için yön oklarını kullanın.'}

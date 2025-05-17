@@ -113,32 +113,33 @@ const FormRenderer = ({
       const elementBubbleValues = getElementBubbleValues(element.uniqueId);
       
       return (
-        <div style={{ 
-          width: '100%', height: '100%', position: 'relative', 
-          display: 'flex', flexDirection: 'column', overflow: 'hidden'
-        }}>
-          <div style={{ 
-            backgroundColor: '#f8f8f8', padding: '4px', textAlign: 'center',
-            borderBottom: '1px solid #ddd', fontWeight: 'bold', fontSize: '14px',
-            height: '20px', display: 'flex', alignItems: 'center',
-            justifyContent: 'center', minHeight: '20px', maxHeight: '20px',
-            flexShrink: 0
-          }}>
-            {headerTitle}
-          </div>
-          <div style={{ padding: 0, flex: '1 1 auto', overflow: 'hidden', display: 'flex' }}>
-            <div style={{ width: '100%', height: '100%', overflow: 'hidden' }}>
-              <BubbleGrid 
-                rows={element.rows || 20} 
-                cols={element.cols || 5}
-                type={element.type}
-                startNumber={element.startNumber || 1}
-                isEditable={false}
-                customValues={elementBubbleValues}
-              />
-            </div>
-          </div>
-        </div>
+  <div style={{ 
+    width: '100%', height: '100%', position: 'relative', 
+    display: 'flex', flexDirection: 'column', overflow: 'hidden'
+  }}>
+    <div style={{ 
+      backgroundColor: 'rgba(128, 0, 128, 0.1)', /* Şeffaf mor renk */
+      padding: '4px', textAlign: 'center',
+      borderBottom: '1px solid #ddd', fontWeight: 'bold', fontSize: '14px',
+      height: '20px', display: 'flex', alignItems: 'center',
+      justifyContent: 'center', minHeight: '20px', maxHeight: '20px',
+      flexShrink: 0, color: '#333' /* Başlık yazı rengi */
+    }}>
+      {headerTitle}
+    </div>
+    <div style={{ padding: 0, flex: '1 1 auto', overflow: 'hidden', display: 'flex' }}>
+      <div style={{ width: '100%', height: '100%', overflow: 'hidden' }}>
+        <BubbleGrid 
+          rows={element.rows || 20} 
+          cols={element.cols || 5}
+          type={element.type}
+          startNumber={element.startNumber || 1}
+          isEditable={false}
+          customValues={elementBubbleValues}
+        />
+      </div>
+    </div>
+  </div>
       );
     }
     

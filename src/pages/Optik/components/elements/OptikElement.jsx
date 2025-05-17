@@ -1,3 +1,4 @@
+// OptikElement.jsx - Başlık stillemesi için güncellenmiş versiyon
 import React, { memo, useState, useEffect } from 'react';
 import BubbleGrid from './BubbleGrid';
 import TextArea from './TextArea';

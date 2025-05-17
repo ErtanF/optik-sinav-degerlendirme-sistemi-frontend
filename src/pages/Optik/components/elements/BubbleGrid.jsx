@@ -199,7 +199,10 @@ const BubbleGrid = memo(function BubbleGrid({
             <div className={styles.emptyCell}></div>
             <div className={styles.choices}>
               {availableChoices.slice(0, displayedCols).map((char, colIndex) => (
-                <div key={`choice-0-${colIndex}`} className={styles.choiceContainer}>
+                <div 
+                  key={`choice-0-${colIndex}`} 
+                  className={`${styles.choiceContainer} ${colIndex % 2 === 0 ? styles.oddColumn : ''}`}
+                >
                   {renderBubble(0, colIndex, char)}
                 </div>
               ))}
@@ -217,7 +220,10 @@ const BubbleGrid = memo(function BubbleGrid({
             <div className={styles.questionNumber}>{startNumber + rowIndex}</div>
             <div className={styles.choices}>
               {availableChoices.slice(0, displayedCols).map((char, colIndex) => (
-                <div key={`choice-${rowIndex}-${colIndex}`} className={styles.choiceContainer}>
+                <div 
+                  key={`choice-${rowIndex}-${colIndex}`} 
+                  className={`${styles.choiceContainer} ${colIndex % 2 === 0 ? styles.oddColumn : ''}`}
+                >
                   {renderBubble(rowIndex, colIndex, char)}
                 </div>
               ))}
@@ -245,7 +251,10 @@ const BubbleGrid = memo(function BubbleGrid({
         {/* Dikey sütunlar */}
         <div className={styles.columnsContainer}>
           {Array.from({ length: columnCount }).map((_, colIndex) => (
-            <div key={`col-${colIndex}`} className={styles.digitColumn}>
+            <div 
+              key={`col-${colIndex}`} 
+              className={`${styles.digitColumn} ${colIndex % 2 === 0 ? styles.oddColumn : ''}`}
+            >
               {digits.map((digit, digitIndex) => (
                 <div key={`digit-${colIndex}-${digitIndex}`} className={styles.digitCell}>
                   {renderBubble(digitIndex, colIndex, digit)}
@@ -258,14 +267,18 @@ const BubbleGrid = memo(function BubbleGrid({
     );
   };
 
-  // Ad Soyad ve Numara alanları için dikey layout
-  const renderVerticalGrid = () => {
+   const renderVerticalGrid = () => {
     const columnCount = cols;
     let allCharacters = [];
     
     // Eleman tipine göre karakterleri belirle
-    if (type === 'nameSurname' || type === 'classBranch') {
+    if (type === 'nameSurname') {
       allCharacters = Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i)); // A-Z
+    } else if (type === 'classBranch') {
+      // Burada rows değerini kullanarak gösterilecek harf sayısını sınırlıyoruz
+      // rows değeri elementPropertiesPanel'den özelleştirilebilir
+      const branchLetterCount = rows || 26; // Eğer rows tanımlı değilse varsayılan 26 kullan
+      allCharacters = Array.from({ length: branchLetterCount }, (_, i) => String.fromCharCode(65 + i)); 
     } else if (type === 'classNumber') {
       allCharacters = Array.from({ length: 12 }, (_, i) => String(i + 1)); // 1-12
     } else {
@@ -284,7 +297,10 @@ const BubbleGrid = memo(function BubbleGrid({
         {/* Sütunlar */}
         <div className={styles.columnContainer}>
           {Array.from({ length: columnCount }).map((_, colIndex) => (
-            <div key={`col-${colIndex}`} className={styles.bubbleColumn}>
+            <div 
+              key={`col-${colIndex}`} 
+              className={`${styles.bubbleColumn} ${colIndex % 2 === 0 ? styles.oddColumn : ''}`}
+            >
               {allCharacters.map((char, charIndex) => (
                 <div key={`bubble-${colIndex}-${charIndex}`} className={styles.bubbleCell}>
                   {renderBubble(charIndex, colIndex, char)}

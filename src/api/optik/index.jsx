@@ -14,7 +14,7 @@ const optikApi = {
         throw new Error('Geçerli bir okul ID\'si gereklidir.');
       }
       
-      const response = await apiClient.post('/exam/addexam', formData);
+       const response = await apiClient.post('/exam', formData);
       return response;
     } catch (error) {
       console.error("Form oluşturma hatası:", error);
@@ -24,13 +24,16 @@ const optikApi = {
   
   // Tüm formları getir
   getAllForms: async (creatorId) => {
-    try {
-      const response = await apiClient.get(`/exam/getExam/creator/${creatorId}`);
-      return response;
-    } catch (error) {
-      throw error;
-    }
-  },
+  try {
+    //console.log("Kullanıcı ID:", creatorId); // ID kontrolü için log
+    const response = await apiClient.get('/exam');
+    //console.log("Ham API yanıtı:", response); // Ham yanıtı görmek için
+    return response;
+  } catch (error) {
+    console.error("Form getirme hatası:", error);
+    throw error;
+  }
+},
   
   // Belirli bir formu getir
   getFormById: async (id) => {

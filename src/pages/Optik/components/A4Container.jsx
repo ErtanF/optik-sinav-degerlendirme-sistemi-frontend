@@ -98,7 +98,7 @@ const A4Container = memo(function A4Container() {
   );
   dots.push(
     <div 
-      key="specialDot"
+      key="specialDot1"
       style={{ 
         position: 'absolute', 
         top: '45px',
