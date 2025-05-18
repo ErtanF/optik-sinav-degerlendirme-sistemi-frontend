@@ -1,6 +1,7 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Button from '../../../components/ui/Button/Button';
 import FormRenderer from './FormRenderer';
+import html2canvas from 'html2canvas';
 import './PreviewModal.css';
 
 const PreviewModal = ({ 
@@ -15,19 +16,17 @@ const PreviewModal = ({
   const paperRef = useRef(null);
   // Önizleme container'ına referans
   const containerRef = useRef(null);
-  // Sabit ölçek faktörü - %110
-  const SCALE_FACTOR = 1.10;
-
+  // Yakalanan görüntü
+  const [capturedImage, setCapturedImage] = useState(null);
+  // Yakalama durumu
+  const [isCapturing, setIsCapturing] = useState(false);
+  
   // Modal açıldığında A4 boyutunu hesapla
   useEffect(() => {
     if (!isOpen) return;
     
     const calculateScale = () => {
       if (!paperRef.current || !containerRef.current) return;
-      
-      // A4 kağıdı boyutları (mm)
-      const a4Width = 210; // mm
-      const a4Height = 297; // mm
       
       // Container boyutlarını al
       const containerWidth = containerRef.current.clientWidth;
@@ -38,10 +37,9 @@ const PreviewModal = ({
       const availableWidth = containerWidth - padding;
       const availableHeight = containerHeight - padding;
       
-      // mm'den piksel'e çevirme (yaklaşık olarak)
-      const pixelsPerMm = 3.78; // Bu değer değişebilir
-      const a4WidthInPixels = a4Width * pixelsPerMm;
-      const a4HeightInPixels = a4Height * pixelsPerMm;
+      // A4 kağıdı boyutları (piksel)
+      const a4WidthInPixels = 793; // 210mm yaklaşık piksel değeri
+      const a4HeightInPixels = 1122; // 297mm yaklaşık piksel değeri
       
       // En-boy oranını koruyarak en iyi ölçek faktörünü hesapla
       const scaleWidth = availableWidth / a4WidthInPixels;
@@ -49,9 +47,6 @@ const PreviewModal = ({
       
       // En sınırlayıcı boyutu seç (daha küçük ölçek faktörü)
       let scale = Math.min(scaleWidth, scaleHeight);
-      
-      // Sabit %110 büyütme faktörünü uygula
-      scale = scale * SCALE_FACTOR;
       
       // A4 kağıdına ölçeği uygula
       if (paperRef.current) {
@@ -75,12 +70,74 @@ const PreviewModal = ({
     };
   }, [isOpen]);
 
+  // Modal açıldığında ekran görüntüsünü al
+  useEffect(() => {
+    if (isOpen && paperRef.current) {
+      // DOM'un tam olarak render edilmesini bekle
+      setTimeout(capturePreview, 500);
+    }
+  }, [isOpen]);
+
+  // Ekran görüntüsünü al
+  const capturePreview = () => {
+    if (!paperRef.current) return;
+    
+    setIsCapturing(true);
+    
+    // Scrollbar pozisyonunu kaydet
+    const scrollPos = { x: window.scrollX, y: window.scrollY };
+    
+    html2canvas(paperRef.current, {
+      backgroundColor: 'white',
+      scale: 2, // 2x ölçek faktörü ile daha yüksek kalite
+      useCORS: true,
+      logging: false,
+      allowTaint: true,
+      scrollX: -scrollPos.x,
+      scrollY: -scrollPos.y,
+      // Sadece gereksiz UI elemanlarını filtrele, kalibrasyon çizgilerini ve noktalarını dahil et
+      ignoreElements: (element) => {
+        return element.classList && 
+               (element.classList.contains('gridLines') || 
+                element.classList.contains('resize-handle') ||
+                element.classList.contains('removeButton'));
+                // 'dotColumn' sınıfını filtreden kaldırdık - sol taraftaki çizgileri ve noktaları gösterecek
+      }
+    }).then(canvas => {
+      // Scrollbar pozisyonunu geri yükle
+      window.scrollTo(scrollPos.x, scrollPos.y);
+      
+      // Canvas içeriğini PNG formatında base64 veri URL'sine dönüştür
+      const imageData = canvas.toDataURL('image/png', 1.0);
+      
+      // Yakalanan görüntüyü state'e kaydet
+      setCapturedImage(imageData);
+      setIsCapturing(false);
+      
+      console.log("Önizleme görüntüsü yakalandı");
+    }).catch(error => {
+      console.error("Önizleme görüntüsü yakalanırken hata:", error);
+      setIsCapturing(false);
+    });
+  };
+
   if (!isOpen) return null;
 
   // Kaydetme butonuna tıklandığında
   const handleSaveClick = () => {
-    if (onSave && typeof onSave === 'function') {
-      onSave();
+    if (capturedImage && onSave) {
+      // Yakalanan görüntüyü onSave fonksiyonu ile gönder
+      onSave(capturedImage);
+    } else if (onSave) {
+      // Eğer görüntü yoksa, yeniden yakalamayı dene
+      capturePreview();
+      setTimeout(() => {
+        if (capturedImage) {
+          onSave(capturedImage);
+        } else {
+          console.error("Görüntü yakalanamadı!");
+        }
+      }, 1000);
     }
   };
 
@@ -99,12 +156,26 @@ const PreviewModal = ({
               visible={true}
               showGrid={false}
               customBubbleValues={customBubbleValues}
+              includeCalibrationMarks={true} // Kalibrasyon işaretlerini dahil et
             />
           </div>
+          
+          {isCapturing && (
+            <div className="capture-overlay">
+              <div className="spinner"></div>
+              <p>Görüntü yakalanıyor...</p>
+            </div>
+          )}
         </div>
         <div className="preview-modal-footer">
           <Button variant="outline" onClick={onClose}>Kapat</Button>
-          <Button variant="primary" onClick={handleSaveClick}>Bu Görünümü Kaydet</Button>
+          <Button 
+            variant="primary" 
+            onClick={handleSaveClick}
+            disabled={isCapturing}
+          >
+            {isCapturing ? 'Görüntü Yakalanıyor...' : 'Bu Görünümü Kaydet'}
+          </Button>
         </div>
       </div>
     </div>

@@ -5,7 +5,6 @@ import Button from '../../components/ui/Button/Button';
 import LeftSidebar from './components/LeftSidebar';
 import A4Container from './components/A4Container';
 import PreviewModal from './components/PreviewModal';
-import FormRenderer from './components/FormRenderer';
 import { FormEditorProvider, useFormEditor } from './context/FormEditorContext';
 import optikApi from '../../api/optik';
 
@@ -40,7 +39,7 @@ const OptikOlusturmaContent = () => {
   };
   
   // Form kaydetme
-  const handleSave = async () => {
+  const handleSave = async (capturedImage) => {
     try {
       setSaving(true);
       setError(null);
@@ -66,10 +65,13 @@ const OptikOlusturmaContent = () => {
         throw new Error("Okul bilgisi bulunamadı. Lütfen tekrar giriş yapın.");
       }
       
-      // Form görüntüsü kontrolü
-      if (!formImage) {
+      // Yakalanan görüntüyü kullan
+      const imageToSave = capturedImage || formImage;
+      if (!imageToSave) {
         throw new Error("Form görüntüsü oluşturulamadı. Lütfen tekrar deneyin.");
       }
+      
+      console.log("Görüntü kaydediliyor");
       
       // Form verisini hazırla
       const formData = {
@@ -77,7 +79,7 @@ const OptikOlusturmaContent = () => {
         school: schoolId,
         createdBy: user._id,
         date: new Date().toISOString(),
-        opticalFormImage: formImage,
+        opticalFormImage: imageToSave,
         components: pageElements.map(element => ({
           ...element,
           bubbleValues: customBubbleValues[element.uniqueId] || {}
@@ -127,12 +129,6 @@ const OptikOlusturmaContent = () => {
     setIsPreviewOpen(false);
   };
   
-  // Önizleme görünümünü kaydetme
-  const handleSavePreview = () => {
-    closePreview();
-    setTimeout(handleSave, 100);
-  };
-  
   return (
     <div className="optik-olusturma-page">
       <div className="page-header">
@@ -171,25 +167,13 @@ const OptikOlusturmaContent = () => {
         </div>
       </div>
       
-      {/* Görünmez renderer - form görüntüsü oluşturmak için */}
-      <div style={{ position: 'absolute', left: '-9999px', top: '-9999px', width: '210mm', height: '297mm', overflow: 'hidden' }}>
-        <FormRenderer 
-          pageElements={pageElements}
-          formTitle={formTitle}
-          onRender={setFormImage}
-          visible={true}
-          showGrid={false}
-          customBubbleValues={customBubbleValues}
-        />
-      </div>
-      
       {/* Önizleme Modalı */}
       <PreviewModal 
         isOpen={isPreviewOpen}
         onClose={closePreview}
         pageElements={pageElements}
         formTitle={formTitle}
-        onSave={handleSavePreview}
+        onSave={handleSave}
         customBubbleValues={customBubbleValues}
       />
     </div>

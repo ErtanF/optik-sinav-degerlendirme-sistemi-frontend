@@ -7,7 +7,8 @@ const FormRenderer = ({
   onRender, 
   visible = false, 
   showGrid = false,
-  customBubbleValues = {}
+  customBubbleValues = {},
+  includeCalibrationMarks = true // Yeni parametre ekledik
 }) => {
   const containerRef = useRef(null);
   
@@ -31,8 +32,8 @@ const FormRenderer = ({
             return element.classList && 
                    (element.classList.contains('gridLines') || 
                     element.classList.contains('resize-handle') ||
-                    element.classList.contains('removeButton') ||
-                    element.classList.contains('dotColumn')); // Nokta sütunu gizleme - yazdırmada görünmesin
+                    element.classList.contains('removeButton')); 
+                    // dotColumn'ı çıkardık - soldaki çizgiler ve noktalar görünecek
           }
         }).then(canvas => {
           window.scrollTo(scrollPos.x, scrollPos.y);
@@ -44,7 +45,7 @@ const FormRenderer = ({
       
       return () => clearTimeout(timer);
     }
-  }, [pageElements, onRender, customBubbleValues]);
+  }, [pageElements, onRender, customBubbleValues, includeCalibrationMarks]);
 
   // Bir elemanın özelleştirilmiş bubble değerlerini al
   const getElementBubbleValues = (elementId) => {
@@ -75,6 +76,7 @@ const FormRenderer = ({
             src={element.content} 
             alt="Form Image" 
             style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} 
+            crossOrigin="anonymous"
           />
         </div>
       );
@@ -197,66 +199,68 @@ const FormRenderer = ({
         pageBreakInside: 'avoid'
       }}
     >
-      {/* Sol kenarda dikdörtgen noktalar - grid genişliğinde */}
-<div 
-  className="dotColumn"
-  style={{
-    position: 'absolute',
-    left: '20px',  
-    top: '0',
-    width: '20px',
-    height: '100%',
-    pointerEvents: 'none'
-  }}
->
-  {/* İlk 3 satırı atlayarak 4. satırdan başla */}
-  {Array.from({ length: Math.floor((297 * 3.78 - 20) / 20) }).map((_, index) => {
-    // İlk 3 satırı atla
-    if (index < 3) return null;
+      {/* Sol kenarda dikdörtgen noktalar - grid genişliğinde - Kalibrasyon işaretleri */}
+{includeCalibrationMarks && (
+  <div 
+    className="dotColumn"
+    style={{
+      position: 'absolute',
+      left: '20px',  
+      top: '0',
+      width: '20px',
+      height: '100%',
+      pointerEvents: 'none',
+      zIndex: 5
+    }}
+  >
+    {/* İlk 3 satırı atlayarak 4. satırdan başla */}
+    {Array.from({ length: Math.floor((297 * 3.78 - 20) / 20) }).map((_, index) => {
+      // İlk 3 satırı atla
+      if (index < 3) return null;
+      
+      return (
+        <div 
+          key={index} 
+          style={{
+            position: 'absolute',
+            top: `${(index * 20) + 10}px`, 
+            left: '0',                     
+            width: '20px',                  
+            height: '5px',                  
+            backgroundColor: '#000',
+            borderRadius: '0'               
+          }}
+        ></div>
+      );
+    })}
     
-    return (
-      <div 
-        key={index} 
-        style={{
-          position: 'absolute',
-          top: `${(index * 20) + 10}px`, 
-          left: '0',                     
-          width: '20px',                  
-          height: '5px',                  
-          backgroundColor: '#000',
-          borderRadius: '0'               
-        }}
-      ></div>
-    );
-  })}
-  
-  {/* Sağındaki sütunun 2. satırına büyük nokta */}
-  <div 
-    style={{
-      position: 'absolute',
-      top: '45px',   // 2. satır pozisyonu (10px + 20px*2)
-      left: '25px',  // Sağdaki sütun (20px + 20px)
-      width: '12px', 
-      height: '12px',
-      backgroundColor: '#000',
-      borderRadius: '50%', // Yuvarlak nokta
-      zIndex: '10'
-    }}
-  ></div>
-  <div 
-    style={{
-      position: 'absolute',
-      top: '45px',   // 2. satır pozisyonu (10px + 20px*2)
-      left: '45px',  // Sağdaki sütun (20px + 20px)
-      width: '12px', 
-      height: '12px',
-      backgroundColor: '#000',
-      borderRadius: '50%', // Yuvarlak nokta
-      zIndex: '10'
-    }}
-  ></div>
-</div>
-
+    {/* Sağındaki sütunun 2. satırına büyük nokta */}
+    <div 
+      style={{
+        position: 'absolute',
+        top: '45px',   // 2. satır pozisyonu (10px + 20px*2)
+        left: '25px',  // Sağdaki sütun (20px + 20px)
+        width: '12px', 
+        height: '12px',
+        backgroundColor: '#000',
+        borderRadius: '50%', // Yuvarlak nokta
+        zIndex: '10'
+      }}
+    ></div>
+    <div 
+      style={{
+        position: 'absolute',
+        top: '45px',   // 2. satır pozisyonu (10px + 20px*2)
+        left: '45px',  // Sağdaki sütun (20px + 20px)
+        width: '12px', 
+        height: '12px',
+        backgroundColor: '#000',
+        borderRadius: '50%', // Yuvarlak nokta
+        zIndex: '10'
+      }}
+    ></div>
+  </div>
+)}
       
       {showGrid && (
         <div 
