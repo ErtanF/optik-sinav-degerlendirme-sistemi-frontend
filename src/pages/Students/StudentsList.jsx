@@ -63,9 +63,9 @@ const StudentsList = () => {
     }
   };
 
-  const fetchClassesBySchool = async (schoolId) => {
+  const fetchClassesBySchool = async () => {
     try {
-      const response = await classApi.getClassesBySchool(schoolId);
+      const response = await classApi.getClassesBySchool();
       setClasses(response.data || []);
     } catch (error) {
       console.error('Error fetching classes:', error);
@@ -79,8 +79,8 @@ const StudentsList = () => {
   };
 
   const filterStudents = () => {
-    if (!students) return [];
-
+    if (!Array.isArray(students)) return [];
+  
     return students.filter(student => {
       const matchesSchool = !filters.schoolId || student.school._id === filters.schoolId;
       const matchesClass = !filters.classId || student.class._id === filters.classId;
@@ -88,10 +88,11 @@ const StudentsList = () => {
         student.firstName.toLowerCase().includes(filters.searchTerm.toLowerCase()) || 
         student.lastName.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
         student.studentNumber.toLowerCase().includes(filters.searchTerm.toLowerCase());
-      
+  
       return matchesSchool && matchesClass && matchesSearch;
     });
   };
+  
 
   const handleDeleteStudent = async (studentId) => {
     if (!window.confirm('Bu öğrenciyi silmek istediğinizden emin misiniz?')) {
@@ -107,6 +108,10 @@ const StudentsList = () => {
       toast.error('Öğrenci silinirken bir hata oluştu');
     }
   };
+  console.log('students:', students);
+  console.log('typeof students:', typeof students);
+  console.log('Array.isArray(students):', Array.isArray(students));
+
 
   const filteredStudents = filterStudents();
 

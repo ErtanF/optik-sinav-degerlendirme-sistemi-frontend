@@ -21,6 +21,16 @@ const optikApi = {
       throw error;
     }
   },
+  getExamsByCreator: async () => {
+    try {
+      // Backend'de userId req.user.userId'den alınıyor
+      const response = await apiClient.get('/exam');
+      return response;
+    } catch (error) {
+      console.error("Sınav getirme hatası:", error);
+      throw error;
+    }
+  },
   
   // Tüm formları getir
   getAllForms: async (creatorId) => {
@@ -48,7 +58,7 @@ const optikApi = {
   // Formu güncelle
   updateForm: async (id, formData) => {
     try {
-      const response = await apiClient.put(`/exam/editExam/${id}`, formData);
+      const response = await apiClient.put(`/exam/${id}`, formData);
       return response;
     } catch (error) {
       throw error;
@@ -58,7 +68,7 @@ const optikApi = {
   // Formu sil
   deleteForm: async (id) => {
     try {
-      const response = await apiClient.delete(`/exam/deleteExam/${id}`);
+      const response = await apiClient.delete(`/exam/${id}`);
       return response;
     } catch (error) {
       throw error;
