@@ -63,9 +63,9 @@ const StudentsList = () => {
     }
   };
 
-  const fetchClassesBySchool = async (schoolId) => {
+   const fetchClassesBySchool = async () => {
     try {
-      const response = await classApi.getClassesBySchool(schoolId);
+      const response = await classApi.getClassesBySchool();
       setClasses(response.data || []);
     } catch (error) {
       console.error('Error fetching classes:', error);
@@ -79,7 +79,7 @@ const StudentsList = () => {
   };
 
   const filterStudents = () => {
-    if (!students) return [];
+    if (!Array.isArray(students)) return [];
 
     return students.filter(student => {
       const matchesSchool = !filters.schoolId || student.school._id === filters.schoolId;

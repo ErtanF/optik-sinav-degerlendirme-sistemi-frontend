@@ -7,8 +7,8 @@ const classApi = {
   },
   
   // Get classes by school
-  getClassesBySchool: (schoolId) => {
-    return apiClient.get(`/class/school/${schoolId}`);
+  getClassesBySchool: () => {
+    return apiClient.get(`/class/school`);
   },
   
   // Get a specific class by ID
