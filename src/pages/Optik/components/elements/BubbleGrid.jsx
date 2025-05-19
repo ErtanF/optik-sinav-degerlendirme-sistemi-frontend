@@ -19,11 +19,21 @@ const BubbleGrid = memo(function BubbleGrid({
   const [editValue, setEditValue] = useState('');
   const [localValues, setLocalValues] = useState({});
   const inputRef = useRef(null);
+  const isFirstRender = useRef(true);
   
-  // Props'tan gelen customValues değerini localValues'a aktar
+  // Props'tan gelen customValues değerini localValues'a aktar - düzeltilmiş versiyon
   useEffect(() => {
-    setLocalValues(customValues);
-  }, [customValues]);
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      setLocalValues(customValues);
+    } else {
+      // Sadece değerler gerçekten değiştiyse güncelle
+      const isEqual = JSON.stringify(localValues) === JSON.stringify(customValues);
+      if (!isEqual) {
+        setLocalValues(customValues);
+      }
+    }
+  }, [customValues, localValues]);
 
   // Bubble içeriğini al
   const getBubbleContent = (row, col, defaultValue) => {

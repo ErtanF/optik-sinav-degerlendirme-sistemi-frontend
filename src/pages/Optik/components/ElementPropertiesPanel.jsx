@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import styles from './ElementPropertiesPanel.module.css';
 import { useFormEditor } from '../context/FormEditorContext';
 
@@ -71,7 +71,7 @@ const InfoBox = ({ title, children }) => (
 const ElementPropertiesPanel = () => {
   const { 
     activeElementId, pageElements, updateElement, fileInputRef,
-     isWithinSafeZone
+    isWithinSafeZone
   } = useFormEditor();
   
   // Aktif eleman
@@ -89,7 +89,8 @@ const ElementPropertiesPanel = () => {
   // Aktif eleman değiştiğinde özellikleri güncelle
   useEffect(() => {
     if (activeElement) {
-      setProperties({
+      // Yeni properties değerlerini oluştur
+      const newProperties = {
         rows: activeElement.rows || 0,
         cols: activeElement.cols || 0,
         startNumber: activeElement.startNumber || 1,
@@ -97,14 +98,38 @@ const ElementPropertiesPanel = () => {
         posY: activeElement.position?.y || 0,
         width: activeElement.size?.width || 0,
         height: activeElement.size?.height || 0
-      });
+      };
       
-      // Güvenli alan kontrolü
-      const inSafeZone = isWithinSafeZone(
-        activeElement.position || { x: 0, y: 0 },
-        activeElement.size || { width: 100, height: 100 }
-      );
-      setIsInSafeZone(inSafeZone);
+      // Mevcut değerlerle karşılaştırma
+      const isDifferent = 
+        properties.rows !== newProperties.rows ||
+        properties.cols !== newProperties.cols ||
+        properties.startNumber !== newProperties.startNumber ||
+        properties.posX !== newProperties.posX ||
+        properties.posY !== newProperties.posY ||
+        properties.width !== newProperties.width ||
+        properties.height !== newProperties.height;
+      
+      // Sadece değerler değiştiyse state'i güncelle
+      if (isDifferent) {
+        setProperties(newProperties);
+      }
+      
+      // Güvenli alan kontrolü - memoize edilen versiyonunu kullan
+      const checkSafeZone = () => {
+        const inSafeZone = isWithinSafeZone(
+          activeElement.position || { x: 0, y: 0 },
+          activeElement.size || { width: 100, height: 100 }
+        );
+        
+        // Sadece değer değiştiyse güncelle
+        if (inSafeZone !== isInSafeZone) {
+          setIsInSafeZone(inSafeZone);
+        }
+      };
+      
+      // Güvenli alan kontrolünü yap
+      checkSafeZone();
     }
   }, [activeElement, isWithinSafeZone]);
   
@@ -149,15 +174,18 @@ const ElementPropertiesPanel = () => {
       return; // Diğer eleman tipleri için işlem yok
     }
     
-    setProperties(prev => ({ ...prev, rows: newRows }));
-    
-    updateElement(activeElementId, {
-      rows: newRows,
-      size: {
-        ...activeElement.size,
-        height: heightCalculation
-      }
-    });
+    // Sadece değer değiştiyse state'i güncelle
+    if (properties.rows !== newRows) {
+      setProperties(prev => ({ ...prev, rows: newRows }));
+      
+      updateElement(activeElementId, {
+        rows: newRows,
+        size: {
+          ...activeElement.size,
+          height: heightCalculation
+        }
+      });
+    }
   };
   
   const handleColsChange = (increment) => {
@@ -165,47 +193,45 @@ const ElementPropertiesPanel = () => {
     
     let newCols = properties.cols + increment;
     let maxCols = 26;
+    let newWidth;
     
     if (activeElement.type === 'multipleChoice') {
       maxCols = 5;
       newCols = Math.min(maxCols, Math.max(1, newCols));
-      
-      updateElement(activeElementId, {
-        cols: newCols,
-        size: { ...activeElement.size, width: (newCols + 1) * 20 }
-      });
+      newWidth = (newCols + 1) * 20;
     } 
     else if (activeElement.type === 'bookletCode') {
       // Kitapçık kodu için özel ölçeklendirme
       maxCols = 5;
       newCols = Math.min(maxCols, Math.max(1, newCols));
-      
-      updateElement(activeElementId, {
-        cols: newCols,
-        size: { 
-          ...activeElement.size, 
-          width: newCols * 20 // Her şıkkın tam olarak 20px genişliği olur
-        }
-      });
+      newWidth = newCols * 20; // Her şıkkın tam olarak 20px genişliği olur
     }
     else if (activeElement.type === 'nameSurname' || activeElement.type === 'number' || 
              activeElement.type === 'classBranch' || activeElement.type === 'classNumber') {
       maxCols = activeElement.type === 'number' ? 15 : 26;
       newCols = Math.min(maxCols, Math.max(1, newCols));
+      newWidth = newCols * 20;
+    }
+    
+    // Sadece değer değiştiyse state'i güncelle
+    if (properties.cols !== newCols) {
+      setProperties(prev => ({ ...prev, cols: newCols }));
       
       updateElement(activeElementId, {
         cols: newCols,
-        size: { ...activeElement.size, width: newCols * 20 }
+        size: { ...activeElement.size, width: newWidth }
       });
     }
-    
-    setProperties(prev => ({ ...prev, cols: newCols }));
   };
   
   const handleStartNumberChange = (e) => {
     const newStartNumber = parseInt(e.target.value) || 1;
-    setProperties(prev => ({ ...prev, startNumber: newStartNumber }));
-    updateElement(activeElementId, { startNumber: newStartNumber });
+    
+    // Sadece değer değiştiyse state'i güncelle
+    if (properties.startNumber !== newStartNumber) {
+      setProperties(prev => ({ ...prev, startNumber: newStartNumber }));
+      updateElement(activeElementId, { startNumber: newStartNumber });
+    }
   };
   
   const handlePositionChange = (direction, amount = 20) => {
@@ -216,18 +242,14 @@ const ElementPropertiesPanel = () => {
       case 'right': posX = posX + amount; break;
       case 'up': posY = Math.max(0, posY - amount); break;
       case 'down': posY = posY + amount; break;
+      default: break;
     }
     
-    setProperties(prev => ({ ...prev, posX, posY }));
-    updateElement(activeElementId, { position: { x: posX, y: posY } });
-    
-    // Güvenli alan kontrolü
-    setTimeout(() => {
-      const current = pageElements.find(el => el.uniqueId === activeElementId);
-      if (current) {
-        setIsInSafeZone(isWithinSafeZone(current.position, current.size));
-      }
-    }, 10);
+    // Sadece konum değiştiyse state'i güncelle
+    if (properties.posX !== posX || properties.posY !== posY) {
+      setProperties(prev => ({ ...prev, posX, posY }));
+      updateElement(activeElementId, { position: { x: posX, y: posY } });
+    }
   };
   
   const handleSizeChange = (dimension, e) => {
@@ -238,19 +260,14 @@ const ElementPropertiesPanel = () => {
     const gridSize = 20;
     const alignedValue = Math.max(gridSize, Math.floor(value / gridSize) * gridSize);
     
-    setProperties(prev => ({ ...prev, [dimension]: alignedValue }));
-    
-    updateElement(activeElementId, {
-      size: { ...activeElement.size, [dimension]: alignedValue }
-    });
-    
-    // Güvenli alan kontrolü
-    setTimeout(() => {
-      const current = pageElements.find(el => el.uniqueId === activeElementId);
-      if (current) {
-        setIsInSafeZone(isWithinSafeZone(current.position, current.size));
-      }
-    }, 10);
+    // Sadece boyut değiştiyse state'i güncelle
+    if (properties[dimension] !== alignedValue) {
+      setProperties(prev => ({ ...prev, [dimension]: alignedValue }));
+      
+      updateElement(activeElementId, {
+        size: { ...activeElement.size, [dimension]: alignedValue }
+      });
+    }
   };
   
   const handleChangeImage = () => {

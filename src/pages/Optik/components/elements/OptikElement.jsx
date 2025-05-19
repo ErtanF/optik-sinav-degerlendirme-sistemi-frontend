@@ -1,5 +1,5 @@
 // OptikElement.jsx - Başlık stillemesi için güncellenmiş versiyon
-import React, { memo, useState, useEffect } from 'react';
+import React, { memo, useState, useEffect, useRef } from 'react';
 import BubbleGrid from './BubbleGrid';
 import TextArea from './TextArea';
 import styles from './OptikElement.module.css';
@@ -22,29 +22,37 @@ const OptikElement = memo(function OptikElement({
 }) {
   // Manuel başlık için state
   const [manualTitle, setManualTitle] = useState('');
+  // İlk render kontrolü için ref
+  const isFirstRender = useRef(true);
   
   // Eleman türüne göre varsayılan başlık belirle
   useEffect(() => {
-    const defaultTitles = {
-      'nameSurname': 'AD SOYAD',
-      'number': 'NUMARA',
-      'tcNumber': 'TC KİMLİK NO',
-      'phoneNumber': 'TELEFON NO',
-      'multipleChoice': 'TEST',
-      'bookletCode': 'KİTAPÇIK',
-      'classNumber': 'SINIF',
-      'classBranch': 'ŞUBE',
-      'textArea': '', // Yazı alanı için boş başlık
-      'image': 'RESİM'
-    };
-    
-    setManualTitle(defaultTitles[type] || 'BAŞLIK');
-    
-    // Başlık değerini element özelliklerine ekle, bu sayede FormRenderer bu değeri kullanabilir
-    if (onTitleChange) {
-      onTitleChange(defaultTitles[type] || 'BAŞLIK');
+    // Sadece ilk render'da veya type değiştiğinde çalışsın
+    if (isFirstRender.current || isFirstRender.current === undefined) {
+      const defaultTitles = {
+        'nameSurname': 'AD SOYAD',
+        'number': 'NUMARA',
+        'tcNumber': 'TC KİMLİK NO',
+        'phoneNumber': 'TELEFON NO',
+        'multipleChoice': 'TEST',
+        'bookletCode': 'KİTAPÇIK',
+        'classNumber': 'SINIF',
+        'classBranch': 'ŞUBE',
+        'textArea': '', // Yazı alanı için boş başlık
+        'image': 'RESİM'
+      };
+      
+      const newTitle = defaultTitles[type] || 'BAŞLIK';
+      setManualTitle(newTitle);
+      
+      // Başlık değerini element özelliklerine ekle, bu sayede FormRenderer bu değeri kullanabilir
+      if (onTitleChange) {
+        onTitleChange(newTitle);
+      }
+      
+      isFirstRender.current = false;
     }
-  }, [type, onTitleChange]);
+  }, [type]); // Sadece type değiştiğinde çalışsın
   
   // Elemanın gerçek yüksekliğini ayarlamak için
   const [adjustedSize, setAdjustedSize] = useState({
@@ -54,6 +62,11 @@ const OptikElement = memo(function OptikElement({
   
   // İlk yükleme ve boyut değişiminde hesaplanmış boyutu güncelle
   useEffect(() => {
+    // Önceki boyut ile şimdiki boyut aynıysa update etme
+    if (adjustedSize.width === size.width && adjustedSize.height === size.height) {
+      return;
+    }
+    
     const gridSize = 20;
     const adjustedWidth = Math.ceil(size.width / gridSize) * gridSize;
     let calculatedHeight;
@@ -82,11 +95,16 @@ const OptikElement = memo(function OptikElement({
       ? calculatedHeight 
       : Math.max(calculatedHeight, size.height);
     
-    setAdjustedSize({
+    // Sadece boyut değiştiyse update et
+    const newAdjustedSize = {
       width: adjustedWidth,
       height: finalHeight
-    });
-  }, [size, rows, cols, type]);
+    };
+    
+    if (newAdjustedSize.width !== adjustedSize.width || newAdjustedSize.height !== adjustedSize.height) {
+      setAdjustedSize(newAdjustedSize);
+    }
+  }, [size, rows, cols, type, adjustedSize]);
   
   // Bubble içeriği güncellendiğinde
   const handleBubbleContentUpdate = (rowCol, value) => {
