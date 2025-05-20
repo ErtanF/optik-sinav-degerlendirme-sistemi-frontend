@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { FiEdit, FiTrash2, FiUpload, FiPlus } from 'react-icons/fi';
 import studentApi from '../../api/students';
 import schoolApi from '../../api/schools';
 import classApi from '../../api/classes';
@@ -212,10 +213,10 @@ const StudentsList = () => {
         <h1>Öğrenci Yönetimi</h1>
         <div className="students-actions">
           <Link to="/students/import" className="button primary">
-            <i className="icon-upload"></i> Excel ile Toplu Ekle
+            <FiUpload className="button-icon" /> Excel ile Toplu Ekle
           </Link>
           <Link to="/students/new" className="button secondary">
-            <i className="icon-plus"></i> Yeni Öğrenci
+            <FiPlus className="button-icon" /> Yeni Öğrenci
           </Link>
         </div>
       </div>
@@ -316,14 +317,14 @@ const StudentsList = () => {
                       className="edit-button" 
                       title="Düzenle"
                     >
-                      <i className="icon-edit"></i>
+                      <FiEdit size={16} />
                     </Link>
                     <button 
                       className="delete-button" 
                       title="Sil"
                       onClick={() => handleDeleteStudent(student._id)}
                     >
-                      <i className="icon-trash"></i>
+                      <FiTrash2 size={16} color="white" />
                     </button>
                   </td>
                 </tr>

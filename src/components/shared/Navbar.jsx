@@ -19,39 +19,74 @@ const throttle = (func, delay) => {
   };
 };
 
-// Custom hook for scroll progress
+// Improved custom hook for scroll progress
 const useScrollProgress = () => {
-  useEffect(() => {
-    const calculateScrollPercent = () => {
-      const docHeight = Math.max(
-        document.body.scrollHeight, 
-        document.body.offsetHeight, 
-        document.documentElement.clientHeight, 
-        document.documentElement.scrollHeight, 
-        document.documentElement.offsetHeight
-      );
-      const windowHeight = window.innerHeight;
-      const scrollTop = window.scrollY;
-      
-      // Calculate the scroll percentage
-      const scrollPercent = (scrollTop / (docHeight - windowHeight)) * 100;
+  const [scrollPercent, setScrollPercent] = useState(0);
+  
+  // Use a more efficient calculation method
+  const calculateScrollPercent = useCallback(() => {
+    // Check if document is fully loaded
+    if (!document.body) return;
+    
+    const docHeight = Math.max(
+      document.body.scrollHeight, 
+      document.body.offsetHeight, 
+      document.documentElement.clientHeight, 
+      document.documentElement.scrollHeight, 
+      document.documentElement.offsetHeight
+    );
+    
+    const windowHeight = window.innerHeight;
+    const scrollTop = window.scrollY;
+    
+    // Prevent division by zero
+    if (docHeight <= windowHeight) {
+      setScrollPercent(0);
+      return;
+    }
+    
+    // Calculate the scroll percentage with precision
+    const newScrollPercent = Math.min(100, Math.max(0, (scrollTop / (docHeight - windowHeight)) * 100));
+    
+    // Only update if there's significant change (optimization)
+    if (Math.abs(newScrollPercent - scrollPercent) > 0.5) {
+      setScrollPercent(newScrollPercent);
       
       // Update the CSS variable for the progress bar
-      document.documentElement.style.setProperty('--scroll', scrollPercent);
-    };
+      requestAnimationFrame(() => {
+        document.documentElement.style.setProperty('--scroll', newScrollPercent.toFixed(2));
+      });
+    }
+  }, [scrollPercent]);
 
-    // Throttle the scroll handler
-    const handleScroll = throttle(calculateScrollPercent, 10);
+  useEffect(() => {
+    // Throttle the scroll handler to improve performance
+    const handleScroll = throttle(calculateScrollPercent, 20);
 
-    window.addEventListener('scroll', handleScroll);
+    // Handle browser resize which affects scroll calculations
+    const handleResize = throttle(() => {
+      // Small delay to ensure DOM is updated
+      setTimeout(calculateScrollPercent, 100);
+    }, 250);
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleResize, { passive: true });
     
-    // Initial call to set the correct value
-    calculateScrollPercent();
+    // Initial call after DOM is ready
+    if (document.readyState === 'complete') {
+      calculateScrollPercent();
+    } else {
+      window.addEventListener('load', calculateScrollPercent);
+    }
     
     return () => {
       window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('load', calculateScrollPercent);
     };
-  }, []);
+  }, [calculateScrollPercent]);
+
+  return scrollPercent;
 };
 
 const Navbar = () => {
@@ -64,11 +99,18 @@ const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   
+  // Yeni dropdown state'leri
+  const [optikMenuOpen, setOptikMenuOpen] = useState(false);
+  const [yonetimMenuOpen, setYonetimMenuOpen] = useState(false);
+  
   const navigate = useNavigate();
   const location = useLocation();
   const dropdownRef = useRef(null);
   const notificationRef = useRef(null);
   const mobileMenuRef = useRef(null);
+  const scrollPreviousPosition = useRef(0);
+  const optikMenuRef = useRef(null);
+  const yonetimMenuRef = useRef(null);
   
   const canApproveTeachers = currentUser?.role === 'admin' || currentUser?.role === 'superadmin';
 
@@ -87,6 +129,12 @@ const Navbar = () => {
       ) {
         setMobileMenuOpen(false);
       }
+      if (optikMenuRef.current && !optikMenuRef.current.contains(event.target)) {
+        setOptikMenuOpen(false);
+      }
+      if (yonetimMenuRef.current && !yonetimMenuRef.current.contains(event.target)) {
+        setYonetimMenuOpen(false);
+      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
@@ -101,27 +149,44 @@ const Navbar = () => {
     }
   }, [isAuthenticated, canApproveTeachers]);
 
-  // Memoize the scroll handler with useCallback to prevent recreation
+  // Improved scroll handler with debounce to prevent excessive updates
   const handleScrollChange = useCallback(() => {
     const scrollPosition = window.scrollY;
-    setScrolled(scrollPosition > 20);
-  }, []);
+    const scrollThreshold = 20;
+    
+    // Add hysteresis to prevent flickering at the threshold
+    if (scrollPosition > scrollThreshold && !scrolled) {
+      setScrolled(true);
+    } else if (scrollPosition <= scrollThreshold - 5 && scrolled) { // Subtraction creates hysteresis
+      setScrolled(false);
+    }
+    
+    scrollPreviousPosition.current = scrollPosition;
+  }, [scrolled]);
 
   useEffect(() => {
-    // Throttle the scroll handler to improve performance
-    const throttledHandleScroll = throttle(handleScrollChange, 50);
+    // Adjust throttle for better performance
+    const throttledHandleScroll = throttle(handleScrollChange, 30);
 
+    // Use passive event listener for better performance
     window.addEventListener('scroll', throttledHandleScroll, { passive: true });
 
-    // Initial check - important for pages that load already scrolled
-    handleScrollChange();
-
-    // Check scroll position after images and content load
-    window.addEventListener('load', handleScrollChange);
+    // Initial check - ensure scroll position is respected on page refresh or direct link access
+    const checkInitialScroll = () => {
+      handleScrollChange();
+      
+      // Double-check after page is fully loaded (images, fonts, etc)
+      window.requestAnimationFrame(() => {
+        handleScrollChange();
+      });
+    };
+    
+    checkInitialScroll();
+    window.addEventListener('load', checkInitialScroll);
 
     return () => {
       window.removeEventListener('scroll', throttledHandleScroll);
-      window.removeEventListener('load', handleScrollChange);
+      window.removeEventListener('load', checkInitialScroll);
     };
   }, [handleScrollChange]);
 
@@ -155,6 +220,20 @@ const Navbar = () => {
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
+  };
+
+  const toggleOptikMenu = (e) => {
+    e.preventDefault();
+    setOptikMenuOpen(!optikMenuOpen);
+    // Diğer açık menüleri kapat
+    setYonetimMenuOpen(false);
+  };
+
+  const toggleYonetimMenu = (e) => {
+    e.preventDefault();
+    setYonetimMenuOpen(!yonetimMenuOpen);
+    // Diğer açık menüleri kapat
+    setOptikMenuOpen(false);
   };
 
   const handleApprove = async (teacherId) => {
@@ -194,7 +273,11 @@ const Navbar = () => {
     if (path === '/') {
       return location.pathname === '/' ? 'active' : '';
     }
-    return location.pathname === path ? 'active' : '';
+    // Path bir dizi ise, herhangi birindeyse aktif olarak işaretle (dropdown menüler için)
+    if (Array.isArray(path)) {
+      return path.some(p => location.pathname.startsWith(p)) ? 'active' : '';
+    }
+    return location.pathname.startsWith(path) ? 'active' : '';
   };
   
   // Function to handle link navigation with scroll to top
@@ -210,7 +293,11 @@ const Navbar = () => {
   };
 
   return (
-    <nav className={`navbar ${scrolled ? 'scrolled' : ''}`} aria-label="Ana navigasyon">
+    <nav 
+      className={`navbar ${scrolled ? 'scrolled' : ''}`} 
+      aria-label="Ana navigasyon"
+      role="navigation"
+    >
       <div className="navbar-container">
         <div className="navbar-logo">
           <Link to="/" aria-label="Ana sayfaya git" onClick={(e) => handleNavigate('/', e)}>
@@ -236,34 +323,169 @@ const Navbar = () => {
           {isAuthenticated ? (
             <>
               <div className="navbar-links">
-                <Link 
-                  to="/optik-olustur" 
-                  className={`navbar-item ${isActive('/optik-olustur')}`}
-                  onClick={(e) => handleNavigate('/optik-olustur', e)}
-                >
-                  <span className="navbar-item-text">Optik Oluştur</span>
-                </Link>
-                <Link 
-                  to="/optik-formlarim" 
-                  className={`navbar-item ${isActive('/optik-formlarim')}`}
-                  onClick={(e) => handleNavigate('/optik-formlarim', e)}
-                >
-                  <span className="navbar-item-text">Optik Formlarım</span>
-                </Link>
-                <Link 
-                  to="/students" 
-                  className={`navbar-item ${isActive('/students')}`}
-                  onClick={(e) => handleNavigate('/students', e)}
-                >
-                  <span className="navbar-item-text">Öğrenci Yönetimi</span>
-                </Link>
-                <Link 
-                  to="/classes" 
-                  className={`navbar-item ${isActive('/classes')}`}
-                  onClick={(e) => handleNavigate('/classes', e)}
-                >
-                  <span className="navbar-item-text">Sınıf Yönetimi</span>
-                </Link>
+                {/* Optik İşlemleri Dropdown */}
+                <div className={`navbar-item nav-dropdown ${isActive(['/optik-olustur', '/optik-formlarim'])}`} ref={optikMenuRef}>
+                  <span 
+                    onClick={toggleOptikMenu} 
+                    className="nav-dropdown-trigger"
+                    tabIndex="0"
+                    onKeyDown={(e) => e.key === 'Enter' && toggleOptikMenu(e)}
+                    aria-haspopup="true"
+                    aria-expanded={optikMenuOpen}
+                  >
+                    <span className="navbar-item-text">Optik İşlemleri</span>
+                    <svg 
+                      xmlns="http://www.w3.org/2000/svg" 
+                      width="16" 
+                      height="16" 
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      strokeWidth="2" 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round"
+                      className={`dropdown-arrow ${optikMenuOpen ? 'open' : ''}`}
+                    >
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </span>
+                  
+                  {optikMenuOpen && (
+                    <div className="nav-dropdown-content">
+                      <Link 
+                        to="/optik-olustur" 
+                        className={`dropdown-item ${isActive('/optik-olustur')}`}
+                        onClick={(e) => handleNavigate('/optik-olustur', e)}
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="dropdown-icon"
+                        >
+                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                          <polyline points="14 2 14 8 20 8"></polyline>
+                          <line x1="12" y1="18" x2="12" y2="12"></line>
+                          <line x1="9" y1="15" x2="15" y2="15"></line>
+                        </svg>
+                        Optik Form Oluştur
+                      </Link>
+                      <Link 
+                        to="/optik-formlarim" 
+                        className={`dropdown-item ${isActive('/optik-formlarim')}`}
+                        onClick={(e) => handleNavigate('/optik-formlarim', e)}
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="dropdown-icon"
+                        >
+                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                          <polyline points="14 2 14 8 20 8"></polyline>
+                          <line x1="16" y1="13" x2="8" y2="13"></line>
+                          <line x1="16" y1="17" x2="8" y2="17"></line>
+                          <polyline points="10 9 9 9 8 9"></polyline>
+                        </svg>
+                        Optik Formlarım
+                      </Link>
+                    </div>
+                  )}
+                </div>
+                
+                {/* Yönetim İşlemleri Dropdown */}
+                <div className={`navbar-item nav-dropdown ${isActive(['/students', '/classes'])}`} ref={yonetimMenuRef}>
+                  <span 
+                    onClick={toggleYonetimMenu} 
+                    className="nav-dropdown-trigger"
+                    tabIndex="0"
+                    onKeyDown={(e) => e.key === 'Enter' && toggleYonetimMenu(e)}
+                    aria-haspopup="true"
+                    aria-expanded={yonetimMenuOpen}
+                  >
+                    <span className="navbar-item-text">Yönetim İşlemleri</span>
+                    <svg 
+                      xmlns="http://www.w3.org/2000/svg" 
+                      width="16" 
+                      height="16" 
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      strokeWidth="2" 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round"
+                      className={`dropdown-arrow ${yonetimMenuOpen ? 'open' : ''}`}
+                    >
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </span>
+                  
+                  {yonetimMenuOpen && (
+                    <div className="nav-dropdown-content">
+                      <Link 
+                        to="/students" 
+                        className={`dropdown-item ${isActive('/students')}`}
+                        onClick={(e) => handleNavigate('/students', e)}
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="dropdown-icon"
+                        >
+                          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                          <circle cx="9" cy="7" r="4"></circle>
+                          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                        Öğrenci Yönetimi
+                      </Link>
+                      <Link 
+                        to="/classes" 
+                        className={`dropdown-item ${isActive('/classes')}`}
+                        onClick={(e) => handleNavigate('/classes', e)}
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="dropdown-icon"
+                        >
+                          <path d="M3 3v18h18"></path>
+                          <path d="M18.4 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-9.6"></path>
+                          <path d="M10 10h5v5h-5z"></path>
+                        </svg>
+                        Sınıf Yönetimi
+                      </Link>
+                    </div>
+                  )}
+                </div>
+                
+                {/* Yönetici Menüleri Tek Başına Bırakıldı */}
                 {canApproveTeachers && (
                   <Link 
                     to="/approved-teachers" 

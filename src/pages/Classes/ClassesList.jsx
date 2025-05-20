@@ -4,12 +4,14 @@ import { toast } from 'react-toastify';
 import { FiEdit, FiEye, FiTrash2, FiUpload, FiPlus } from 'react-icons/fi';
 import classApi from '../../api/classes';
 import schoolApi from '../../api/schools';
+import studentApi from '../../api/students';
 import './ClassesList.css';
 
 const ClassesList = () => {
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [schools, setSchools] = useState([]);
+  const [studentCounts, setStudentCounts] = useState({});
   const [filters, setFilters] = useState({
     schoolId: '',
     grade: '',
@@ -21,6 +23,13 @@ const ClassesList = () => {
     fetchSchools();
   }, []);
 
+  useEffect(() => {
+    // Sınıf listesi yüklendikten sonra, her sınıf için öğrenci sayısını al
+    if (classes.length > 0) {
+      fetchStudentCounts();
+    }
+  }, [classes]);
+
   const fetchClasses = async () => {
     try {
       setLoading(true);
@@ -31,6 +40,27 @@ const ClassesList = () => {
       toast.error('Sınıflar yüklenirken bir hata oluştu');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchStudentCounts = async () => {
+    try {
+      const counts = {};
+      
+      // Her sınıf için öğrenci sayısını al
+      for (const classItem of classes) {
+        try {
+          const response = await studentApi.getStudentsByClass(classItem._id);
+          counts[classItem._id] = response.data ? response.data.length : 0;
+        } catch (error) {
+          console.error(`Error fetching students for class ${classItem._id}:`, error);
+          counts[classItem._id] = 0;
+        }
+      }
+      
+      setStudentCounts(counts);
+    } catch (error) {
+      console.error('Error fetching student counts:', error);
     }
   };
 
@@ -174,21 +204,21 @@ const ClassesList = () => {
                   </td>
                   <td>{classItem.grade}. Sınıf</td>
                   <td>{classItem.school.name}</td>
-                  <td>{classItem.students ? classItem.students.length : 0}</td>
+                  <td>{studentCounts[classItem._id] !== undefined ? studentCounts[classItem._id] : 'Yükleniyor...'}</td>
                   <td className="action-buttons">
-                    <Link 
-                      to={`/classes/edit/${classItem._id}`}
-                      className="edit-button"
-                      title="Düzenle"
-                    >
-                      <FiEdit size={16} />
-                    </Link>
                     <Link
                       to={`/classes/detail/${classItem._id}`}
                       className="view-button"
                       title="Görüntüle"
                     >
                       <FiEye size={16} />
+                    </Link>
+                    <Link 
+                      to={`/classes/edit/${classItem._id}`}
+                      className="edit-button"
+                      title="Düzenle"
+                    >
+                      <FiEdit size={16} />
                     </Link>
                     <button 
                       className="delete-button"
