@@ -8,7 +8,8 @@ const classApi = {
   
   // Get classes by school
   getClassesBySchool: () => {
-    return apiClient.get(`/class/school`);
+    // Backend'de /class/school şeklinde tanımlanmış, schoolId parametresi backend'de kullanıcı token'ından alınıyor
+    return apiClient.get('/class/school');
   },
   
   // Get a specific class by ID

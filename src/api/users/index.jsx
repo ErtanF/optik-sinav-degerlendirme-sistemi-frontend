@@ -59,6 +59,11 @@ const usersApi = {
   // Okul müdürünün okulundaki onaylanmış öğretmenleri getir
   getApprovedTeachersBySchool: async () => {
     return apiClient.get('/user/getApprovedTeachersBySchool');
+  },
+
+  // Superadmin için tüm onaylanmış öğretmenleri getir
+  getAllApprovedTeachers: async () => {
+    return apiClient.get('/user/getAllApprovedTeachers');
   }
 };
 

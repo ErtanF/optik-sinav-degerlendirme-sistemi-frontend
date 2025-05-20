@@ -11,9 +11,9 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // LocalStorage'dan kullanıcı bilgilerini kontrol et
-    const token = localStorage.getItem('token');
-    const user = localStorage.getItem('user');
+    // LocalStorage ve SessionStorage'dan kullanıcı bilgilerini kontrol et
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    const user = localStorage.getItem('user') || sessionStorage.getItem('user');
     
     if (token && user) {
       setCurrentUser(JSON.parse(user));
@@ -24,13 +24,26 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   // Login işlemi
-  const login = (userData, token) => {
+  const login = (userData, token, rememberMe = false) => {
     setCurrentUser(userData);
     setIsAuthenticated(true);
     
-    // LocalStorage'a kaydet
-    localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify(userData));
+    // rememberMe seçeneğine göre localStorage veya sessionStorage'a kaydet
+    if (rememberMe) {
+      // Kalıcı olarak sakla
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(userData));
+      // SessionStorage'ı temizle
+      sessionStorage.removeItem('token');
+      sessionStorage.removeItem('user');
+    } else {
+      // Geçici olarak sakla (tarayıcı kapandığında silinir)
+      sessionStorage.setItem('token', token);
+      sessionStorage.setItem('user', JSON.stringify(userData));
+      // LocalStorage'ı temizle
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+    }
   };
 
   // Logout işlemi
@@ -38,9 +51,11 @@ export const AuthProvider = ({ children }) => {
     setCurrentUser(null);
     setIsAuthenticated(false);
     
-    // LocalStorage'dan temizle
+    // Her iki storage'dan da temizle
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('user');
     
     // Login sayfasına yönlendir
     navigate('/login');
