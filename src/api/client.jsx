@@ -16,8 +16,8 @@ const apiClient = axios.create(apiConfig);
 // Request interceptor
 apiClient.interceptors.request.use(
   (config) => {
-    // LocalStorage'dan token alma ve her isteğe ekleme
-    const token = localStorage.getItem('token');
+    // LocalStorage veya SessionStorage'dan token alma ve her isteğe ekleme
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -40,6 +40,8 @@ apiClient.interceptors.response.use(
     if (response && response.status === 401) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
+      sessionStorage.removeItem('token');
+      sessionStorage.removeItem('user');
       window.location.href = '/login';
     }
     

@@ -1,6 +1,6 @@
 // src/pages/Auth/Login.jsx - Güncelleme
 import './Login.css';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import Input from '../../components/ui/Input/Input';
 import Button from '../../components/ui/Button/Button';
@@ -14,7 +14,8 @@ const Login = () => {
 
   const [formData, setFormData] = useState({
     email: '',
-    password: ''
+    password: '',
+    rememberMe: false
   });
 
   const [errors, setErrors] = useState({});
@@ -23,12 +24,24 @@ const Login = () => {
 
   // Location state'inden mesajı al (kayıt başarılı mesajı gibi)
   const message = location.state?.message;
+  
+  // Component mount olduğunda localStorage'dan rememberMe değerini kontrol et
+  useEffect(() => {
+    const savedRememberMe = localStorage.getItem('rememberMe') === 'true';
+    const savedEmail = savedRememberMe ? localStorage.getItem('userEmail') || '' : '';
+    
+    setFormData(prevState => ({
+      ...prevState,
+      email: savedEmail,
+      rememberMe: savedRememberMe
+    }));
+  }, []);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setFormData({
       ...formData,
-      [name]: value
+      [name]: type === 'checkbox' ? checked : value
     });
 
     // Clear error when field is edited
@@ -71,9 +84,20 @@ const Login = () => {
         // Gerçek API çağrısı
         const response = await authApi.login({
           email: formData.email,
-          password: formData.password
-        });        // Başarılı login
-        login(response.user, response.token);
+          password: formData.password,
+          rememberMe: formData.rememberMe
+        });        
+        
+        // Beni hatırla seçeneğini localStorage'a kaydet
+        localStorage.setItem('rememberMe', formData.rememberMe);
+        if (formData.rememberMe) {
+          localStorage.setItem('userEmail', formData.email);
+        } else {
+          localStorage.removeItem('userEmail');
+        }
+        
+        // Başarılı login
+        login(response.user, response.token, formData.rememberMe);
         navigate('/');
       } catch (error) {
         setErrors({
@@ -113,40 +137,56 @@ const Login = () => {
               required
           />
 
-          <div className="password-input-container">
-            <Input
+          <div className="input-group">
+            <label htmlFor="password" className="input-label">
+              Şifre
+              <span className="required-mark">*</span>
+            </label>
+            <div className="password-input-container">
+              <input
                 type={showPassword ? "text" : "password"}
-                label="Şifre"
                 id="password"
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
                 placeholder="Şifrenizi girin"
-                error={errors.password}
+                className={`input-field ${errors.password ? 'input-error' : ''}`}
                 required
-            />
-            <button 
-                type="button" 
-                className="password-toggle" 
-                onClick={togglePasswordVisibility}
-                aria-label={showPassword ? "Parolayı gizle" : "Parolayı göster"}
-            >
-                {showPassword ? (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-                        <line x1="1" y1="1" x2="23" y2="23"></line>
-                    </svg>
-                ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                        <circle cx="12" cy="12" r="3"></circle>
-                    </svg>
-                )}
-            </button>
+              />
+              <button 
+                  type="button" 
+                  className="password-toggle" 
+                  onClick={togglePasswordVisibility}
+                  aria-label={showPassword ? "Parolayı gizle" : "Parolayı göster"}
+              >
+                  {showPassword ? (
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                          <line x1="1" y1="1" x2="23" y2="23"></line>
+                      </svg>
+                  ) : (
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                          <circle cx="12" cy="12" r="3"></circle>
+                      </svg>
+                  )}
+              </button>
+            </div>
+            {errors.password && <div className="error-message">{errors.password}</div>}
           </div>
 
-          <div className="forgot-password">
-            <Link to="/forgotPassword" className="auth-link">
+          <div className="remember-me-container">
+            <label className="remember-me-label">
+              <input
+                type="checkbox"
+                name="rememberMe"
+                checked={formData.rememberMe}
+                onChange={handleChange}
+                className="remember-me-checkbox"
+              />
+              <span className="remember-me-text">Beni hatırla</span>
+            </label>
+            <Link to="/forgotPassword" className="auth-link forgot-password-link">
               Şifremi unuttum
             </Link>
           </div>

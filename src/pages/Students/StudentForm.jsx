@@ -8,10 +8,14 @@ import { useAuth } from '../../hooks/useAuth';
 import './StudentForm.css';
 
 const StudentForm = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, currentUser } = useAuth();
   const { id } = useParams();
   const navigate = useNavigate();
   const isEditMode = Boolean(id);
+  
+  // Kullanıcının rolünü ve okul ID'sini kontrol et
+  const isSuperAdmin = currentUser?.role === 'superadmin';
+  const userSchoolId = currentUser?.school?._id || currentUser?.schoolId;
   
   const [loading, setLoading] = useState(isEditMode);
   const [submitting, setSubmitting] = useState(false);
@@ -32,14 +36,27 @@ const StudentForm = () => {
     if (!isAuthenticated) {
       toast.error('Bu sayfaya erişmek için giriş yapmanız gerekmektedir');
       navigate('/login');
+      return;
     }
-  }, [isAuthenticated, navigate]);
+    
+    // Süperadmin değilse ve okulId varsa, formData'yı otomatik ayarla
+    if (!isSuperAdmin && userSchoolId && !isEditMode) {
+      setFormData(prev => ({ ...prev, schoolId: userSchoolId }));
+    }
+  }, [isAuthenticated, navigate, isSuperAdmin, userSchoolId, isEditMode]);
   
   const fetchStudentData = useCallback(async () => {
     try {
       setLoading(true);
       const response = await studentApi.getStudentById(id);
       const student = response.data;
+      
+      // Eğer süperadmin değilse ve öğrencinin okulu kullanıcının okulundan farklıysa
+      if (!isSuperAdmin && student.school._id !== userSchoolId) {
+        toast.error('Bu öğrenciyi düzenleme yetkiniz bulunmamaktadır');
+        navigate('/students');
+        return;
+      }
       
       setFormData({
         firstName: student.firstName,
@@ -56,7 +73,7 @@ const StudentForm = () => {
     } finally {
       setLoading(false);
     }
-  }, [id, navigate]);
+  }, [id, navigate, isSuperAdmin, userSchoolId]);
   
   // Fetch student data if in edit mode
   useEffect(() => {
@@ -69,7 +86,7 @@ const StudentForm = () => {
   // Fetch classes when school is selected
   useEffect(() => {
     if (formData.schoolId) {
-      fetchClassesBySchool(formData.schoolId);
+      fetchClassesBySchool();
     } else {
       setClasses([]);
       setFormData(prev => ({ ...prev, classId: '' }));
@@ -86,10 +103,23 @@ const StudentForm = () => {
     }
   };
   
-  const fetchClassesBySchool = async (schoolId) => {
+  const fetchClassesBySchool = async () => {
     try {
-      const response = await classApi.getClassesBySchool(schoolId);
-      setClasses(response.data || []);
+      // schoolId parametresini kaldırdık çünkü backend API'si kullanıcının okul bilgisini token'dan alıyor
+      const response = await classApi.getClassesBySchool();
+      
+      // Sınıfları doğru sıralamak için (sayısal olarak, ör: 1-A, 5-A, 10-A şeklinde)
+      const sortedClasses = [...(response.data || [])].sort((a, b) => {
+        // Sınıf adından sayısal kısmı çıkarıyoruz (örn: "10-A" -> 10)
+        const getClassNumber = (className) => {
+          const match = className.name.match(/^(\d+)/);
+          return match ? parseInt(match[1], 10) : 0;
+        };
+        
+        return getClassNumber(a) - getClassNumber(b);
+      });
+      
+      setClasses(sortedClasses);
     } catch (error) {
       console.error('Error fetching classes:', error);
       toast.error('Sınıflar yüklenirken bir hata oluştu');
@@ -122,12 +152,15 @@ const StudentForm = () => {
     try {
       setSubmitting(true);
       
+      // Süperadmin değilse, okul değiştirmeye izin verme
+      const finalSchoolId = !isSuperAdmin ? userSchoolId : formData.schoolId;
+      
       const studentData = {
         firstName: formData.firstName,
         lastName: formData.lastName,
         nationalId: formData.nationalId,
         studentNumber: formData.studentNumber,
-        schoolId: formData.schoolId,
+        schoolId: finalSchoolId,
         classId: formData.classId
       };
       
@@ -217,20 +250,32 @@ const StudentForm = () => {
           </div>
           
           <div className="form-row">
+            {/* Okul seçimi sadece süperadmin için, diğerleri için sadece görüntülenir */}
             <div className="form-group">
               <label htmlFor="schoolId">Okul *</label>
-              <select
-                id="schoolId"
-                name="schoolId"
-                value={formData.schoolId}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Okul Seçin</option>
-                {schools.map(school => (
-                  <option key={school._id} value={school._id}>{school.name}</option>
-                ))}
-              </select>
+              {isSuperAdmin ? (
+                <select
+                  id="schoolId"
+                  name="schoolId"
+                  value={formData.schoolId}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Okul Seçin</option>
+                  {schools.map(school => (
+                    <option key={school._id} value={school._id}>{school.name}</option>
+                  ))}
+                </select>
+              ) : (
+                <div className="form-display-value">
+                  {schools.find(s => s._id === userSchoolId)?.name || 'Yükleniyor...'}
+                  <input 
+                    type="hidden" 
+                    name="schoolId" 
+                    value={userSchoolId || ''} 
+                  />
+                </div>
+              )}
             </div>
             
             <div className="form-group">
