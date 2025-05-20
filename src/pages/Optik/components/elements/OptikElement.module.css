@@ -18,7 +18,7 @@
 }
 
 .manualHeaderInput {
-  background-color: rgba(128, 0, 128, 0.1); /* Şeffaf mor renk */
+  background-color: rgba(255, 101, 187, 0.6); /* Şeffaf mor renk */
   border: none;
   border-bottom: 1px solid #ddd;
   padding: 4px 8px;
@@ -55,23 +55,33 @@
 
 .removeButton {
   position: absolute;
-  top: -10px;
-  right: -10px;
+  top: -1px;
+  right: -1px;
   width: 20px;
   height: 20px;
   background-color: #f44336;
   color: white;
-  border: none;
+  border: 1px solid white;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 14px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  font-size: 12px;
+  font-weight: bold;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   z-index: 10;
+  transition: all 0.2s ease;
+  padding: 0;
+  line-height: 1;
 }
 
 .removeButton:hover {
   background-color: #d32f2f;
+  transform: scale(1.1);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+}
+
+.removeButton:active {
+  transform: scale(0.95);
 }

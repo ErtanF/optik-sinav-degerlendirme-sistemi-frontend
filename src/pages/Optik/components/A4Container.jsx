@@ -62,7 +62,7 @@ const A4Container = memo(function A4Container() {
 
   // Elle hesaplayarak her bir noktayı grid hizasında oluştur
   // İlk noktayı 10px aşağıdan başlat, son noktayı dahil etme
-  for (let i = 10 + (gridSize * 3); i < a4Height - gridSize; i += gridSize) {
+  for (let i = 10 + (gridSize * 2); i < a4Height - gridSize; i += gridSize) {
   dots.push(
     <div 
       key={i} 
@@ -86,7 +86,7 @@ const A4Container = memo(function A4Container() {
       style={{ 
         position: 'absolute', 
         top: '45px',
-        left: '25px',
+        left: '45px',
         width: '12px',
         height: '12px',
         backgroundColor: '#000',
@@ -102,6 +102,38 @@ const A4Container = memo(function A4Container() {
       style={{ 
         position: 'absolute', 
         top: '45px',
+        left: '725px',
+        width: '12px',
+        height: '12px',
+        backgroundColor: '#000',
+        borderRadius: '50%',
+        zIndex: '10'
+      }}
+    />
+    
+  );
+  dots.push(
+    <div 
+      key="specialDot4"
+      style={{ 
+        position: 'absolute', 
+        top: '45px',
+        left: '705px',
+        width: '12px',
+        height: '12px',
+        backgroundColor: '#000',
+        borderRadius: '50%',
+        zIndex: '10'
+      }}
+    />
+    
+  );
+  dots.push(
+    <div 
+      key="specialDot2"
+      style={{ 
+        position: 'absolute', 
+        top: '1085px',
         left: '45px',
         width: '12px',
         height: '12px',
