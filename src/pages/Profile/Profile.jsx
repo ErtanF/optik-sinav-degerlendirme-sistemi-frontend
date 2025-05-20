@@ -27,6 +27,7 @@ const Profile = () => {
   });
   const [errors, setErrors] = useState({});
   const errorShownRef = useRef(false);
+  const profileFetchedRef = useRef(false); // Profil bilgisinin çekilip çekilmediğini takip etmek için
 
   // İlk yüklemede context'ten başlat
   useEffect(() => {
@@ -38,17 +39,22 @@ const Profile = () => {
         school: currentUser.school
       });
     }
-    fetchUserProfile();
+    
+    // Profil bilgisi sadece bir kez çekilsin
+    if (!profileFetchedRef.current) {
+      fetchUserProfile();
+      profileFetchedRef.current = true;
+    }
     // eslint-disable-next-line
-  }, [currentUser]);
+  }, []);
 
   const fetchUserProfile = async () => {
     try {
       setLoading(true);
       const response = await usersApi.getUserProfile();
       
-      // response.data içinde kullanıcı bilgileri var
       const profileData = response.data;
+      // console.log(profileData); // Sürekli log yapmayı kaldırıyoruz
       
       // Eğer okul bir ID ise, okul bilgilerini çek
       if (profileData.school && typeof profileData.school === 'string') {

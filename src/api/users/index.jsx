@@ -32,7 +32,7 @@ const usersApi = {
   // Kullanıcı profilini getir
   getUserProfile: async () => {
     try {
-      const response = await apiClient.get('/user/profile');
+      const response = await apiClient.get('/user');
       return response;
     } catch (error) {
       console.error('API error in getUserProfile:', error);
