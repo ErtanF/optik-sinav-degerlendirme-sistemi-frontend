@@ -102,13 +102,130 @@ const OptikDetay = () => {
     }
   };
 
-  const handlePrint = () => {
-    // Mevcut yazdırma fonksiyonu
-  };
+ const handlePrint = () => {
+  if (!form) return;
+  
+  try {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      alert('Lütfen popup engelleyiciyi devre dışı bırakın.');
+      return;
+    }
+    
+    const baseUrl = getBaseUrl();
+    const formImageUrl = `${baseUrl}${form.opticalFormImage}`;
+    
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>${form.title}</title>
+        <style>
+          @page { 
+            size: A4 portrait; 
+            margin: 0; 
+          }
+          body { 
+            margin: 0; 
+            padding: 0; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: white;
+          }
+          .form-container {
+            width: 210mm;
+            height: 297mm;
+            overflow: hidden;
+            position: relative;
+            background-color: white;
+          }
+          .form-image { 
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+          }
+          @media print {
+            .no-print { 
+              display: none; 
+            }
+            html, body {
+              width: 210mm;
+              height: 297mm;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="no-print" style="position: fixed; top: 10px; right: 10px; z-index: 9999;">
+          <button onclick="window.print()" style="padding: 8px 16px; background: #0056b3; color: white; border: none; border-radius: 4px; cursor: pointer;">Yazdır</button>
+          <button onclick="window.close()" style="padding: 8px 16px; margin-left: 10px; background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer;">Kapat</button>
+        </div>
+        
+        <div class="form-container">
+          <img src="${formImageUrl}" alt="${form.title}" class="form-image" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100%\\' height=\\'100%\\' viewBox=\\'0 0 24 24\\'><text x=\\'50%\\' y=\\'50%\\' dominant-baseline=\\'middle\\' text-anchor=\\'middle\\' font-size=\\'14\\'>Resim yüklenemedi</text></svg>'; this.style.padding='20px'; this.style.border='1px dashed #ccc';" />
+        </div>
+        
+        <script>
+          // Resim başarıyla yüklendiğinde otomatik yazdırma işlemi başlat
+          document.querySelector('.form-image').onload = function() {
+            // Yazdırma işlemi için kısa bir gecikme ekle
+            setTimeout(() => {
+              window.print();
+            }, 300);
+          };
+        </script>
+      </body>
+      </html>
+    `;
+    
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
+  } catch (error) {
+    console.error('Yazdırma işlemi sırasında hata:', error);
+    alert('Yazdırma işlemi sırasında bir hata oluştu: ' + error.message);
+  }
+};
 
-  const handleDelete = async () => {
-    // Mevcut silme fonksiyonu
-  };
+ const handleDelete = async () => {
+  if (!form) return;
+  
+  // Silme işlemi için kullanıcıdan onay al
+  const isConfirmed = window.confirm(`"${form.title}" adlı formu silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.`);
+  
+  if (!isConfirmed) return;
+  
+  try {
+    // UI'da yükleniyor durumunu göster
+    setLoading(true);
+    setError(null);
+    
+    // Form silme API çağrısı
+    await optikApi.deleteForm(form._id);
+    
+    // Başarılı mesajı göster ve listeye yönlendir
+    navigate('/optik-formlarim', { 
+      state: { 
+        message: `"${form.title}" adlı form başarıyla silindi.`,
+        success: true
+      } 
+    });
+    
+  } catch (error) {
+    console.error('Form silinirken hata:', error);
+    
+    // Hata mesajını hazırla
+    const errorMessage = error.response?.data?.message || error.message || 'Form silinirken bir hata oluştu.';
+    setError(errorMessage);
+    
+    // Yükleniyor durumunu kapat
+    setLoading(false);
+    
+    // Kullanıcıya görünür geri bildirim
+    window.scrollTo(0, 0); // Hata mesajının görünmesi için sayfanın üstüne kaydır
+  }
+};
 
   if (loading) {
     return (
