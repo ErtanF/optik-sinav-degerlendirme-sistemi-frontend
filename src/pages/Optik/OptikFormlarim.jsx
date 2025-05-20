@@ -105,7 +105,7 @@ const OptikFormlarim = () => {
                   <Link to={`/optik/${form._id}`}>
                     <Button variant="outline" size="small">Görüntüle</Button>
                   </Link>
-                  <Link to={`/optik-duzenle/${form._id}`}>
+                  <Link to={`/optik-olustur?edit=${form._id}`}>
                     <Button variant="primary" size="small">Düzenle</Button>
                   </Link>
                   <Button 

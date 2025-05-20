@@ -56,11 +56,36 @@ const optikApi = {
 },
   
   // Formu güncelle
-  updateForm: async (id, formData) => {
+    updateForm: async (id, formData) => {
     try {
-      const response = await apiClient.put(`/exam/${id}`, formData);
+      console.log(`Form güncelleme API çağrısı başlatılıyor - ID: ${id}`);
+      console.log('Gönderilen form verisi:', formData);
+      console.log('Gönderilen sınıflar:', formData.assignedClasses);
+      
+      // Kritik alanlar için veri doğrulama
+      if (!formData.createdBy || formData.createdBy === 'undefined') {
+        throw new Error('Geçerli bir kullanıcı ID\'si gereklidir.');
+      }
+      
+      if (!formData.school || formData.school === 'undefined') {
+        throw new Error('Geçerli bir okul ID\'si gereklidir.');
+      }
+      
+      // Veriyi düzenle - sınıf ID'lerinin düzgün formatta olduğundan emin ol
+      const preparedData = {
+        ...formData,
+        assignedClasses: Array.isArray(formData.assignedClasses) 
+          ? formData.assignedClasses.map(id => id.toString())
+          : []
+      };
+      
+      // PUT isteği gönder
+      const response = await apiClient.put(`/exam/${id}`, preparedData);
+      console.log('Backend yanıtı:', response);
       return response;
     } catch (error) {
+      console.error("Form güncelleme hatası:", error);
+      console.error("Hata detayları:", error.response?.data);
       throw error;
     }
   },

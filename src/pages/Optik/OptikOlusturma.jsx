@@ -1,6 +1,6 @@
 // src/pages/Optik/OptikOlusturma.jsx
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import './OptikOlusturma.css';
 import Button from '../../components/ui/Button/Button';
 import LeftSidebar from './components/LeftSidebar';
@@ -9,25 +9,98 @@ import PreviewModal from './components/PreviewModal';
 import FormRenderer from './components/FormRenderer';
 import { FormEditorProvider, useFormEditor } from './context/FormEditorContext';
 import optikApi from '../../api/optik';
-import classApi from '../../api/classes'; // Sınıfları getirmek için API'yi ekleyin
+import classApi from '../../api/classes';
 
 // FormEditor Context'ine erişmek için wrapper bileşen
 const OptikOlusturmaContent = () => {
   const navigate = useNavigate();
-  const { pageElements, customBubbleValues} = useFormEditor();
+  const [searchParams] = useSearchParams();
+  const editId = searchParams.get('edit'); // URL'den düzenleme ID'sini al
+  const { pageElements, customBubbleValues, loadFormState, getFormStateForSave } = useFormEditor();
   
-  // State değişkenleri
+  const [isEditMode, setIsEditMode] = useState(false);
   const [formTitle, setFormTitle] = useState('Yeni Optik Form');
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [userData, setUserData] = useState(null);
   const [formImage, setFormImage] = useState(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   
-  // Sınıf listesi ve seçim için state ekleyin
+  // Sınıf listesi ve seçim için state
   const [classes, setClasses] = useState([]);
   const [selectedClasses, setSelectedClasses] = useState([]);
   const [classesLoading, setClassesLoading] = useState(false);
+  
+  // Eğer düzenleme modu ise, form verilerini yükle
+  useEffect(() => {
+    if (editId) {
+      setIsEditMode(true);
+      setLoading(true);
+      loadExistingForm(editId);
+    }
+  }, [editId]);
+  
+  // Mevcut formu yükleme fonksiyonu
+  const loadExistingForm = async (formId) => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Form verilerini API'den al
+      const response = await optikApi.getFormById(formId);
+      
+      if (!response || !response.data) {
+        throw new Error("Form verileri alınamadı");
+      }
+      
+      const formData = response.data;
+      
+      // Form başlığını ayarla
+      setFormTitle(formData.title || 'Düzenlenen Form');
+      
+      // Form görüntüsünü ayarla
+      if (formData.opticalFormImage) {
+        setFormImage(formData.opticalFormImage);
+      }
+      
+      // Atanan sınıfları ayarla
+      if (formData.assignedClasses && Array.isArray(formData.assignedClasses)) {
+        setSelectedClasses(formData.assignedClasses);
+      }
+      
+      // Form bileşenlerini FormEditor context'ine yükle
+      if (formData.components && Array.isArray(formData.components)) {
+        // Form elemanlarını ve bubble değerlerini ayırma
+        const elements = formData.components.map(comp => {
+          const { bubbleValues, ...elementData } = comp;
+          return elementData;
+        });
+        
+        // Bubble değerlerini ayırma
+        const bubbleValues = {};
+        formData.components.forEach(comp => {
+          if (comp.bubbleValues && comp.uniqueId) {
+            bubbleValues[comp.uniqueId] = comp.bubbleValues;
+          }
+        });
+        
+        // FormEditor context'ine form durumunu yükle
+        loadFormState({
+          pageElements: elements,
+          customBubbleValues: bubbleValues
+        });
+      }
+      
+      console.log('Form başarıyla yüklendi:', formData.title);
+      
+    } catch (error) {
+      console.error('Form yüklenirken hata:', error);
+      setError('Form yüklenirken bir sorun oluştu: ' + (error.message || 'Bilinmeyen hata'));
+    } finally {
+      setLoading(false);
+    }
+  };
   
   // Kullanıcı bilgilerini yükle
   useEffect(() => {
@@ -78,7 +151,7 @@ const OptikOlusturmaContent = () => {
     setFormTitle(e.target.value);
   };
   
-  // Form kaydetme
+  // Form kaydetme - düzenleme modunu destekleyecek şekilde güncellenmiş
   const handleSave = async () => {
     try {
       setSaving(true);
@@ -110,7 +183,7 @@ const OptikOlusturmaContent = () => {
         throw new Error("Form görüntüsü oluşturulamadı. Lütfen tekrar deneyin.");
       }
       
-      // Form verisini hazırla - sınıf bilgisini ekliyoruz
+      // Form verisini hazırla
       const formData = {
         title: formTitle,
         school: schoolId,
@@ -121,16 +194,27 @@ const OptikOlusturmaContent = () => {
           ...element,
           bubbleValues: customBubbleValues[element.uniqueId] || {}
         })),
-        // Seçilen sınıfları ekle
         assignedClasses: selectedClasses
       };
       
-      // Form verisini sunucuya gönder
-      await optikApi.createForm(formData);
+      let response;
+      
+      // Düzenleme modu veya yeni oluşturma moduna göre API çağrısı yap
+      if (isEditMode && editId) {
+        response = await optikApi.updateForm(editId, formData);
+        console.log('Form güncellendi:', response);
+      } else {
+        response = await optikApi.createForm(formData);
+        console.log('Yeni form oluşturuldu:', response);
+      }
       
       // Başarıyla kaydetme ve yönlendirme
       navigate('/', { 
-        state: { message: 'Form başarıyla kaydedildi.' } 
+        state: { 
+          message: isEditMode 
+            ? 'Form başarıyla güncellendi.' 
+            : 'Form başarıyla kaydedildi.' 
+        } 
       });
     } catch (error) {
       // Hata mesajını hazırla
@@ -174,11 +258,23 @@ const OptikOlusturmaContent = () => {
     setTimeout(handleSave, 100);
   };
   
+  // Yükleniyor durumunu göster
+  if (loading) {
+    return (
+      <div className="optik-olusturma-page">
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p>Form yükleniyor...</p>
+        </div>
+      </div>
+    );
+  }
+  
   return (
     <div className="optik-olusturma-page">
       <div className="page-header">
         <div className="header-title">
-          <h1>Optik Form Oluştur</h1>
+          <h1>{isEditMode ? 'Optik Form Düzenle' : 'Optik Form Oluştur'}</h1>
           <div className="form-header-inputs">
             <input
               type="text"
@@ -249,10 +345,10 @@ const OptikOlusturmaContent = () => {
             onClick={openPreview}
             disabled={saving}
           >
-            Önizle ve Kaydet
+            {saving ? 'Kaydediliyor...' : isEditMode ? 'Önizle ve Güncelle' : 'Önizle ve Kaydet'}
           </Button>
-          <Link to="/">
-            <Button variant="outline">Dashboard'a Dön</Button>
+          <Link to={isEditMode ? `/optik/${editId}` : "/"}>
+            <Button variant="outline">{isEditMode ? 'Detaya Dön' : 'Dashboard\'a Dön'}</Button>
           </Link>
         </div>
       </div>
