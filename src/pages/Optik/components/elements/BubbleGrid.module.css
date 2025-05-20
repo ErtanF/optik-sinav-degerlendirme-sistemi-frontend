@@ -12,16 +12,16 @@
   display: none !important;
 }
 .oddColumn {
-  background-color: rgba(128, 0, 128, 0.1); /* Şeffaf mor renk */
+  background-color: rgba(255, 101, 187, 0.3); /* Şeffaf mor renk */
 }
 .digitColumn.oddColumn,
 .bubbleColumn.oddColumn {
-  background-color: rgba(128, 0, 128, 0.1);
+  background-color: rgba(255, 101, 187, 0.3);
 }
 
 /* Çoktan seçmeli için kolon stillerini güncelleme */
 .choiceContainer.oddColumn {
-  background-color: rgba(128, 0, 128, 0.1);
+  background-color: rgba(255, 101, 187, 0.3);
 }
 
 /* Veri niteliği kullanarak erişim için */

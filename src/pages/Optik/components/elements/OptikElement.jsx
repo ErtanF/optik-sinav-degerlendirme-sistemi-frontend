@@ -210,11 +210,12 @@ const OptikElement = memo(function OptikElement({
       
       {isActive && (
         <button 
-          className={styles.removeButton}
-          onClick={onRemove}
-        >
-          &times;
-        </button>
+            className={styles.removeButton}
+            onClick={onRemove}
+            title="Elemanı sil"
+          >
+            ×
+          </button>
       )}
     </div>
   );

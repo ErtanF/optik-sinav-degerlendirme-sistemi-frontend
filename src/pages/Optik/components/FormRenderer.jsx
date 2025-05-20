@@ -216,7 +216,7 @@ const FormRenderer = ({
     {/* İlk 3 satırı atlayarak 4. satırdan başla */}
     {Array.from({ length: Math.floor((297 * 3.78 - 20) / 20) }).map((_, index) => {
       // İlk 3 satırı atla
-      if (index < 3) return null;
+      if (index < 2) return null;
       
       return (
         <div 
@@ -250,8 +250,32 @@ const FormRenderer = ({
     <div 
       style={{
         position: 'absolute',
-        top: '45px',   // 2. satır pozisyonu (10px + 20px*2)
+        top: '1085px',   // 2. satır pozisyonu (10px + 20px*2)
         left: '45px',  // Sağdaki sütun (20px + 20px)
+        width: '12px', 
+        height: '12px',
+        backgroundColor: '#000',
+        borderRadius: '50%', // Yuvarlak nokta
+        zIndex: '10'
+      }}
+    ></div>
+    <div 
+      style={{
+        position: 'absolute',
+        top: '45px',   // 2. satır pozisyonu (10px + 20px*2)
+        left: '705px',  // Sağdaki sütun (20px + 20px)
+        width: '12px', 
+        height: '12px',
+        backgroundColor: '#000',
+        borderRadius: '50%', // Yuvarlak nokta
+        zIndex: '10'
+      }}
+    ></div>
+    <div 
+      style={{
+        position: 'absolute',
+        top: '45px',   // 2. satır pozisyonu (10px + 20px*2)
+        left: '725px',  // Sağdaki sütun (20px + 20px)
         width: '12px', 
         height: '12px',
         backgroundColor: '#000',
