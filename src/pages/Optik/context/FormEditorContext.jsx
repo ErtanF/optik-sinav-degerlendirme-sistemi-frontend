@@ -33,23 +33,59 @@ export const FormEditorProvider = ({ children }) => {
   
   // Pozisyonun güvenli alan içinde olup olmadığını kontrol et
   const isWithinSafeZone = useCallback((position, size) => {
-  // Güvenli alan kontrolünü kaldırıyoruz - her zaman true dönecek
-  return true;
+  if (!position || !size) return true;
+  
+  // Eleman boyutları
+  const elementWidth = size.width || 100;
+  const elementHeight = size.height || 100;
+  
+  // Yatay sınırlar
+  const leftBoundary = 85 + 10;
+  const rightBoundary = 745 - 10;
+  
+  // Dikey alt sınır
+  const bottomBoundary = 1125 - 10;
+  
+  // Yatay ve alt sınır kontrolü
+  const isWithinHorizontalBounds = 
+    position.x >= leftBoundary && 
+    (position.x + elementWidth) <= rightBoundary;
+  
+  const isWithinVerticalBounds = 
+    position.y >= 0 && // Üst sınır yok
+    (position.y + elementHeight) <= bottomBoundary; // Alt sınır
+  
+  return isWithinHorizontalBounds && isWithinVerticalBounds;
 }, []);
   
-  const constrainToSafeZone = useCallback((position, size) => {
-    const gridSize = gridSizeRef.current;
-    
-    // Sadece grid'e hizalama yapılıyor, sınırlama yapılmıyor
-    let x = Math.floor(position.x / gridSize) * gridSize;
-    let y = Math.floor(position.y / gridSize) * gridSize;
-    
-    // Negatif değerleri önle
-    x = Math.max(0, x);
-    y = Math.max(0, y);
-    
-    return { x, y };
-  }, []);
+ const constrainToSafeZone = useCallback((position, size) => {
+  const gridSize = gridSizeRef.current;
+  
+  // Grid'e hizalama
+  let x = Math.floor(position.x / gridSize) * gridSize;
+  let y = Math.floor(position.y / gridSize) * gridSize;
+  
+  // Eleman boyutları
+  const elementWidth = size?.width || 100;
+  const elementHeight = size?.height || 100;
+  
+  // Yatay sınırlandırma - özel noktaların konumlarını kullanarak
+  const leftBoundary = 85 + 10; // Sol sınır (özel nokta + biraz boşluk)
+  const rightBoundary = 745 - 10; // Sağ sınır (özel nokta - biraz boşluk)
+  
+  // Dikey alt sınır - 1085px (özel nokta konumu)
+  const bottomBoundary = 1125 - 10; // Alt sınır (özel nokta - biraz boşluk)
+  
+  // X pozisyonunu sınırla - eleman genişliğini hesaba kat
+  x = Math.max(leftBoundary, x);
+  x = Math.min(rightBoundary - elementWidth, x);
+  
+  // Y pozisyonunu sınırla - sadece alt sınır ve negatif değerler
+  y = Math.max(0, y); // Üst sınır yok (sadece negatif değerleri önleme)
+  y = Math.min(bottomBoundary - elementHeight, y); // Alt sınır
+  
+  return { x, y };
+}, []);
   
   // Bubble içeriklerini saklamak için state
   const [customBubbleValues, setCustomBubbleValues] = useState({});

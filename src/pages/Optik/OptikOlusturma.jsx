@@ -209,7 +209,7 @@ const OptikOlusturmaContent = () => {
       }
       
       // Başarıyla kaydetme ve yönlendirme
-      navigate('/', { 
+      navigate('/optik-formlarim', {  
         state: { 
           message: isEditMode 
             ? 'Form başarıyla güncellendi.' 

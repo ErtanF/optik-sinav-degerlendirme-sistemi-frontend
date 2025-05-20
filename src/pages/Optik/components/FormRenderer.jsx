@@ -120,7 +120,7 @@ const FormRenderer = ({
     display: 'flex', flexDirection: 'column', overflow: 'hidden'
   }}>
     <div style={{ 
-      backgroundColor: 'rgba(128, 0, 128, 0.1)', /* Şeffaf mor renk */
+      backgroundColor: 'rgba(255, 101, 187, 0.6)', /* Şeffaf mor renk */
       padding: '4px', textAlign: 'center',
       borderBottom: '1px solid #ddd', fontWeight: 'bold', fontSize: '14px',
       height: '20px', display: 'flex', alignItems: 'center',
@@ -239,7 +239,7 @@ const FormRenderer = ({
       style={{
         position: 'absolute',
         top: '45px',   // 2. satır pozisyonu (10px + 20px*2)
-        left: '25px',  // Sağdaki sütun (20px + 20px)
+        left: '45px',  // Sağdaki sütun (20px + 20px)
         width: '12px', 
         height: '12px',
         backgroundColor: '#000',
