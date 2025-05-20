@@ -19,6 +19,8 @@ import Contact from '../pages/Contact';
 import ApprovedTeachersPage from '../pages/ApprovedTeachersPage';
 import { StudentsList, StudentForm, ExcelImport } from '../pages/Students';
 import { ClassesList, ClassForm, ClassExcelImport, ClassDetail, AddStudentsToClass } from '../pages/Classes';
+// Okul yönetimi sayfaları
+import { SchoolsList, SchoolForm, AdminForm } from '../pages/Schools';
 // Kurumsal sayfalar
 import { Hakkimizda, Kariyer, GizlilikPolitikasi, KullanimSartlari } from '../pages/Kurumsal';
 
@@ -37,6 +39,19 @@ const PublicRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
   if (loading) return null; // veya bir loading spinner dönebilir
   if (isAuthenticated) {
+    return <Navigate to="/" />;
+  }
+  return children;
+};
+
+// SuperAdminRoute bileşeni (sadece süperadmin için)
+const SuperAdminRoute = ({ children }) => {
+  const { isAuthenticated, loading, currentUser } = useAuth();
+  if (loading) return null;
+  if (!isAuthenticated) {
+    return <Navigate to="/login" />;
+  }
+  if (currentUser?.role !== 'superadmin') {
     return <Navigate to="/" />;
   }
   return children;
@@ -104,6 +119,23 @@ const routes = () => [
       {
         path: 'classes/add-students/:id',
         element: <PrivateRoute><AddStudentsToClass /></PrivateRoute>
+      },
+      // Okul Yönetimi Sayfaları (Sadece Süperadmin)
+      {
+        path: 'schools',
+        element: <SuperAdminRoute><SchoolsList /></SuperAdminRoute>
+      },
+      {
+        path: 'schools/new',
+        element: <SuperAdminRoute><SchoolForm /></SuperAdminRoute>
+      },
+      {
+        path: 'schools/edit/:id',
+        element: <SuperAdminRoute><SchoolForm /></SuperAdminRoute>
+      },
+      {
+        path: 'schools/add-admin/:id',
+        element: <SuperAdminRoute><AdminForm /></SuperAdminRoute>
       },
       // Kurumsal Sayfalar
       {

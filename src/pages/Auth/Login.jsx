@@ -78,7 +78,7 @@ const Login = () => {
       } catch (error) {
         setErrors({
           ...errors,
-          general: error.response?.data?.message || 'Giriş başarısız. Lütfen bilgilerinizi kontrol edin.'
+          general: error.response?.data?.error || 'Giriş başarısız. Lütfen bilgilerinizi kontrol edin.'
         });
       } finally {
         setIsSubmitting(false);

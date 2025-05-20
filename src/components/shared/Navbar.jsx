@@ -273,6 +273,15 @@ const Navbar = () => {
                     <span className="navbar-item-text">Onaylı Öğretmenler</span>
                   </Link>
                 )}
+                {currentUser?.role === 'superadmin' && (
+                  <Link 
+                    to="/schools" 
+                    className={`navbar-item ${isActive('/schools')}`}
+                    onClick={(e) => handleNavigate('/schools', e)}
+                  >
+                    <span className="navbar-item-text">Okul Yönetimi</span>
+                  </Link>
+                )}
               </div>
               
               <div className="navbar-actions">
