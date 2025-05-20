@@ -283,7 +283,8 @@ const BubbleGrid = memo(function BubbleGrid({
     
     // Eleman tipine göre karakterleri belirle
     if (type === 'nameSurname') {
-      allCharacters = Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i)); // A-Z
+      allCharacters = ['A', 'B', 'C', 'Ç', 'D', 'E', 'F', 'G', 'Ğ', 'H', 'I', 'İ',
+         'J', 'K', 'L', 'M', 'N', 'O', 'Ö', 'P', 'R', 'S', 'Ş', 'T', 'U', 'Ü', 'V', 'Y', 'Z'];
     } else if (type === 'classBranch') {
       // Burada rows değerini kullanarak gösterilecek harf sayısını sınırlıyoruz
       // rows değeri elementPropertiesPanel'den özelleştirilebilir

@@ -142,12 +142,12 @@ const getDefaultElementSize = useCallback((type) => {
   
   switch (type) {
     case 'nameSurname':
-      return {
-        width: 10 * gridSize,
-        height: (26 * gridSize) + 60,
-        rows: 26,
-        cols: 10
-      };
+       return {
+    width: 10 * gridSize,
+    height: (29 * gridSize) + 60, // 26 yerine 29 (Türkçe alfabe için)
+    rows: 29, // 26 yerine 29
+    cols: 10
+  };
     case 'number':
       return {
         width: 6 * gridSize,
