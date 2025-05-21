@@ -224,24 +224,24 @@ const BubbleGrid = memo(function BubbleGrid({
 
     // Normal çoktan seçmeli için mevcut düzen
     return (
-      <div className={styles.horizontalGrid}>
-        {Array.from({ length: rows }).map((_, rowIndex) => (
-          <div key={`question-${rowIndex}`} className={styles.questionRow}>
-            <div className={styles.questionNumber}>{startNumber + rowIndex}</div>
-            <div className={styles.choices}>
-              {availableChoices.slice(0, displayedCols).map((char, colIndex) => (
-                <div 
-                  key={`choice-${rowIndex}-${colIndex}`} 
-                  className={`${styles.choiceContainer} ${colIndex % 2 === 0 ? styles.oddColumn : ''}`}
-                >
-                  {renderBubble(rowIndex, colIndex, char)}
-                </div>
-              ))}
+  <div className={styles.horizontalGrid}>
+    {Array.from({ length: rows }).map((_, rowIndex) => (
+      <div key={`question-${rowIndex}`} className={`${styles.questionRow} ${rowIndex % 2 === 0 ? styles.oddRow : ''}`}>
+        <div className={styles.questionNumber}>{startNumber + rowIndex}</div>
+        <div className={styles.choices}>
+          {availableChoices.slice(0, displayedCols).map((char, colIndex) => (
+            <div 
+              key={`choice-${rowIndex}-${colIndex}`} 
+              className={styles.choiceContainer}
+            >
+              {renderBubble(rowIndex, colIndex, char)}
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
-    );
+    ))}
+  </div>
+);
   };
   
   // TC Kimlik ve Telefon No için özel dikey düzen

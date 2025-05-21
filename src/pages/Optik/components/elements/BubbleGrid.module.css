@@ -14,6 +14,9 @@
 .oddColumn {
   background-color: rgba(255, 101, 187, 0.3); /* Şeffaf mor renk */
 }
+.oddRow {
+  background-color: rgba(255, 101, 187, 0.3); /* Şeffaf mor renk - mevcut oddColumn ile aynı renk */
+}
 .digitColumn.oddColumn,
 .bubbleColumn.oddColumn {
   background-color: rgba(255, 101, 187, 0.3);
@@ -61,11 +64,11 @@
 
 /* Diğer mevcut stiller */
 .bubble {
-  width: 16px;
-  height: 16px;
-  border: 1px solid #333;
+  width: 14px;
+  height: 14px;
+  border: 1px solid rgba(255, 101, 187, 0.7);
   border-radius: 50%;
-  background-color: white;
+  background-color: rgba(255, 255, 255, 1);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -76,8 +79,9 @@
 .bubbleLabel {
   font-size: 9px;
   font-weight: bold;
-  color: #555;
+   color: rgba(255, 101, 187, 0.9);
 }
+
 
 /* YATAY (Çoktan Seçmeli) */
 .horizontalGrid {
@@ -92,7 +96,7 @@
 
 .questionRow {
   display: flex;
-  height: 20px;
+  height: 17px;
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -100,14 +104,14 @@
 }
 
 .questionNumber {
-  width: 20px;
-  height: 20px;
+  width: 17px;
+  height: 17px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 10px;
   font-weight: bold;
-  color: #666;
+  color: rgba(255, 101, 187, 0.9);
   box-sizing: border-box;
   flex-shrink: 0;
 }
@@ -121,8 +125,8 @@
 }
 
 .choiceContainer {
-  width: 20px;
-  height: 20px;
+  width: 17px;
+  height: 17px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -169,7 +173,7 @@
 
 .digitCell {
   width: 100%;
-  height: 20px;
+  height: 17px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -180,7 +184,7 @@
 /* El ile yazı yazılacak alan - ÖNEMLİ DEĞİŞİKLİK: Sadece görsel bir boşluk */
 .manualWriteArea {
   display: flex;
-  height: 20px; /* Daha yüksek bir alan yapıldı */
+  height: 17px; /* Daha yüksek bir alan yapıldı */
   padding: 0;
   box-sizing: border-box;
   border-bottom: 1px solid #ddd;
@@ -224,7 +228,7 @@
 
 .bubbleCell {
   width: 100%;
-  height: 20px;
+  height: 17px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -234,7 +238,7 @@
 
 .bookletCodeRow {
   display: flex;
-  height: 20px;
+  height: 17px;
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -245,7 +249,7 @@
 /* Yazdırma için ek stiller */
 @media print {
   .manualWriteArea {
-    height: 25px;
+    height: 17px;
     background-color: white;
     border-bottom: 1px solid #aaa;
   }

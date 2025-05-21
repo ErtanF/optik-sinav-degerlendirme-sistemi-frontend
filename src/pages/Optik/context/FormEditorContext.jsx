@@ -13,7 +13,7 @@ export const FormEditorProvider = ({ children }) => {
   const fileInputRef = useRef(null);
   
   // Grid ve güvenli alan ayarları
-  const gridSizeRef = useRef(20); // Grid boyutu
+  const gridSizeRef = useRef(17); // Grid boyutu
   const safeZoneMarginRef = useRef(30); // Köşe işaretlerinin bulunduğu kenar boşluğu
   const safeZonePaddingRef = useRef(10); // Güvenli alan ek boşluğu
   
@@ -144,35 +144,35 @@ const getDefaultElementSize = useCallback((type) => {
     case 'nameSurname':
        return {
     width: 10 * gridSize,
-    height: (29 * gridSize) + 60, // 26 yerine 29 (Türkçe alfabe için)
+    height: (28 * gridSize) + 52, // 26 yerine 29 (Türkçe alfabe için)
     rows: 29, // 26 yerine 29
     cols: 10
   };
     case 'number':
       return {
         width: 6 * gridSize,
-        height: (10 * gridSize) + 60,
+        height: (9 * gridSize) + 52,
         rows: 10,
         cols: 6
       };
     case 'tcNumber':
       return {
         width: 11 * gridSize,
-        height: (10 * gridSize) + 60,
+        height: (9 * gridSize) + 52,
         rows: 10,
         cols: 11
       };
     case 'phoneNumber':
       return {
         width: 10 * gridSize,
-        height: (10 * gridSize) + 60,
+        height: (9 * gridSize) + 52,
         rows: 10,
         cols: 10
       };
     case 'multipleChoice':
       return {
         width: (5 + 1) * gridSize,
-        height: (20 * gridSize) + 30,
+        height: (20 * gridSize) + 18,
         rows: 20,
         cols: 5
       };
@@ -194,14 +194,14 @@ const getDefaultElementSize = useCallback((type) => {
       case 'classNumber':
   return {
     width: 3 * gridSize,
-    height: (12 * gridSize) + 60, // Ad Soyad gibi +60 ekleyerek
+    height: (12 * gridSize) + 35, // Ad Soyad gibi +60 ekleyerek
     rows: 12,
     cols: 1
   };
 case 'classBranch':
   return {
     width: 3 * gridSize,
-    height: (26 * gridSize) + 60, // Ad Soyad gibi +60 ekleyerek
+    height: (26 * gridSize) + 0, // Ad Soyad gibi +60 ekleyerek
     rows: 26,
     cols: 1
   };

@@ -120,12 +120,12 @@ const FormRenderer = ({
     display: 'flex', flexDirection: 'column', overflow: 'hidden'
   }}>
     <div style={{ 
-      backgroundColor: 'rgba(255, 101, 187, 0.6)', /* Şeffaf mor renk */
+      backgroundColor: 'rgb(255, 255, 255)', /* Şeffaf mor renk */
       padding: '4px', textAlign: 'center',
       borderBottom: '1px solid #ddd', fontWeight: 'bold', fontSize: '14px',
-      height: '20px', display: 'flex', alignItems: 'center',
-      justifyContent: 'center', minHeight: '20px', maxHeight: '20px',
-      flexShrink: 0, color: '#333' /* Başlık yazı rengi */
+      height: '17px', display: 'flex', alignItems: 'center',
+      justifyContent: 'center', minHeight: '17px', maxHeight: '17px',
+      flexShrink: 0, color: 'rgba(248, 76, 173, 0.9)' /* Başlık yazı rengi */
     }}>
       {headerTitle}
     </div>
@@ -170,7 +170,7 @@ const FormRenderer = ({
           height: `${element.size?.height || 100}px`,
           boxSizing: 'border-box',
           backgroundColor: 'white',
-          border: '1px solid rgba(0, 0, 0, 0.1)',
+          border: element.type === 'textArea' || element.type === 'image' ? 'none' : '1px solid rgba(0, 0, 0, 0.1)',
           borderRadius: '4px',
           overflow: 'hidden'
         }}
@@ -214,32 +214,32 @@ const FormRenderer = ({
     }}
   >
     {/* İlk 3 satırı atlayarak 4. satırdan başla */}
-    {Array.from({ length: Math.floor((297 * 3.78 - 20) / 20) }).map((_, index) => {
-      // İlk 3 satırı atla
-      if (index < 2) return null;
-      
-      return (
-        <div 
-          key={index} 
-          style={{
-            position: 'absolute',
-            top: `${(index * 20) + 10}px`, 
-            left: '0',                     
-            width: '20px',                  
-            height: '5px',                  
-            backgroundColor: '#000',
-            borderRadius: '0'               
-          }}
-        ></div>
-      );
-    })}
+    {Array.from({ length: Math.floor((297 * 3.78 - 10) / 17) }).map((_, index) => {
+  // İlk 2 satırı atla
+  if (index < 2) return null;
+  
+  return (
+    <div 
+      key={index} 
+      style={{
+        position: 'absolute',
+        top: `${(index * 17) + 8}px`, // Grid boyutu 17px, 10px offset ile
+        left: '10px',                   // 2. sütun (ilk sütundan sonraki)
+        width: '15px',                  // Grid genişliği
+        height: '4px',                  // Çizgi yüksekliği
+        backgroundColor: '#000',
+        borderRadius: '0'               
+      }}
+    ></div>
+  );
+})}
     
     {/* Sağındaki sütunun 2. satırına büyük nokta */}
     <div 
       style={{
         position: 'absolute',
-        top: '45px',   // 2. satır pozisyonu (10px + 20px*2)
-        left: '45px',  // Sağdaki sütun (20px + 20px)
+        top: '37px',
+        left: '37px',  // Sağdaki sütun (20px + 20px)
         width: '12px', 
         height: '12px',
         backgroundColor: '#000',
@@ -250,8 +250,8 @@ const FormRenderer = ({
     <div 
       style={{
         position: 'absolute',
-        top: '1085px',   // 2. satır pozisyonu (10px + 20px*2)
-        left: '45px',  // Sağdaki sütun (20px + 20px)
+        top: '37px',
+        left: '717px',  // Sağdaki sütun (20px + 20px)
         width: '12px', 
         height: '12px',
         backgroundColor: '#000',
@@ -262,8 +262,8 @@ const FormRenderer = ({
     <div 
       style={{
         position: 'absolute',
-        top: '45px',   // 2. satır pozisyonu (10px + 20px*2)
-        left: '705px',  // Sağdaki sütun (20px + 20px)
+        top: '37px',
+        left: '734px',  // Sağdaki sütun (20px + 20px)
         width: '12px', 
         height: '12px',
         backgroundColor: '#000',
@@ -274,8 +274,8 @@ const FormRenderer = ({
     <div 
       style={{
         position: 'absolute',
-        top: '45px',   // 2. satır pozisyonu (10px + 20px*2)
-        left: '725px',  // Sağdaki sütun (20px + 20px)
+        top: '1090px',
+        left: '37px',  // Sağdaki sütun (20px + 20px)
         width: '12px', 
         height: '12px',
         backgroundColor: '#000',
@@ -291,7 +291,7 @@ const FormRenderer = ({
           className="gridLines"
           style={{
             position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-            backgroundSize: '20px 20px',
+            backgroundSize: '17px 17px',
             backgroundImage: `
               linear-gradient(to right, rgba(0, 0, 0, 0.07) 1px, transparent 1px),
               linear-gradient(to bottom, rgba(0, 0, 0, 0.07) 1px, transparent 1px)

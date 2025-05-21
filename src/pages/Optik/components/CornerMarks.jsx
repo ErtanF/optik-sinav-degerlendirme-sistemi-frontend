@@ -6,7 +6,7 @@ import styles from './CornerMarks.module.css';
  * Bu işaretler optik tarama sırasında formun doğru hizalanması için kullanılır
  */
 const CornerMarks = memo(function CornerMarks({ 
-  safeZoneMargin = 20, // Köşe işaretlerinin kenara uzaklığı
+  safeZoneMargin = 17, // Köşe işaretlerinin kenara uzaklığı
   safeZonePadding = 10, // Güvenli alan çizgisi ek boşluğu
   isVisible = true // Görünürlük kontrolü
 }) {

@@ -67,22 +67,22 @@ const OptikElement = memo(function OptikElement({
       return;
     }
     
-    const gridSize = 20;
+    const gridSize = 17;
     const adjustedWidth = Math.ceil(size.width / gridSize) * gridSize;
     let calculatedHeight;
     
     if (type === 'multipleChoice') {
       // Her soru satırı 20px + başlık yüksekliği (30px)
       const visibleRows = Math.min(rows, 20);
-      calculatedHeight = (visibleRows * 20) + 30;
+      calculatedHeight = (visibleRows * 17) + 25;
     } else if (type === 'nameSurname' || type === 'classBranch' || type === 'classNumber') {
       // Tüm dikey elemanlara aynı yükseklik hesaplama mantığı
-      const rowCount = type === 'nameSurname' || type === 'classBranch' ? 26 :
+      const rowCount = type === 'nameSurname' || type === 'classBranch' ? 28 :
                     type === 'classNumber' ? 12 : 10;
-      calculatedHeight = 30 + 30 + (rowCount * 20); // başlık + yazı alanı + satırlar
+      calculatedHeight = 30 + 30 + (rowCount * 17); // başlık + yazı alanı + satırlar
     } else if (type === 'number' || type === 'tcNumber' || type === 'phoneNumber') {
       // 30px başlık + 30px el yazı alanı + 10 * 20px karakter alanı (0-9)
-      calculatedHeight = 30 + 30 + (10 * 20);
+      calculatedHeight = 30 + 30 + (9 * 17);
     } else if (type === 'textArea' || type === 'image') {
       // Yazı alanı ve resim için boyut korunur
       calculatedHeight = Math.ceil(size.height / gridSize) * gridSize;
@@ -131,7 +131,7 @@ const OptikElement = memo(function OptikElement({
   };
 
   // Pozisyon ve boyutu grid'e göre ayarla
-  const gridSize = 20;
+  const gridSize = 17;
   const adjustedPosition = {
     x: Math.floor(position.x / gridSize) * gridSize,
     y: Math.floor(position.y / gridSize) * gridSize
@@ -182,7 +182,7 @@ const OptikElement = memo(function OptikElement({
               }} 
               onError={(e) => {
                 e.target.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M20.4 14.5L16 10 4 20"/></svg>';
-                e.target.style.padding = '20px';
+                e.target.style.padding = '17px';
                 e.target.style.opacity = '0.5';
               }}
             />

@@ -56,13 +56,13 @@ const A4Container = memo(function A4Container() {
   // Grid çizgileri her 20px'de bir olduğu için, noktalarda da aynı grid hizalamasını kullanacağız
   // Her bir grid çizgisine denk gelen nokta oluşturacağız
   // Toplam nokta sayısı (A4 kağıdının yüksekliği / grid boyutu)
-  const gridSize = 20; // Grid boyutu (piksel)
+  const gridSize = 17; // Grid boyutu (piksel)
   const a4Height = 1122; // A4 kağıdının yaklaşık yüksekliği (piksel)
   const dots = [];
 
   // Elle hesaplayarak her bir noktayı grid hizasında oluştur
   // İlk noktayı 10px aşağıdan başlat, son noktayı dahil etme
-  for (let i = 10 + (gridSize * 2); i < a4Height - gridSize; i += gridSize) {
+  for (let i = 7 + (gridSize * 2); i < a4Height - gridSize; i += gridSize) {
   dots.push(
     <div 
       key={i} 
@@ -71,7 +71,7 @@ const A4Container = memo(function A4Container() {
         position: 'absolute', 
         top: `${i}px`,
         width: `${gridSize}px`,
-        height: '5px',
+        height: '4px',
         left: '0',
         borderRadius: '0'
       }}
@@ -85,8 +85,8 @@ const A4Container = memo(function A4Container() {
       key="specialDot"
       style={{ 
         position: 'absolute', 
-        top: '45px',
-        left: '45px',
+        top: '37px',
+        left: '37px',
         width: '12px',
         height: '12px',
         backgroundColor: '#000',
@@ -101,8 +101,8 @@ const A4Container = memo(function A4Container() {
       key="specialDot1"
       style={{ 
         position: 'absolute', 
-        top: '45px',
-        left: '725px',
+        top: '37px',
+        left: '717px',
         width: '12px',
         height: '12px',
         backgroundColor: '#000',
@@ -117,8 +117,8 @@ const A4Container = memo(function A4Container() {
       key="specialDot4"
       style={{ 
         position: 'absolute', 
-        top: '45px',
-        left: '705px',
+        top: '37px',
+        left: '734px',
         width: '12px',
         height: '12px',
         backgroundColor: '#000',
@@ -133,8 +133,8 @@ const A4Container = memo(function A4Container() {
       key="specialDot2"
       style={{ 
         position: 'absolute', 
-        top: '1085px',
-        left: '45px',
+        top: '1090px',
+        left: '37px',
         width: '12px',
         height: '12px',
         backgroundColor: '#000',

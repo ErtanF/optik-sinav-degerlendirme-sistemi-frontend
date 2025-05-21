@@ -163,13 +163,13 @@ const ElementPropertiesPanel = () => {
       maxRows = 40; // Çoktan seçmeli için makul bir üst sınır
       newRows = Math.max(minRows, Math.min(maxRows, properties.rows + increment));
       // Çoktan seçmeli: başlık + satır başına yükseklik
-      heightCalculation = newRows * 20 + 30; 
+      heightCalculation = newRows * 17 + 30; 
     } else if (activeElement.type === 'classBranch') {
       minRows = 3; // Minimum 3 şube (A, B, C)
       maxRows = 26; // Maksimum 26 şube (A-Z)
       newRows = Math.max(minRows, Math.min(maxRows, properties.rows + increment));
       // Şube: başlık + yazı alanı + harf sayısı * yükseklik
-      heightCalculation = 30 + 30 + (newRows * 20);
+      heightCalculation = 30 + 30 + (newRows * 17);
     } else {
       return; // Diğer eleman tipleri için işlem yok
     }
@@ -198,19 +198,19 @@ const ElementPropertiesPanel = () => {
     if (activeElement.type === 'multipleChoice') {
       maxCols = 5;
       newCols = Math.min(maxCols, Math.max(1, newCols));
-      newWidth = (newCols + 1) * 20;
+      newWidth = (newCols + 1) * 17;
     } 
     else if (activeElement.type === 'bookletCode') {
       // Kitapçık kodu için özel ölçeklendirme
       maxCols = 5;
       newCols = Math.min(maxCols, Math.max(1, newCols));
-      newWidth = newCols * 20; // Her şıkkın tam olarak 20px genişliği olur
+      newWidth = newCols * 17; // Her şıkkın tam olarak 20px genişliği olur
     }
     else if (activeElement.type === 'nameSurname' || activeElement.type === 'number' || 
              activeElement.type === 'classBranch' || activeElement.type === 'classNumber') {
       maxCols = activeElement.type === 'number' ? 15 : 26;
       newCols = Math.min(maxCols, Math.max(1, newCols));
-      newWidth = newCols * 20;
+      newWidth = newCols * 17;
     }
     
     // Sadece değer değiştiyse state'i güncelle
@@ -234,7 +234,7 @@ const ElementPropertiesPanel = () => {
     }
   };
   
-  const handlePositionChange = (direction, amount = 20) => {
+  const handlePositionChange = (direction, amount = 17) => {
     let { posX, posY } = properties;
     
     switch(direction) {
@@ -257,7 +257,7 @@ const ElementPropertiesPanel = () => {
     if (activeElement.type !== 'image' && activeElement.type !== 'textArea') return;
     
     const value = parseInt(e.target.value) || 0;
-    const gridSize = 20;
+    const gridSize = 17;
     const alignedValue = Math.max(gridSize, Math.floor(value / gridSize) * gridSize);
     
     // Sadece boyut değiştiyse state'i güncelle
@@ -328,15 +328,15 @@ const ElementPropertiesPanel = () => {
               label="Genişlik:" 
               value={properties.width}
               onChange={(e) => handleSizeChange('width', e)}
-              min={20}
-              step={20}
+              min={17}
+              step={17}
             />
             <InputControl 
               label="Yükseklik:" 
               value={properties.height}
               onChange={(e) => handleSizeChange('height', e)}
-              min={20}
-              step={20}
+              min={17}
+              step={17}
             />
           </div>
           
@@ -357,15 +357,15 @@ const ElementPropertiesPanel = () => {
             label="Genişlik:" 
             value={properties.width}
             onChange={(e) => handleSizeChange('width', e)}
-            min={20}
-            step={20}
+            min={17}
+            step={17}
           />
           <InputControl 
             label="Yükseklik:" 
             value={properties.height}
             onChange={(e) => handleSizeChange('height', e)}
-            min={20}
-            step={20}
+            min={17}
+            step={17}
           />
           
           <div className={styles.helpText}>
