@@ -73,7 +73,7 @@ const OptikOlusturmaContent = () => {
       if (formData.components && Array.isArray(formData.components)) {
         // Form elemanlarını ve bubble değerlerini ayırma
         const elements = formData.components.map(comp => {
-          const { bubbleValues, ...elementData } = comp;
+          const { ...elementData } = comp;
           return elementData;
         });
         

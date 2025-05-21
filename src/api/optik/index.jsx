@@ -33,30 +33,26 @@ const optikApi = {
   },
   
   // Tüm formları getir
-  getAllForms: async (creatorId) => {
-  try {
-    //console.log("Kullanıcı ID:", creatorId); // ID kontrolü için log
-    const response = await apiClient.get('/exam');
-    //console.log("Ham API yanıtı:", response); // Ham yanıtı görmek için
-    return response;
-  } catch (error) {
-    console.error("Form getirme hatası:", error);
-    throw error;
-  }
-},
+  getAllForms: async () => {
+    try {
+      //console.log("Kullanıcı ID:", creatorId); // ID kontrolü için log
+      const response = await apiClient.get('/exam');
+      console.log("Ham API yanıtı:", response); // Ham yanıtı görmek için
+      return response;
+    } catch (error) {
+      console.error("Form getirme hatası:", error);
+      throw error;
+    }
+  },
   
   // Belirli bir formu getir
   getFormById: async (id) => {
-  try {
     const response = await apiClient.get(`/exam/${id}`);
     return response;
-  } catch (error) {
-    throw error;
-  }
-},
+  },
   
   // Formu güncelle
-    updateForm: async (id, formData) => {
+  updateForm: async (id, formData) => {
     try {
       console.log(`Form güncelleme API çağrısı başlatılıyor - ID: ${id}`);
       console.log('Gönderilen form verisi:', formData);
@@ -92,13 +88,9 @@ const optikApi = {
   
   // Formu sil
   deleteForm: async (id) => {
-  try {
     const response = await apiClient.delete(`/exam/${id}`);
     return response;
-  } catch (error) {
-    throw error;
   }
-}
 };
 
 export default optikApi;

@@ -1,6 +1,5 @@
 // src/pages/Dashboard/Dashboard.jsx - Güncelleme
 import './Dashboard.css';
-import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import Button from '../../components/ui/Button/Button';
@@ -8,7 +7,6 @@ import Button from '../../components/ui/Button/Button';
 const Dashboard = () => {
   const { currentUser } = useAuth();
   const location = useLocation();
-  const [error, setError] = useState(null);
   
   // Location state'inden mesajı al
   const message = location.state?.message;
@@ -22,10 +20,6 @@ const Dashboard = () => {
       
       {message && (
         <div className="success-alert">{message}</div>
-      )}
-      
-      {error && (
-        <div className="error-alert">{error}</div>
       )}
       
       <div className="dashboard-content">

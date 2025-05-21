@@ -70,8 +70,8 @@ export const FormEditorProvider = ({ children }) => {
   const elementHeight = size?.height || 100;
   
   // Yatay sınırlandırma - özel noktaların konumlarını kullanarak
-  const leftBoundary = 85 + 10; // Sol sınır (özel nokta + biraz boşluk)
-  const rightBoundary = 745 - 10; // Sağ sınır (özel nokta - biraz boşluk)
+  const leftBoundary = 65 + 10; // Sol sınır (özel nokta + biraz boşluk)
+  const rightBoundary = 725 - 10; // Sağ sınır (özel nokta - biraz boşluk)
   
   // Dikey alt sınır - 1085px (özel nokta konumu)
   const bottomBoundary = 1125 - 10; // Alt sınır (özel nokta - biraz boşluk)
