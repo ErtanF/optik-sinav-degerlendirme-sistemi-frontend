@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import './Navbar.css';
 import './NotificationBadge.css';
-import favicon from '../../assets/favicon.jpg';
+import favicon from '../../assets/favicon3.png';
 import usersApi from '../../api/users';
 import { useAuth } from '../../hooks/useAuth';
 

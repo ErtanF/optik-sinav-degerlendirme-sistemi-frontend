@@ -1,6 +1,6 @@
 import './Footer.css';
 import { Link, useNavigate } from 'react-router-dom';
-import favicon from '../../assets/favicon.jpg';
+import favicon from '../../assets/favicon2.png';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();

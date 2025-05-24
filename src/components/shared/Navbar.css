@@ -40,7 +40,7 @@
 
 .navbar-logo a {
   color: white;
-  font-size: 1.15rem;
+  font-size: 1.25rem;
   font-weight: 600;
   text-decoration: none;
   display: flex;
@@ -55,8 +55,8 @@
 
 /* Add transition for logo image */
 .navbar-logo-image {
-  width: 32px;
-  height: 32px;
+  width: 56px;
+  height: 56px;
   border-radius: 8px;
   margin-right: 12px;
   object-fit: contain;
@@ -65,8 +65,8 @@
 }
 
 .navbar.scrolled .navbar-logo-image {
-  width: 28px;
-  height: 28px;
+  width: 44px;
+  height: 44px;
   margin-right: 10px;
 }
 
@@ -79,7 +79,7 @@
 }
 
 .navbar.scrolled .navbar-logo-text {
-  font-size: 0.95rem;
+  font-size: 1.05rem;
 }
 
 .navbar-logo-text::after {

@@ -1,5 +1,5 @@
 .footer {
-  background: linear-gradient(to bottom, var(--primary-color-dark, #0a375a), #072a46);
+  background: linear-gradient(to bottom, #0a375a, #072a46);
   color: rgba(255, 255, 255, 0.9);
   padding: 2rem 1.5rem 1rem;
   width: 100%;
@@ -52,8 +52,8 @@
 }
 
 .footer-logo {
-  width: 36px;
-  height: 36px;
+  width: 48px;
+  height: 48px;
   border-radius: 8px;
   margin-bottom: 0.5rem;
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
@@ -61,7 +61,7 @@
 }
 
 .footer-title {
-  font-size: 1rem;
+  font-size: 1.1rem;
   font-weight: 700;
   margin: 0 0 0.75rem;
   color: white;
@@ -195,7 +195,7 @@
 /* Dark mode optimization */
 @media (prefers-color-scheme: dark) {
   .footer {
-    background: linear-gradient(to bottom, var(--dark-color, #0d1117), #060b11);
+    background: linear-gradient(to bottom, #0d1117, #060b11);
   }
 
   .footer::before {
