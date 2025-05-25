@@ -1,9 +1,12 @@
 import { Navigate } from 'react-router-dom';
 import MainLayout from '../components/layouts/MainLayout';
 import AuthLayout from '../components/layouts/AuthLayout';
+import LandingLayout from '../components/layouts/LandingLayout';
 import { useAuth } from '../hooks/useAuth';
 
 // Sayfa bileşenleri
+import Landing from '../pages/Landing/Landing';
+import LandingContact from '../pages/Landing/Contact';
 import Login from '../pages/Auth/Login';
 import Register from '../pages/Auth/Register';
 import ForgotPassword from '../pages/Auth/ForgotPassword'; // Eklenen bileşen
@@ -29,7 +32,7 @@ const PrivateRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
   if (loading) return null; // veya bir loading spinner dönebilir
   if (!isAuthenticated) {
-    return <Navigate to="/login" />;
+    return <Navigate to="/" />;
   }
   return children;
 };
@@ -39,7 +42,7 @@ const PublicRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
   if (loading) return null; // veya bir loading spinner dönebilir
   if (isAuthenticated) {
-    return <Navigate to="/" />;
+    return <Navigate to="/dashboard" />;
   }
   return children;
 };
@@ -49,10 +52,20 @@ const SuperAdminRoute = ({ children }) => {
   const { isAuthenticated, loading, currentUser } = useAuth();
   if (loading) return null;
   if (!isAuthenticated) {
-    return <Navigate to="/login" />;
+    return <Navigate to="/" />;
   }
   if (currentUser?.role !== 'superadmin') {
-    return <Navigate to="/" />;
+    return <Navigate to="/dashboard" />;
+  }
+  return children;
+};
+
+// LandingRoute bileşeni (giriş yapmamış kullanıcılar için)
+const LandingRoute = ({ children }) => {
+  const { isAuthenticated, loading } = useAuth();
+  if (loading) return null;
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" />;
   }
   return children;
 };
@@ -60,10 +73,24 @@ const SuperAdminRoute = ({ children }) => {
 const routes = () => [
   {
     path: '/',
-    element: <MainLayout />,
+    element: <LandingLayout />,
     children: [
       {
         path: '/',
+        element: <LandingRoute><Landing /></LandingRoute>
+      },
+      {
+        path: 'contact',
+        element: <LandingRoute><LandingContact /></LandingRoute>
+      }
+    ]
+  },
+  {
+    path: '/',
+    element: <MainLayout />,
+    children: [
+      {
+        path: 'dashboard',
         element: <PrivateRoute><Dashboard /></PrivateRoute>
       },
       {
