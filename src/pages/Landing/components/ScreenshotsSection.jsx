@@ -7,30 +7,30 @@ const ScreenshotsSection = () => {
   const categories = [
     { id: 'form', name: 'FORM OLUŞTURMA', icon: '📋' },
     { id: 'optical', name: 'OPTİK OKUMA', icon: '📷' },
-    { id: 'analysis', name: 'ANALİZ DEĞERLENDİRME', icon: '📊' },
+    { id: 'analysis', name: 'ANALİZ', icon: '📊' },
     { id: 'reports', name: 'KARNELER', icon: '📄' }
   ];
 
   const screenshots = {
     form: [
-      { id: 1, title: 'Form Tasarım Arayüzü', description: 'Sürükle-bırak ile kolay form oluşturma' },
-      { id: 2, title: 'Soru Düzenleme', description: 'Çoktan seçmeli ve açık uçlu sorular' },
-      { id: 3, title: 'Form Önizleme', description: 'Oluşturduğunuz formun son hali' }
+      { id: 1, title: 'Form Tasarım Arayüzü', description: 'Sürükle-bırak form oluşturma' },
+      { id: 2, title: 'Soru Düzenleme', description: 'Çoktan seçmeli sorular' },
+      { id: 3, title: 'Form Önizleme', description: 'Formun son hali' }
     ],
     optical: [
-      { id: 1, title: 'Optik Okuma Ekranı', description: 'Taranmış formları yükleme ve işleme' },
-      { id: 2, title: 'Otomatik Algılama', description: 'Cevapların otomatik tanınması' },
+      { id: 1, title: 'Optik Okuma', description: 'Taranmış formları işleme' },
+      { id: 2, title: 'Otomatik Algılama', description: 'Cevapları otomatik tanıma' },
       { id: 3, title: 'Hata Düzeltme', description: 'Manuel düzeltme araçları' }
     ],
     analysis: [
-      { id: 1, title: 'İstatistik Paneli', description: 'Detaylı analiz ve grafikler' },
-      { id: 2, title: 'Soru Analizi', description: 'Soru bazında başarı oranları' },
-      { id: 3, title: 'Karşılaştırma', description: 'Sınıf ve öğrenci karşılaştırmaları' }
+      { id: 1, title: 'İstatistik Paneli', description: 'Detaylı analiz grafikleri' },
+      { id: 2, title: 'Soru Analizi', description: 'Soru başarı oranları' },
+      { id: 3, title: 'Karşılaştırma', description: 'Sınıf karşılaştırmaları' }
     ],
     reports: [
-      { id: 1, title: 'Öğrenci Karnesi', description: 'Bireysel başarı raporları' },
-      { id: 2, title: 'Sınıf Raporu', description: 'Toplu değerlendirme raporları' },
-      { id: 3, title: 'Excel Çıktısı', description: 'Detaylı veri dışa aktarımı' }
+      { id: 1, title: 'Öğrenci Karnesi', description: 'Bireysel başarı raporu' },
+      { id: 2, title: 'Sınıf Raporu', description: 'Toplu değerlendirme' },
+      { id: 3, title: 'Excel Çıktısı', description: 'Veri dışa aktarımı' }
     ]
   };
 
@@ -82,12 +82,6 @@ const ScreenshotsSection = () => {
           </div>
         </div>
 
-        <div className="screenshots-cta">
-          <p>Tüm özellikleri keşfetmek için hemen başlayın</p>
-          <a href="/register" className="btn btn-primary">
-            Ücretsiz Hesap Oluştur
-          </a>
-        </div>
       </div>
     </section>
   );

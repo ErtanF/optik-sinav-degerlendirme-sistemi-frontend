@@ -89,13 +89,9 @@ const LandingNavbar = () => {
             >
               <span>Ekran Görüntüleri</span>
             </button>
-            <button 
-              onClick={() => scrollToSection('faq')} 
-              className="nav-link"
-              aria-label="Sıkça sorulan sorular bölümüne git"
-            >
+            <Link to="/faq" className="nav-link" aria-label="Sıkça sorulan sorular sayfasına git">
               <span>S.S.S.</span>
-            </button>
+            </Link>
             <Link to="/contact" className="nav-link" aria-label="İletişim sayfasına git">
               <span>İletişim</span>
             </Link>

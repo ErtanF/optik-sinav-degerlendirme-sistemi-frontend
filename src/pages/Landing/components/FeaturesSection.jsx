@@ -6,37 +6,37 @@ const FeaturesSection = () => {
     {
       icon: '📝',
       title: 'Optik Okuma',
-      description: 'Tarayıcı yardımı ile siyah-beyaz cevap kağıtlarını tarayarak okuyabilirsiniz.',
+      description: 'Tarayıcı ile optik formları tarayarak hızlı ve doğru şekilde okuma.',
       color: 'pink'
     },
     {
       icon: '📋',
       title: 'Form Oluşturma',
-      description: 'Sınav veya anket uygulamalarınız için kişilere özel formlar oluşturabilirsiniz.',
+      description: 'Sınavlar için kişiselleştirilmiş optik formlar oluşturma.',
       color: 'orange'
     },
     {
       icon: '📊',
       title: 'Analiz & Değerlendirme',
-      description: 'Okunan formları analiz yapabilir. Detaylı karneler ve değerlendirme raporları alabilirsiniz.',
+      description: 'Detaylı karneler ve kapsamlı değerlendirme raporları.',
       color: 'blue'
     },
     {
       icon: '🏢',
       title: 'Salon Dağıtımı',
-      description: 'Kelebek sistem olarak da bilinen farklı sınıflardaki adayları salonlara dağıtabilme.',
+      description: 'Kelebek sistem ile adayları salonlara otomatik dağıtma.',
       color: 'green'
     },
     {
       icon: '🔧',
       title: 'Hata Düzeltme',
-      description: 'Baskı ve tarama esnasındaki makine hatalarını, hatalı kodlama ile oluşan sorunları düzeltebilme.',
+      description: 'Baskı ve tarama hatalarını otomatik tespit ve düzeltme.',
       color: 'purple'
     },
     {
       icon: '📄',
-      title: 'Yazılı Sınavı & Yaprak Test',
-      description: 'A4 Kağıtlarına iki yönlü olarak yazılı sınav kağıdı veya yaprak testler oluşturabilirme.',
+      title: 'Yazılı Sınavı',
+      description: 'A4 kağıtlarına çift yönlü yazılı sınav formları oluşturma.',
       color: 'indigo'
     }
   ];

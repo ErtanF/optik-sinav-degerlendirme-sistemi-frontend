@@ -7,6 +7,12 @@ import { useAuth } from '../hooks/useAuth';
 // Sayfa bileşenleri
 import Landing from '../pages/Landing/Landing';
 import LandingContact from '../pages/Landing/Contact';
+import LandingFAQ from '../pages/Landing/FAQ';
+import LandingHakkimizda from '../pages/Landing/Hakkimizda';
+import LandingGizlilikPolitikasi from '../pages/Landing/GizlilikPolitikasi';
+import LandingKullanimSartlari from '../pages/Landing/KullanimSartlari';
+import LandingKVKK from '../pages/Landing/KVKK';
+import LandingCerezler from '../pages/Landing/Cerezler';
 import Login from '../pages/Auth/Login';
 import Register from '../pages/Auth/Register';
 import ForgotPassword from '../pages/Auth/ForgotPassword'; // Eklenen bileşen
@@ -82,6 +88,30 @@ const routes = () => [
       {
         path: 'contact',
         element: <LandingRoute><LandingContact /></LandingRoute>
+      },
+      {
+        path: 'faq',
+        element: <LandingRoute><LandingFAQ /></LandingRoute>
+      },
+      {
+        path: 'hakkimizda',
+        element: <LandingRoute><LandingHakkimizda /></LandingRoute>
+      },
+      {
+        path: 'gizlilik',
+        element: <LandingRoute><LandingGizlilikPolitikasi /></LandingRoute>
+      },
+      {
+        path: 'kullanim-sartlari',
+        element: <LandingRoute><LandingKullanimSartlari /></LandingRoute>
+      },
+      {
+        path: 'kvkk',
+        element: <LandingRoute><LandingKVKK /></LandingRoute>
+      },
+      {
+        path: 'cerezler',
+        element: <LandingRoute><LandingCerezler /></LandingRoute>
       }
     ]
   },

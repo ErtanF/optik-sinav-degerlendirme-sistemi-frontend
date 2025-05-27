@@ -212,6 +212,15 @@ const Login = () => {
             </Link>
           </div>
         </form>
+
+        <div className="back-to-home">
+          <Link to="/" className="back-to-home-link">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="back-icon">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Ana Sayfaya Dön
+          </Link>
+        </div>
       </div>
   );
 };

@@ -29,15 +29,15 @@ const HeroSection = () => {
             </div>
             <div className="hero-stats">
               <div className="stat-item">
-                <span className="stat-number">10,000+</span>
+                <span className="stat-number">6161+</span>
                 <span className="stat-label">Değerlendirilen Sınav</span>
               </div>
               <div className="stat-item">
-                <span className="stat-number">500+</span>
+                <span className="stat-number">6161+</span>
                 <span className="stat-label">Aktif Kullanıcı</span>
               </div>
               <div className="stat-item">
-                <span className="stat-number">99.9%</span>
+                <span className="stat-number">61%</span>
                 <span className="stat-label">Doğruluk Oranı</span>
               </div>
             </div>

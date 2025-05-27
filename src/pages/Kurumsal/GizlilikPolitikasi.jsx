@@ -205,7 +205,7 @@ const GizlilikPolitikasi = () => {
             yapmamıza olanak tanır.
           </p>
           <p>
-            Çerezler hakkında daha fazla bilgi için <a href="/cerez-politikasi">Çerez Politikamıza</a> bakınız.
+            Çerezler hakkında daha fazla bilgi için <a href="/cerezler">Çerez Politikamıza</a> bakınız.
           </p>
         </section>
 

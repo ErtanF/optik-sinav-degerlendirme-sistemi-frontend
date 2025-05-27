@@ -18,12 +18,22 @@
   margin-bottom: 3rem;
 }
 
+.section-header:after {
+  content: none; /* Çizgiyi kaldır */
+  display: none;
+}
+
 .section-title {
   font-size: 2.5rem;
   font-weight: 700;
   color: #1f2937;
   margin-bottom: 1rem;
   line-height: 1.2;
+}
+
+.section-title:after {
+  content: none; /* Çizgiyi kaldır */
+  display: none;
 }
 
 .section-subtitle {

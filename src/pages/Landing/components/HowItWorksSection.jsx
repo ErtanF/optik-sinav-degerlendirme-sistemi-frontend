@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import './HowItWorksSection.css';
 
 const HowItWorksSection = () => {
@@ -6,7 +7,7 @@ const HowItWorksSection = () => {
     {
       number: '01',
       title: 'Form Oluşturun',
-      description: 'Sınav veya anket formunuzu kolayca oluşturun. Özelleştirilebilir şablonlar ile dakikalar içinde hazır.',
+      description: 'Sınav kağıdınızı kolayca oluşturun. Özelleştirilebilir şablonlar ile dakikalar içinde hazır.',
       icon: '📝'
     },
     {
@@ -48,21 +49,14 @@ const HowItWorksSection = () => {
               </div>
               {index < steps.length - 1 && (
                 <div className="step-connector">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <path d="M5 12h10" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M15 7l5 5-5 5" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </div>
               )}
             </div>
           ))}
-        </div>
-
-        <div className="how-it-works-cta">
-          <h3>Hemen Başlayın</h3>
-          <p>Ücretsiz hesap oluşturun ve optik okuma sisteminin gücünü keşfedin</p>
-          <a href="/register" className="btn btn-primary btn-large">
-            Ücretsiz Deneyin
-          </a>
         </div>
       </div>
     </section>

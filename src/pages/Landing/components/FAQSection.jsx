@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import './FAQSection.css';
 
 const FAQSection = () => {
@@ -29,11 +30,6 @@ const FAQSection = () => {
       id: 5,
       question: 'Mobil cihazlardan kullanabilir miyim?',
       answer: 'Evet, sistemimiz responsive tasarıma sahiptir. Tablet ve akıllı telefonlardan da rahatlıkla kullanabilirsiniz.'
-    },
-    {
-      id: 6,
-      question: 'Teknik destek alabilir miyim?',
-      answer: 'Tabii ki! E-posta, telefon ve canlı destek kanallarımız ile 7/24 teknik destek sağlıyoruz.'
     }
   ];
 
@@ -78,6 +74,15 @@ const FAQSection = () => {
                 </div>
               </div>
             ))}
+            
+            <div className="faq-view-all">
+              <Link to="/faq" className="view-all-link">
+                <span>Tüm Soruları Görüntüle</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="view-all-icon">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </Link>
+            </div>
           </div>
 
           <div className="faq-contact">
@@ -85,9 +90,9 @@ const FAQSection = () => {
               <h3>Başka sorularınız mı var?</h3>
               <p>Size yardımcı olmaktan mutluluk duyarız. Bizimle iletişime geçin.</p>
               <div className="contact-actions">
-                <a href="/contact" className="btn btn-primary">
+                <Link to="/contact" className="btn btn-primary">
                   İletişime Geç
-                </a>
+                </Link>
                 <a href="mailto:destek@optikoku.com" className="btn btn-outline">
                   E-posta Gönder
                 </a>

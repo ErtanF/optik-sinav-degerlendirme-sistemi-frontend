@@ -1,6 +1,47 @@
 /* Login Page Styles */
 .login-page {
   padding: 20px;
+  position: relative;
+}
+
+/* Back to Home Button */
+.back-to-home {
+  text-align: center;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.back-to-home-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  color: #64748b;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.back-to-home-link:hover {
+  color: #0474C4;
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+}
+
+.back-icon {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.3s ease;
+}
+
+.back-to-home-link:hover .back-icon {
+  transform: translateX(-2px);
 }
 
 /* Şifre göster/gizle butonu için stil */
@@ -165,4 +206,26 @@
   color: #ef4444;
   font-size: 14px;
   margin-top: 5px;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .back-to-home {
+    margin-top: 20px;
+    padding-top: 16px;
+  }
+
+  .back-to-home-link {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+
+  .back-icon {
+    width: 14px;
+    height: 14px;
+  }
+
+  .login-page {
+    padding: 16px;
+  }
 }
