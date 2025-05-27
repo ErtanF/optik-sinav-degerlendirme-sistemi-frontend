@@ -47,6 +47,11 @@
   letter-spacing: -0.02em;
 }
 
+.title-line {
+  display: block;
+  line-height: 1.1;
+}
+
 .hero-highlight {
   background: linear-gradient(45deg, #ffffff, #A8C4EC);
   -webkit-background-clip: text;
@@ -320,6 +325,10 @@
 
   .hero-title {
     font-size: 2.25rem;
+  }
+
+  .title-line {
+    line-height: 1.2;
   }
 
   .hero-description {

@@ -9,8 +9,8 @@ const HeroSection = () => {
         <div className="hero-content">
           <div className="hero-text">
             <h1 className="hero-title">
-              Düşük Maliyet
-              <span className="hero-highlight"> Akılcı Çözümler</span>
+              <div className="title-line">Düşük Maliyet</div>
+              <div className="title-line hero-highlight">Akılcı Çözümler</div>
             </h1>
             <p className="hero-description">
               Optik sınav değerlendirme sistemi ile eğitimde teknolojinin gücünü keşfedin. 
