@@ -42,65 +42,66 @@ const OptikOlusturmaContent = () => {
   }, [editId]);
   
   // Mevcut formu yükleme fonksiyonu
-  const loadExistingForm = async (formId) => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      // Form verilerini API'den al
-      const response = await optikApi.getFormById(formId);
-      
-      if (!response || !response.data) {
-        throw new Error("Form verileri alınamadı");
-      }
-      
-      const formData = response.data;
-      
-      // Form başlığını ayarla
-      setFormTitle(formData.title || 'Düzenlenen Form');
-      
-      // Form görüntüsünü ayarla
-      if (formData.opticalFormImage) {
-        setFormImage(formData.opticalFormImage);
-      }
-      
-      // Atanan sınıfları ayarla
-      if (formData.assignedClasses && Array.isArray(formData.assignedClasses)) {
-        setSelectedClasses(formData.assignedClasses);
-      }
-      
-      // Form bileşenlerini FormEditor context'ine yükle
-      if (formData.components && Array.isArray(formData.components)) {
-        // Form elemanlarını ve bubble değerlerini ayırma
-        const elements = formData.components.map(comp => {
-          const { ...elementData } = comp;
-          return elementData;
-        });
-        
-        // Bubble değerlerini ayırma
-        const bubbleValues = {};
-        formData.components.forEach(comp => {
-          if (comp.bubbleValues && comp.uniqueId) {
-            bubbleValues[comp.uniqueId] = comp.bubbleValues;
-          }
-        });
-        
-        // FormEditor context'ine form durumunu yükle
-        loadFormState({
-          pageElements: elements,
-          customBubbleValues: bubbleValues
-        });
-      }
-      
-      console.log('Form başarıyla yüklendi:', formData.title);
-      
-    } catch (error) {
-      console.error('Form yüklenirken hata:', error);
-      setError('Form yüklenirken bir sorun oluştu: ' + (error.message || 'Bilinmeyen hata'));
-    } finally {
-      setLoading(false);
+  // OptikOlusturma.jsx - loadExistingForm fonksiyonunu güncelle
+
+const loadExistingForm = async (formId) => {
+  try {
+    setLoading(true);
+    setError(null);
+    
+    // Form verilerini API'den al
+    const response = await optikApi.getFormById(formId);
+    
+    if (!response || !response.data) {
+      throw new Error("Form verileri alınamadı");
     }
-  };
+    
+    const formData = response.data;
+    
+    // Form başlığını ayarla - artık 'name' alanından geliyor
+    setFormTitle(formData.name || 'Düzenlenen Form');
+    
+    // Form görüntüsünü ayarla
+    if (formData.opticalFormImage) {
+      setFormImage(formData.opticalFormImage);
+    }
+    
+    // NOT: assignedClasses artık OpticalTemplate'de yok
+    // Bu yüzden bu kısmı kaldırıyoruz veya boş bırakıyoruz
+    setSelectedClasses([]); // Boş array
+    
+    // Form bileşenlerini FormEditor context'ine yükle
+    if (formData.components && Array.isArray(formData.components)) {
+      // Form elemanlarını ve bubble değerlerini ayırma
+      const elements = formData.components.map(comp => {
+        const { ...elementData } = comp;
+        return elementData;
+      });
+      
+      // Bubble değerlerini ayırma
+      const bubbleValues = {};
+      formData.components.forEach(comp => {
+        if (comp.bubbleValues && comp.uniqueId) {
+          bubbleValues[comp.uniqueId] = comp.bubbleValues;
+        }
+      });
+      
+      // FormEditor context'ine form durumunu yükle
+      loadFormState({
+        pageElements: elements,
+        customBubbleValues: bubbleValues
+      });
+    }
+    
+    console.log('Optik form şablonu başarıyla yüklendi:', formData.name);
+    
+  } catch (error) {
+    console.error('Form yüklenirken hata:', error);
+    setError('Form yüklenirken bir sorun oluştu: ' + (error.message || 'Bilinmeyen hata'));
+  } finally {
+    setLoading(false);
+  }
+};
   
   // Kullanıcı bilgilerini yükle
   useEffect(() => {
@@ -152,84 +153,81 @@ const OptikOlusturmaContent = () => {
   };
   
   // Form kaydetme - düzenleme modunu destekleyecek şekilde güncellenmiş
-  const handleSave = async () => {
-    try {
-      setSaving(true);
-      setError(null);
-      
-      // Doğrulama kontrolleri
-      if (!formTitle.trim()) {
-        throw new Error("Form başlığı boş olamaz");
-      }
-      
-      if (pageElements.length === 0) {
-        throw new Error("Form elemanları eklemeden kaydedemezsiniz");
-      }
-      
-      // Kullanıcı bilgilerini kontrol et
-      const user = userData || getUserFromStorage();
-      if (!user?._id) {
-        throw new Error("Kullanıcı kimliği bulunamadı. Lütfen tekrar giriş yapın.");
-      }
-      
-      // Okul ID'sini doğru şekilde al
-      const schoolId = user.school?._id || user.schoolId;
-      if (!schoolId) {
-        throw new Error("Okul bilgisi bulunamadı. Lütfen tekrar giriş yapın.");
-      }
-      
-      // Form görüntüsü kontrolü
-      if (!formImage) {
-        throw new Error("Form görüntüsü oluşturulamadı. Lütfen tekrar deneyin.");
-      }
-      
-      // Form verisini hazırla
-      const formData = {
-        title: formTitle,
-        school: schoolId,
-        createdBy: user._id,
-        date: new Date().toISOString(),
-        opticalFormImage: formImage,
-        components: pageElements.map(element => ({
-          ...element,
-          bubbleValues: customBubbleValues[element.uniqueId] || {}
-        })),
-        assignedClasses: selectedClasses
-      };
-      
-      let response;
-      
-      // Düzenleme modu veya yeni oluşturma moduna göre API çağrısı yap
-      if (isEditMode && editId) {
-        response = await optikApi.updateForm(editId, formData);
-        console.log('Form güncellendi:', response);
-      } else {
-        response = await optikApi.createForm(formData);
-        console.log('Yeni form oluşturuldu:', response);
-      }
-      
-      // Başarıyla kaydetme ve yönlendirme
-      navigate('/optik-formlarim', {  
-        state: { 
-          message: isEditMode 
-            ? 'Form başarıyla güncellendi.' 
-            : 'Form başarıyla kaydedildi.' 
-        } 
-      });
-    } catch (error) {
-      // Hata mesajını hazırla
-      const errorMessage = error.response?.data?.message || error.message || 'Form kaydedilirken bir hata oluştu.';
-      let detailMessage = '';
-      
-      if (error.response?.data?.errors) {
-        detailMessage = ': ' + error.response.data.errors.join(', ');
-      }
-      
-      setError(errorMessage + detailMessage);
-    } finally {
-      setSaving(false);
+  // OptikOlusturma.jsx - handleSave fonksiyonunu güncelle
+
+const handleSave = async () => {
+  try {
+    setSaving(true);
+    setError(null);
+    
+    // Doğrulama kontrolleri
+    if (!formTitle.trim()) {
+      throw new Error("Form başlığı boş olamaz");
     }
-  };
+    
+    if (pageElements.length === 0) {
+      throw new Error("Form elemanları eklemeden kaydedemezsiniz");
+    }
+    
+    // Kullanıcı bilgilerini kontrol et
+    const user = userData || getUserFromStorage();
+    if (!user?._id) {
+      throw new Error("Kullanıcı kimliği bulunamadı. Lütfen tekrar giriş yapın.");
+    }
+    
+    // Form görüntüsü kontrolü
+    if (!formImage) {
+      throw new Error("Form görüntüsü oluşturulamadı. Lütfen tekrar deneyin.");
+    }
+    
+    // OpticalTemplate modeline uygun veri yapısı
+    const formData = {
+      name: formTitle,                    // title yerine name
+      createdBy: user._id,               // createdBy alanı korunuyor
+      opticalFormImage: formImage,       // opticalFormImage alanı korunuyor
+      components: pageElements.map(element => ({
+        ...element,
+        bubbleValues: customBubbleValues[element.uniqueId] || {}
+      })),                               // components alanı korunuyor
+      isPublic: false                    // Yeni alan - şimdilik false
+    };
+
+    // NOT: school, date, assignedClasses alanları OpticalTemplate'de yok
+    // Bunlar artık Exam modelinde kullanılacak
+    
+    let response;
+    
+    // Düzenleme modu veya yeni oluşturma moduna göre API çağrısı yap
+    if (isEditMode && editId) {
+      response = await optikApi.updateForm(editId, formData);
+      console.log('Optik form şablonu güncellendi:', response);
+    } else {
+      response = await optikApi.createForm(formData);
+      console.log('Yeni optik form şablonu oluşturuldu:', response);
+    }
+    
+    // Başarıyla kaydetme ve yönlendirme
+    navigate('/optik-formlarim', {  
+      state: { 
+        message: isEditMode 
+          ? 'Optik form şablonu başarıyla güncellendi.' 
+          : 'Optik form şablonu başarıyla kaydedildi.' 
+      } 
+    });
+  } catch (error) {
+    // Hata mesajını hazırla
+    const errorMessage = error.response?.data?.message || error.message || 'Form kaydedilirken bir hata oluştu.';
+    let detailMessage = '';
+    
+    if (error.response?.data?.errors) {
+      detailMessage = ': ' + error.response.data.errors.join(', ');
+    }
+    
+    setError(errorMessage + detailMessage);
+  } finally {
+    setSaving(false);
+  }
+};
   
   // LocalStorage'dan kullanıcı bilgisini alma
   const getUserFromStorage = () => {

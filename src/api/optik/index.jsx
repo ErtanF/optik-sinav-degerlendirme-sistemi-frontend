@@ -1,82 +1,83 @@
-// src/api/optik/index.jsx
 import apiClient from '../client';
 
 const optikApi = {
-  // Form oluştur
+  // Optik şablon oluştur
   createForm: async (formData) => {
     try {
-      // Kritik alanlar için veri doğrulama
       if (!formData.createdBy || formData.createdBy === 'undefined') {
         throw new Error('Geçerli bir kullanıcı ID\'si gereklidir.');
       }
-      
-      if (!formData.school || formData.school === 'undefined') {
+
+      /*if (!formData.school || formData.school === 'undefined') {
         throw new Error('Geçerli bir okul ID\'si gereklidir.');
-      }
-      
-       const response = await apiClient.post('/exam', formData);
+      }*/
+
+      const response = await apiClient.post('/opticalTemplate', formData);
       return response;
     } catch (error) {
       console.error("Form oluşturma hatası:", error);
       throw error;
     }
   },
+
+  // Giriş yapan kullanıcıya ait optik şablonları getir
   getExamsByCreator: async () => {
     try {
-      // Backend'de userId req.user.userId'den alınıyor
-      const response = await apiClient.get('/exam');
+      const response = await apiClient.get('/opticalTemplate/creator');
       return response;
     } catch (error) {
       console.error("Sınav getirme hatası:", error);
       throw error;
     }
   },
-  
-  // Tüm formları getir
+
+  // Public (genel) optik şablonları getir
   getAllForms: async () => {
     try {
-      //console.log("Kullanıcı ID:", creatorId); // ID kontrolü için log
-      const response = await apiClient.get('/exam');
-      console.log("Ham API yanıtı:", response); // Ham yanıtı görmek için
+      const response = await apiClient.get('/opticalTemplate/creator');
+      console.log("Ham API yanıtı:", response);
       return response;
     } catch (error) {
       console.error("Form getirme hatası:", error);
       throw error;
     }
   },
-  
-  // Belirli bir formu getir
+
+  // Belirli bir şablonu ID ile getir
   getFormById: async (id) => {
-    const response = await apiClient.get(`/exam/${id}`);
+    const response = await apiClient.get(`/opticalTemplate/${id}`);
     return response;
   },
-  
-  // Formu güncelle
+
+  // Belirli bir şablonun bileşenlerini getir
+  getFormComponentsById: async (id) => {
+    const response = await apiClient.get(`/opticalTemplate/${id}/components`);
+    return response;
+  },
+
+  // Şablonu güncelle
   updateForm: async (id, formData) => {
     try {
       console.log(`Form güncelleme API çağrısı başlatılıyor - ID: ${id}`);
       console.log('Gönderilen form verisi:', formData);
       console.log('Gönderilen sınıflar:', formData.assignedClasses);
-      
-      // Kritik alanlar için veri doğrulama
+
       if (!formData.createdBy || formData.createdBy === 'undefined') {
         throw new Error('Geçerli bir kullanıcı ID\'si gereklidir.');
       }
-      
-      if (!formData.school || formData.school === 'undefined') {
+
+      /*if (!formData.school || formData.school === 'undefined') {
         throw new Error('Geçerli bir okul ID\'si gereklidir.');
-      }
-      
-      // Veriyi düzenle - sınıf ID'lerinin düzgün formatta olduğundan emin ol
+      }*/
+
       const preparedData = {
         ...formData,
         assignedClasses: Array.isArray(formData.assignedClasses) 
           ? formData.assignedClasses.map(id => id.toString())
           : []
       };
-      
-      // PUT isteği gönder
-      const response = await apiClient.put(`/exam/${id}`, preparedData);
+
+      const response = await apiClient.put(`/opticalTemplate/${id}`, preparedData);
       console.log('Backend yanıtı:', response);
       return response;
     } catch (error) {
@@ -85,10 +86,10 @@ const optikApi = {
       throw error;
     }
   },
-  
-  // Formu sil
+
+  // Şablonu sil
   deleteForm: async (id) => {
-    const response = await apiClient.delete(`/exam/${id}`);
+    const response = await apiClient.delete(`/opticalTemplate/${id}`);
     return response;
   }
 };
