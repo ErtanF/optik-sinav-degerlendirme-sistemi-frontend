@@ -40,11 +40,11 @@ export const FormEditorProvider = ({ children }) => {
   const elementHeight = size.height || 100;
   
   // Yatay sınırlar
-  const leftBoundary = 85 + 10;
-  const rightBoundary = 745 - 10;
+  const leftBoundary = 51;
+  const rightBoundary = 765;
   
   // Dikey alt sınır
-  const bottomBoundary = 1125 - 10;
+  const bottomBoundary = 1106;
   
   // Yatay ve alt sınır kontrolü
   const isWithinHorizontalBounds = 
@@ -70,11 +70,11 @@ export const FormEditorProvider = ({ children }) => {
   const elementHeight = size?.height || 100;
   
   // Yatay sınırlandırma - özel noktaların konumlarını kullanarak
-  const leftBoundary = 65 + 10; // Sol sınır (özel nokta + biraz boşluk)
-  const rightBoundary = 725 - 10; // Sağ sınır (özel nokta - biraz boşluk)
+  const leftBoundary = 51; // Sol sınır (özel nokta + biraz boşluk)
+  const rightBoundary = 765; // Sağ sınır (özel nokta - biraz boşluk)
   
   // Dikey alt sınır - 1085px (özel nokta konumu)
-  const bottomBoundary = 1125 - 10; // Alt sınır (özel nokta - biraz boşluk)
+  const bottomBoundary = 1106; // Alt sınır (özel nokta - biraz boşluk)
   
   // X pozisyonunu sınırla - eleman genişliğini hesaba kat
   x = Math.max(leftBoundary, x);
