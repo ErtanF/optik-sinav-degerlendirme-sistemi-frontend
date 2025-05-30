@@ -1,37 +1,48 @@
 // src/pages/Auth/Register.jsx - Güncelleme
-import './Register.css';
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import Input from '../../components/ui/Input/Input';
 import Button from '../../components/ui/Button/Button';
+import AuthLayout from '../../components/auth/AuthLayout';
+import PasswordInput from '../../components/auth/PasswordInput';
+import RegisterIllustration from '../../components/auth/illustrations/RegisterIllustration';
+import useAuthForm from '../../hooks/useAuthForm';
 import authApi from '../../api/auth';
 import schoolApi from '../../api/schools';
+import styles from '../../components/auth/auth.module.css';
 
 const Register = () => {
   const navigate = useNavigate();
+  const [schools, setSchools] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const [formData, setFormData] = useState({
+  // Form validation rules
+  const validationRules = {
+    name: true,
+    email: true,
+    password: { minLength: 6 },
+    confirmPassword: true,
+    schoolId: true
+  };
+
+  // Initialize form data
+  const initialData = {
     name: '',
     email: '',
     password: '',
     confirmPassword: '',
     schoolId: ''
-  });
+  };
+
+  const { formData, errors, handleChange, setError, validateForm } = useAuthForm(initialData, validationRules);
   
-  const [schools, setSchools] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  // Okulları yükle
+  // Load schools on component mount
   useEffect(() => {
     const fetchSchools = async () => {
       try {
         setLoading(true);
         const schoolsData = await schoolApi.getAllSchools();
-        console.log('Schools data from API:', schoolsData); // Debug logging
         
-        // Ensuring we have the correct data structure
         if (schoolsData && schoolsData.data && Array.isArray(schoolsData.data)) {
           setSchools(schoolsData.data);
         } else {
@@ -39,10 +50,7 @@ const Register = () => {
           setSchools([]);
         }
       } catch (error) {
-        setErrors({
-          ...errors,
-          general: 'Okullar yüklenirken bir hata oluştu.'
-        });
+        setError('general', 'Okullar yüklenirken bir hata oluştu.');
         console.error('Okullar yüklenirken hata:', error);
       } finally {
         setLoading(false);
@@ -50,65 +58,7 @@ const Register = () => {
     };
     
     fetchSchools();
-  }, []);
-  
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value
-    });
-    
-    // Clear error when field is edited
-    if (errors[name]) {
-      setErrors({
-        ...errors,
-        [name]: ''
-      });
-    }
-  };
-  
-  const validateForm = () => {
-    let formErrors = {};
-    let isValid = true;
-    
-    if (!formData.name) {
-      formErrors.name = 'Ad Soyad gereklidir';
-      isValid = false;
-    }
-    
-    if (!formData.email) {
-      formErrors.email = 'E-posta adresi gereklidir';
-      isValid = false;
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      formErrors.email = 'Geçerli bir e-posta adresi giriniz';
-      isValid = false;
-    }
-    
-    if (!formData.password) {
-      formErrors.password = 'Şifre gereklidir';
-      isValid = false;
-    } else if (formData.password.length < 6) {
-      formErrors.password = 'Şifre en az 6 karakter olmalıdır';
-      isValid = false;
-    }
-    
-    if (!formData.confirmPassword) {
-      formErrors.confirmPassword = 'Şifre tekrarı gereklidir';
-      isValid = false;
-    } else if (formData.password !== formData.confirmPassword) {
-      formErrors.confirmPassword = 'Şifreler eşleşmiyor';
-      isValid = false;
-    }
-    
-    if (!formData.schoolId) {
-      formErrors.schoolId = 'Lütfen bir okul seçin';
-      isValid = false;
-    }
-    
-    setErrors(formErrors);
-    return isValid;
-  };
+  }, []); // Empty dependency array - only run once on mount
   
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -117,7 +67,6 @@ const Register = () => {
       setIsSubmitting(true);
       
       try {
-        // Gerçek API çağrısı
         await authApi.register({
           name: formData.name,
           email: formData.email,
@@ -125,15 +74,12 @@ const Register = () => {
           schoolId: formData.schoolId
         });
         
-        // Başarılı kayıt, login sayfasına yönlendir
+        // Successful registration, redirect to login
         navigate('/login', { 
           state: { message: 'Kayıt başarılı. Lütfen giriş yapın. Öğretmen hesabınız okul yöneticisi tarafından onaylandıktan sonra giriş yapabilirsiniz.' } 
         });
       } catch (error) {
-        setErrors({
-          ...errors,
-          general: error.response?.data?.message || 'Kayıt başarısız. Lütfen bilgilerinizi kontrol edin.'
-        });
+        setError('general', error.response?.data?.message || 'Kayıt başarısız. Lütfen bilgilerinizi kontrol edin.');
       } finally {
         setIsSubmitting(false);
       }
@@ -141,88 +87,112 @@ const Register = () => {
   };
   
   return (
-    <div className="register-page">
+    <AuthLayout 
+      illustration={<RegisterIllustration />}
+      illustrationText="Eğitim ailemize katılın! Öğretmen hesabınızı oluşturun ve optik sınav değerlendirme sisteminin avantajlarından yararlanın."
+    >
+      <div className={styles.authHeader}>
+        <h2 className={styles.authTitle}>Yeni hesap oluşturun</h2>
+        <p className={styles.authSubtitle}>Öğretmen hesabınızı oluşturarak sisteme dahil olun</p>
+      </div>
 
-      {errors.general && (
-        <div className="error-alert">{errors.general}</div>
-      )}
+      {errors.general && <div className={styles.errorAlert}>{errors.general}</div>}
       
-      <form onSubmit={handleSubmit} className="auth-form">
-        <Input
-          type="text"
-          label="Ad Soyad"
-          id="name"
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-          placeholder="Adınızı ve soyadınızı girin"
-          error={errors.name}
-          required
-        />
+      <form onSubmit={handleSubmit} className={styles.authForm}>
+        <div className={styles.inputGroup}>
+          <label htmlFor="name" className={styles.inputLabel}>
+            Ad Soyad<span className={styles.requiredMark}>*</span>
+          </label>
+          <input
+            type="text"
+            id="name"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            placeholder="Adınızı ve soyadınızı girin"
+            className={`${styles.inputField} ${errors.name ? styles.inputError : ''}`}
+            required
+          />
+          {errors.name && <div className={styles.errorMessage}>{errors.name}</div>}
+        </div>
         
-        <Input
-          type="email"
-          label="E-posta"
-          id="email"
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
-          placeholder="E-posta adresinizi girin"
-          error={errors.email}
-          required
-        />
+        <div className={styles.inputGroup}>
+          <label htmlFor="email" className={styles.inputLabel}>
+            E-posta<span className={styles.requiredMark}>*</span>
+          </label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            placeholder="E-posta adresinizi girin"
+            className={`${styles.inputField} ${errors.email ? styles.inputError : ''}`}
+            required
+          />
+          {errors.email && <div className={styles.errorMessage}>{errors.email}</div>}
+        </div>
         
-        <div className="form-group">
-          <label htmlFor="schoolId" className="input-label">
-            Okul
-            <span className="required-mark">*</span>
+        <div className={styles.inputGroup}>
+          <label htmlFor="schoolId" className={styles.inputLabel}>
+            Okul<span className={styles.requiredMark}>*</span>
           </label>
           <select
             id="schoolId"
             name="schoolId"
             value={formData.schoolId}
             onChange={handleChange}
-            className={`input-field ${errors.schoolId ? 'input-error' : ''}`}
+            className={`${styles.inputField} ${errors.schoolId ? styles.inputError : ''}`}
             disabled={loading || schools.length === 0}
             required
-          >            <option value="">Okul Seçin</option>            {Array.isArray(schools) && schools.map((school, index) => (
+          >
+            <option value="">Okul Seçin</option>
+            {Array.isArray(schools) && schools.map((school, index) => (
               <option key={school._id || school.id || index} value={school._id || school.id}>
                 {school.name}
               </option>
             ))}
           </select>
-          {errors.schoolId && <div className="error-message">{errors.schoolId}</div>}
-          {loading && <div className="info-message">Okullar yükleniyor...</div>}
+          {errors.schoolId && <div className={styles.errorMessage}>{errors.schoolId}</div>}
+          {loading && <div className={styles.infoMessage}>Okullar yükleniyor...</div>}
           {!loading && schools.length === 0 && (
-            <div className="info-message">Henüz kayıtlı okul bulunmuyor.</div>
+            <div className={styles.infoMessage}>Henüz kayıtlı okul bulunmuyor.</div>
           )}
         </div>
         
-        <Input
-          type="password"
-          label="Şifre"
-          id="password"
-          name="password"
-          value={formData.password}
-          onChange={handleChange}
-          placeholder="Şifrenizi girin"
-          error={errors.password}
-          required
-        />
+        <div className={styles.inputGroup}>
+          <label htmlFor="password" className={styles.inputLabel}>
+            Şifre<span className={styles.requiredMark}>*</span>
+          </label>
+          <PasswordInput
+            id="password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            placeholder="Şifrenizi girin (en az 6 karakter)"
+            error={errors.password}
+            required
+          />
+          {errors.password && <div className={styles.errorMessage}>{errors.password}</div>}
+        </div>
         
-        <Input
-          type="password"
-          label="Şifre Tekrarı"
-          id="confirmPassword"
-          name="confirmPassword"
-          value={formData.confirmPassword}
-          onChange={handleChange}
-          placeholder="Şifrenizi tekrar girin"
-          error={errors.confirmPassword}
-          required
-        />
+        <div className={styles.inputGroup}>
+          <label htmlFor="confirmPassword" className={styles.inputLabel}>
+            Şifre Tekrarı<span className={styles.requiredMark}>*</span>
+          </label>
+          <PasswordInput
+            id="confirmPassword"
+            name="confirmPassword"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            placeholder="Şifrenizi tekrar girin"
+            error={errors.confirmPassword}
+            required
+          />
+          {errors.confirmPassword && <div className={styles.errorMessage}>{errors.confirmPassword}</div>}
+        </div>
         
-        <div className="form-actions">
+        <div className={styles.formActions}>
           <Button
             type="submit"
             variant="primary"
@@ -233,13 +203,14 @@ const Register = () => {
           </Button>
         </div>
         
-        <div className="auth-links">
-          <Link to="/login" className="auth-link">
-            Zaten hesabınız var mı? Giriş Yapın
+        <div className={styles.authLinks}>
+          <span style={{ color: 'var(--text-color-light)' }}>Zaten hesabınız var mı? </span>
+          <Link to="/login" className={styles.authLink}>
+            Giriş Yapın
           </Link>
         </div>
       </form>
-    </div>
+    </AuthLayout>
   );
 };
 
