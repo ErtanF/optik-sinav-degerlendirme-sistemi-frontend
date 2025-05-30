@@ -230,7 +230,7 @@ const NotFound = () => {
                 
                 <Link to="/" className="homeBtn">
                   Take me home
-                </Link>
+        </Link>
               </div>
             </div>
           </div>

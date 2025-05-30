@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { toast } from 'react-toastify';
 import usersApi from '../../api/users';
@@ -10,6 +11,7 @@ import './Profile.css';
 import { validateProfileForm, validatePasswordForm } from '../../utils/validators';
 
 const Profile = () => {
+  const navigate = useNavigate();
   const { currentUser, login, logout } = useAuth();
   const [activeTab, setActiveTab] = useState('profile');
   const [loading, setLoading] = useState(true);
@@ -75,8 +77,10 @@ const Profile = () => {
         school: profileData.school
       });
       
-      // Context ve localStorage'ı da güncelle
-      login(profileData, localStorage.getItem('token'));
+      // Mevcut token tipini koruyarak context ve localStorage'ı güncelle
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      const rememberMe = !!localStorage.getItem('token'); // localStorage'da token varsa rememberMe true
+      login(profileData, token, rememberMe);
       errorShownRef.current = false;
     } catch (error) {
       if (!errorShownRef.current && !currentUser) {
@@ -161,8 +165,11 @@ const Profile = () => {
         }
 
         toast.success('Profil bilgileriniz başarıyla güncellendi.');
-        // login is called with profileDataAfterUpdate, where school is now an object (if fetch succeeded) or an ID (if fetch failed).
-        login(profileDataAfterUpdate, localStorage.getItem('token'));
+        
+        // Mevcut token tipini koruyarak context ve localStorage'ı güncelle
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        const rememberMe = !!localStorage.getItem('token'); // localStorage'da token varsa rememberMe true
+        login(profileDataAfterUpdate, token, rememberMe);
         
         // The useEffect hook that depends on [currentUser] will update the local userData state.
         // Optionally, to make the local state update more immediate:
@@ -193,12 +200,22 @@ const Profile = () => {
           newPassword: passwordData.newPassword
         });
         toast.success('Şifreniz başarıyla değiştirildi. Lütfen tekrar giriş yapın.');
+        
+        // Önce logout işlemini yap
         logout();
+        
+        // Form verilerini temizle
         setPasswordData({
           currentPassword: '',
           newPassword: '',
           confirmPassword: ''
         });
+        
+        // Kesin olarak login sayfasına yönlendir
+        setTimeout(() => {
+          navigate('/login');
+        }, 100);
+        
       } catch (error) {
         showApiError(error, 'Şifre değiştirilirken bir hata oluştu.');
       } finally {
@@ -288,6 +305,7 @@ const Profile = () => {
               onChange={handleProfileChange}
               placeholder="Adınızı ve soyadınızı girin"
               error={errors.name}
+              autoComplete="name"
               required
             />
             <Input
@@ -299,6 +317,7 @@ const Profile = () => {
               onChange={handleProfileChange}
               placeholder="E-posta adresinizi girin"
               error={errors.email}
+              autoComplete="email"
               disabled={true}
               readOnly={true}
               required
@@ -330,6 +349,7 @@ const Profile = () => {
                 onChange={handlePasswordChange}
                 placeholder="Mevcut şifrenizi girin"
                 error={errors.currentPassword}
+                autoComplete="current-password"
                 required
               />
               
@@ -342,6 +362,7 @@ const Profile = () => {
                 onChange={handlePasswordChange}
                 placeholder="Yeni şifrenizi girin"
                 error={errors.newPassword}
+                autoComplete="new-password"
                 required
               />
               
@@ -354,6 +375,7 @@ const Profile = () => {
                 onChange={handlePasswordChange}
                 placeholder="Yeni şifrenizi tekrar girin"
                 error={errors.confirmPassword}
+                autoComplete="new-password"
                 required
               />
             </div>

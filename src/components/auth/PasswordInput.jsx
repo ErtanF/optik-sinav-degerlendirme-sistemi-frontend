@@ -9,7 +9,9 @@ const PasswordInput = ({
   placeholder, 
   className = '', 
   error,
-  required = false 
+  required = false,
+  autoComplete,
+  ...props
 }) => {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -27,7 +29,9 @@ const PasswordInput = ({
         onChange={onChange}
         placeholder={placeholder}
         className={`${styles.inputField} ${error ? styles.inputError : ''} ${className}`}
+        autoComplete={autoComplete}
         required={required}
+        {...props}
       />
       <button 
         type="button" 

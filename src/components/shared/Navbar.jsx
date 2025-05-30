@@ -1,93 +1,10 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import './Navbar.css';
 import './NotificationBadge.css';
 import favicon from '../../assets/favicon3.png';
 import usersApi from '../../api/users';
 import { useAuth } from '../../hooks/useAuth';
-
-// Throttle function to limit how often a function can be called
-const throttle = (func, delay) => {
-  let lastCall = 0;
-  return (...args) => {
-    const now = new Date().getTime();
-    if (now - lastCall < delay) {
-      return;
-    }
-    lastCall = now;
-    return func(...args);
-  };
-};
-
-// Improved custom hook for scroll progress
-const useScrollProgress = () => {
-  const [scrollPercent, setScrollPercent] = useState(0);
-  
-  // Use a more efficient calculation method
-  const calculateScrollPercent = useCallback(() => {
-    // Check if document is fully loaded
-    if (!document.body) return;
-    
-    const docHeight = Math.max(
-      document.body.scrollHeight, 
-      document.body.offsetHeight, 
-      document.documentElement.clientHeight, 
-      document.documentElement.scrollHeight, 
-      document.documentElement.offsetHeight
-    );
-    
-    const windowHeight = window.innerHeight;
-    const scrollTop = window.scrollY;
-    
-    // Prevent division by zero
-    if (docHeight <= windowHeight) {
-      setScrollPercent(0);
-      return;
-    }
-    
-    // Calculate the scroll percentage with precision
-    const newScrollPercent = Math.min(100, Math.max(0, (scrollTop / (docHeight - windowHeight)) * 100));
-    
-    // Only update if there's significant change (optimization)
-    if (Math.abs(newScrollPercent - scrollPercent) > 0.5) {
-      setScrollPercent(newScrollPercent);
-      
-      // Update the CSS variable for the progress bar
-      requestAnimationFrame(() => {
-        document.documentElement.style.setProperty('--scroll', newScrollPercent.toFixed(2));
-      });
-    }
-  }, [scrollPercent]);
-
-  useEffect(() => {
-    // Throttle the scroll handler to improve performance
-    const handleScroll = throttle(calculateScrollPercent, 20);
-
-    // Handle browser resize which affects scroll calculations
-    const handleResize = throttle(() => {
-      // Small delay to ensure DOM is updated
-      setTimeout(calculateScrollPercent, 100);
-    }, 250);
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    window.addEventListener('resize', handleResize, { passive: true });
-    
-    // Initial call after DOM is ready
-    if (document.readyState === 'complete') {
-      calculateScrollPercent();
-    } else {
-      window.addEventListener('load', calculateScrollPercent);
-    }
-    
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('resize', handleResize);
-      window.removeEventListener('load', calculateScrollPercent);
-    };
-  }, [calculateScrollPercent]);
-
-  return scrollPercent;
-};
 
 const Navbar = () => {
   const { isAuthenticated, currentUser, logout } = useAuth();
@@ -97,7 +14,6 @@ const Navbar = () => {
   const [loading, setLoading] = useState(false);
   const [actionInProgress, setActionInProgress] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   
   // Yeni dropdown state'leri
   const [optikMenuOpen, setOptikMenuOpen] = useState(false);
@@ -108,7 +24,6 @@ const Navbar = () => {
   const dropdownRef = useRef(null);
   const notificationRef = useRef(null);
   const mobileMenuRef = useRef(null);
-  const scrollPreviousPosition = useRef(0);
   const optikMenuRef = useRef(null);
   const yonetimMenuRef = useRef(null);
   
@@ -148,50 +63,6 @@ const Navbar = () => {
       fetchPendingTeachers();
     }
   }, [isAuthenticated, canApproveTeachers]);
-
-  // Improved scroll handler with debounce to prevent excessive updates
-  const handleScrollChange = useCallback(() => {
-    const scrollPosition = window.scrollY;
-    const scrollThreshold = 20;
-    
-    // Add hysteresis to prevent flickering at the threshold
-    if (scrollPosition > scrollThreshold && !scrolled) {
-      setScrolled(true);
-    } else if (scrollPosition <= scrollThreshold - 5 && scrolled) { // Subtraction creates hysteresis
-      setScrolled(false);
-    }
-    
-    scrollPreviousPosition.current = scrollPosition;
-  }, [scrolled]);
-
-  useEffect(() => {
-    // Adjust throttle for better performance
-    const throttledHandleScroll = throttle(handleScrollChange, 30);
-
-    // Use passive event listener for better performance
-    window.addEventListener('scroll', throttledHandleScroll, { passive: true });
-
-    // Initial check - ensure scroll position is respected on page refresh or direct link access
-    const checkInitialScroll = () => {
-      handleScrollChange();
-      
-      // Double-check after page is fully loaded (images, fonts, etc)
-      window.requestAnimationFrame(() => {
-        handleScrollChange();
-      });
-    };
-    
-    checkInitialScroll();
-    window.addEventListener('load', checkInitialScroll);
-
-    return () => {
-      window.removeEventListener('scroll', throttledHandleScroll);
-      window.removeEventListener('load', checkInitialScroll);
-    };
-  }, [handleScrollChange]);
-
-  // Add scroll progress indicator
-  useScrollProgress();
 
   const fetchPendingTeachers = async () => {
     try {
@@ -294,15 +165,18 @@ const Navbar = () => {
 
   return (
     <nav 
-      className={`navbar ${scrolled ? 'scrolled' : ''}`} 
+      className={`navbar`} 
       aria-label="Ana navigasyon"
       role="navigation"
     >
       <div className="navbar-container">
         <div className="navbar-logo">
           <Link to="/" aria-label="Ana sayfaya git" onClick={(e) => handleNavigate('/', e)}>
-            <img src={favicon || '/placeholder.svg'} alt="Optik Sınav Sistemi Logo" className="navbar-logo-image" />
-            <span className="navbar-logo-text">Optik Sınav Sistemi</span>
+            <img src={favicon || '/placeholder.svg'} alt="OpTürk Logo" className="navbar-logo-image" />
+            <div className="navbar-logo-text">
+              <span>OpTürk</span>
+              <span>Optik Sınav Değerlendirme Sistemi</span>
+            </div>
           </Link>
           
           <button

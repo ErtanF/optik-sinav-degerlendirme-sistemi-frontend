@@ -98,6 +98,7 @@ const ForgotPassword = () => {
             onChange={handleChange}
             placeholder="Kayıtlı e-posta adresinizi girin"
             className={`${styles.inputField} ${errors.email ? styles.inputError : ''}`}
+            autoComplete="email"
             required
           />
           {errors.email && <div className={styles.errorMessage}>{errors.email}</div>}

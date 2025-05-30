@@ -105,6 +105,7 @@ const Login = () => {
               onChange={handleChange}
                 placeholder="ornek@example.com"
             className={`${styles.inputField} ${errors.email ? styles.inputError : ''}`}
+              autoComplete="email"
               required
           />
           {errors.email && <div className={styles.errorMessage}>{errors.email}</div>}
@@ -121,6 +122,7 @@ const Login = () => {
                 onChange={handleChange}
                 placeholder="Şifrenizi girin"
             error={errors.password}
+                autoComplete="current-password"
                 required
               />
           {errors.password && <div className={styles.errorMessage}>{errors.password}</div>}

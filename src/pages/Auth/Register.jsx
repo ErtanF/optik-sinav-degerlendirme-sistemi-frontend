@@ -111,6 +111,7 @@ const Register = () => {
             onChange={handleChange}
             placeholder="Adınızı ve soyadınızı girin"
             className={`${styles.inputField} ${errors.name ? styles.inputError : ''}`}
+            autoComplete="name"
             required
           />
           {errors.name && <div className={styles.errorMessage}>{errors.name}</div>}
@@ -128,6 +129,7 @@ const Register = () => {
             onChange={handleChange}
             placeholder="E-posta adresinizi girin"
             className={`${styles.inputField} ${errors.email ? styles.inputError : ''}`}
+            autoComplete="email"
             required
           />
           {errors.email && <div className={styles.errorMessage}>{errors.email}</div>}
@@ -143,6 +145,7 @@ const Register = () => {
             value={formData.schoolId}
             onChange={handleChange}
             className={`${styles.inputField} ${errors.schoolId ? styles.inputError : ''}`}
+            autoComplete="organization"
             disabled={loading || schools.length === 0}
             required
           >
@@ -171,6 +174,7 @@ const Register = () => {
             onChange={handleChange}
             placeholder="Şifrenizi girin (en az 6 karakter)"
             error={errors.password}
+            autoComplete="new-password"
             required
           />
           {errors.password && <div className={styles.errorMessage}>{errors.password}</div>}
@@ -187,6 +191,7 @@ const Register = () => {
             onChange={handleChange}
             placeholder="Şifrenizi tekrar girin"
             error={errors.confirmPassword}
+            autoComplete="new-password"
             required
           />
           {errors.confirmPassword && <div className={styles.errorMessage}>{errors.confirmPassword}</div>}
