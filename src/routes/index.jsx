@@ -15,7 +15,7 @@ import LandingKVKK from '../pages/Landing/KVKK';
 import LandingCerezler from '../pages/Landing/Cerezler';
 import Login from '../pages/Auth/Login';
 import Register from '../pages/Auth/Register';
-import ForgotPassword from '../pages/Auth/ForgotPassword'; // Eklenen bileşen
+import ForgotPassword from '../pages/Auth/ForgotPassword';
 import Dashboard from '../pages/Dashboard/Dashboard';
 import OptikOlusturma from '../pages/Optik/OptikOlusturma';
 import OptikFormlarim from '../pages/Optik/OptikFormlarim';
@@ -28,17 +28,20 @@ import Contact from '../pages/Contact';
 import ApprovedTeachersPage from '../pages/ApprovedTeachersPage';
 import { StudentsList, StudentForm, ExcelImport } from '../pages/Students';
 import { ClassesList, ClassForm, ClassExcelImport, ClassDetail, AddStudentsToClass } from '../pages/Classes';
-// Okul yönetimi sayfaları
 import { SchoolsList, SchoolForm, AdminForm } from '../pages/Schools';
-// Kurumsal sayfalar
 import { Hakkimizda, Kariyer, GizlilikPolitikasi, KullanimSartlari } from '../pages/Kurumsal';
+
+// Sınav sayfaları importları
+import SinavlarListesi from '../pages/Sinavlar/SinavlarListesi';
+import SinavOlustur from '../pages/Sinavlar/SinavOlustur';
+import SinavDetay from '../pages/Sinavlar/SinavDetay';
 
 // PrivateRoute bileşeni
 const PrivateRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
-  if (loading) return null; // veya bir loading spinner dönebilir
+  if (loading) return null; // veya bir loading spinner
   if (!isAuthenticated) {
-    return <Navigate to="/" />;
+    return <Navigate to="/login" />;
   }
   return children;
 };
@@ -46,7 +49,7 @@ const PrivateRoute = ({ children }) => {
 // PublicRoute bileşeni (auth sayfaları için)
 const PublicRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
-  if (loading) return null; // veya bir loading spinner dönebilir
+  if (loading) return null;
   if (isAuthenticated) {
     return <Navigate to="/dashboard" />;
   }
@@ -58,7 +61,7 @@ const SuperAdminRoute = ({ children }) => {
   const { isAuthenticated, loading, currentUser } = useAuth();
   if (loading) return null;
   if (!isAuthenticated) {
-    return <Navigate to="/" />;
+    return <Navigate to="/login" />;
   }
   if (currentUser?.role !== 'superadmin') {
     return <Navigate to="/dashboard" />;
@@ -123,6 +126,7 @@ const routes = () => [
         path: 'dashboard',
         element: <PrivateRoute><Dashboard /></PrivateRoute>
       },
+      // Optik Formlar
       {
         path: 'optik-olustur',
         element: <PrivateRoute><OptikOlusturma /></PrivateRoute>
@@ -135,7 +139,22 @@ const routes = () => [
         path: 'optik/:id',
         element: <PrivateRoute><OptikDetay /></PrivateRoute>
       },
-      // Öğrenci Yönetimi Sayfaları
+      
+      // Sınav Sayfaları - Yeni Eklenen
+      {
+        path: 'sinavlar',
+        element: <PrivateRoute><SinavlarListesi /></PrivateRoute>
+      },
+      {
+        path: 'sinav-olustur',
+        element: <PrivateRoute><SinavOlustur /></PrivateRoute>
+      },
+      {
+        path: 'sinav/:id',
+        element: <PrivateRoute><SinavDetay /></PrivateRoute>
+      },
+      
+      // Öğrenci Yönetimi
       {
         path: 'students',
         element: <PrivateRoute><StudentsList /></PrivateRoute>
@@ -152,7 +171,8 @@ const routes = () => [
         path: 'students/import',
         element: <PrivateRoute><ExcelImport /></PrivateRoute>
       },
-      // Sınıf Yönetimi Sayfaları
+      
+      // Sınıf Yönetimi
       {
         path: 'classes',
         element: <PrivateRoute><ClassesList /></PrivateRoute>
@@ -177,7 +197,8 @@ const routes = () => [
         path: 'classes/add-students/:id',
         element: <PrivateRoute><AddStudentsToClass /></PrivateRoute>
       },
-      // Okul Yönetimi Sayfaları (Sadece Süperadmin)
+      
+      // Okul Yönetimi (Süperadmin)
       {
         path: 'schools',
         element: <SuperAdminRoute><SchoolsList /></SuperAdminRoute>
@@ -194,6 +215,7 @@ const routes = () => [
         path: 'schools/add-admin/:id',
         element: <SuperAdminRoute><AdminForm /></SuperAdminRoute>
       },
+      
       // Kurumsal Sayfalar
       {
         path: 'hakkimizda',
@@ -211,10 +233,8 @@ const routes = () => [
         path: 'kullanim-sartlari',
         element: <KullanimSartlari />
       },
-      {
-        path: '*',
-        element: <NotFound />
-      },
+      
+      // Diğer Sayfalar
       {
         path: 'teacher-approvals',
         element: <PrivateRoute><TeacherApprovalsPage /></PrivateRoute>
@@ -234,6 +254,10 @@ const routes = () => [
       {
         path: 'contact',
         element: <Contact />
+      },
+      {
+        path: '*',
+        element: <NotFound />
       }
     ]
   },

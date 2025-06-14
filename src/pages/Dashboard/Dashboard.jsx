@@ -40,7 +40,12 @@ const Dashboard = () => {
           <div className="dashboard-card">
             <h3>Sınavlar</h3>
             <p>Sınav sonuçlarını yönetin</p>
-            <Button variant="outline" disabled>Görüntüle</Button>
+            <Link to="/sinav-olustur" className="btn-link">
+              <Button variant="primary">Yeni Sınav Oluştur</Button>
+            </Link>
+            <Link to="/sinavlar" className="btn-link">
+              <Button variant="outline">Tüm Sınavlar</Button>
+            </Link>
           </div>
           
           <div className="dashboard-card">

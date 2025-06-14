@@ -89,7 +89,7 @@ const PreviewModal = ({
     
     html2canvas(paperRef.current, {
       backgroundColor: 'white',
-      scale: 2, // 2x ölçek faktörü ile daha yüksek kalite
+      scale: 4, // 2x ölçek faktörü ile daha yüksek kalite
       useCORS: true,
       logging: false,
       allowTaint: true,

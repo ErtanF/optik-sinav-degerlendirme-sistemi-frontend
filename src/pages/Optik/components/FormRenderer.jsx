@@ -20,7 +20,7 @@ const FormRenderer = ({
         
         html2canvas(containerRef.current, {
           backgroundColor: 'white',
-          scale: 2,
+          scale: 4,
           useCORS: true,
           logging: false, 
           allowTaint: true,
