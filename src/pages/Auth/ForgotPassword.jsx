@@ -1,106 +1,129 @@
-// src/pages/Auth/ForgotPassword.jsx
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import Input from '../../components/ui/Input/Input';
 import Button from '../../components/ui/Button/Button';
+import AuthLayout from '../../components/auth/AuthLayout';
+import ForgotPasswordIllustration from '../../components/auth/illustrations/ForgotPasswordIllustration';
+import useAuthForm from '../../hooks/useAuthForm';
 import authApi from '../../api/auth';
-import './ForgotPassword.css';
+import styles from '../../components/auth/auth.module.css';
 
 const ForgotPassword = () => {
-    const [email, setEmail] = useState('');
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [errors, setErrors] = useState({});
-    const [success, setSuccess] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
-    const handleChange = (e) => {
-        setEmail(e.target.value);
-        if (errors.email) {
-            setErrors({ ...errors, email: '' });
-        }
-    };
+  // Form validation rules
+  const validationRules = {
+    email: true
+  };
 
-    const validateForm = () => {
-        const formErrors = {};
-        let isValid = true;
+  // Initialize form data
+  const initialData = {
+    email: ''
+  };
 
-        if (!email) {
-            formErrors.email = 'E-posta adresi gereklidir';
-            isValid = false;
-        } else if (!/\S+@\S+\.\S+/.test(email)) {
-            formErrors.email = 'Geçerli bir e-posta adresi giriniz';
-            isValid = false;
-        }
+  const { formData, errors, handleChange, setError, validateForm } = useAuthForm(initialData, validationRules);
 
-        setErrors(formErrors);
-        return isValid;
-    };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    if (validateForm()) {
+      setIsSubmitting(true);
 
-        if (validateForm()) {
-            setIsSubmitting(true);
+      try {
+        await authApi.forgotPassword({ email: formData.email });
+        setIsSubmitted(true);
+      } catch (error) {
+        setError('general', error.response?.data?.message || 'Şifre sıfırlama isteği başarısız. Lütfen e-posta adresinizi kontrol edin.');
+      } finally {
+        setIsSubmitting(false);
+      }
+    }
+  };
 
-            try {
-                // API çağrımı yap
-                await authApi.forgotPassword(email);
-
-                setSuccess('Şifre sıfırlama bağlantısı e-posta adresinize gönderildi.');
-                setEmail('');
-            } catch (error) {
-                setErrors({
-                    ...errors,
-                    general: error.response?.data?.message || 'İşlem sırasında bir hata oluştu. Lütfen tekrar deneyin.'
-                });
-            } finally {
-                setIsSubmitting(false);
-            }
-        }
-    };
-
+  if (isSubmitted) {
     return (
-        <div className="forgot-password-page">
-            <h2 className="auth-title">Şifremi Unuttum</h2>
-
-            {errors.general && <div className="error-alert">{errors.general}</div>}
-            {success && <div className="success-alert">{success}</div>}
-
-            <form onSubmit={handleSubmit} className="forgot-password-form">
-                <div className="form-description">
-                    Şifrenizi sıfırlamak için hesabınıza bağlı e-posta adresini girin. E-posta adresinize bir sıfırlama bağlantısı göndereceğiz.
-                </div>
-
-                <Input
-                    type="email"
-                    label="E-posta"
-                    id="email"
-                    name="email"
-                    value={email}
-                    onChange={handleChange}
-                    placeholder="E-posta adresinizi girin"
-                    error={errors.email}
-                    required
-                />
-
-                <div className="form-actions">
-                    <Button
-                        type="submit"
-                        variant="primary"
-                        fullWidth
-                        disabled={isSubmitting}
-                    >
-                        {isSubmitting ? 'Gönderiliyor...' : 'Sıfırlama Bağlantısı Gönder'}
-                    </Button>
-                </div>
-            </form>
-
-            <div className="auth-links">
-                <Link to="/login" className="auth-link">
-                    Giriş sayfasına geri dön
-                </Link>
-            </div>
+      <AuthLayout 
+        illustration={<ForgotPasswordIllustration />}
+        illustrationText="Güvenliğiniz bizim için önemli. E-postanızı kontrol edin ve şifre sıfırlama bağlantısına tıklayın."
+      >
+        <div className={styles.authHeader}>
+          <h2 className={styles.authTitle}>E-posta gönderildi!</h2>
+          <p className={styles.authSubtitle}>Şifre sıfırlama bağlantısını e-posta adresinize gönderdik</p>
         </div>
+
+        <div className={styles.successAlert}>
+          E-posta adresinize şifre sıfırlama bağlantısı gönderilmiştir. 
+          Lütfen e-posta kutunuzu (spam klasörünü de) kontrol edin.
+        </div>
+
+        <div className={styles.formDescription}>
+          <strong>Sonraki adımlar:</strong><br />
+          1. E-posta kutunuzu kontrol edin<br />
+          2. Şifre sıfırlama bağlantısına tıklayın<br />
+          3. Yeni şifrenizi belirleyin<br />
+          4. Sisteme giriş yapın
+        </div>
+
+        <div className={styles.authLinks}>
+          <Link to="/login" className={styles.authLink}>
+            Giriş sayfasına dön
+          </Link>
+        </div>
+      </AuthLayout>
     );
+  }
+
+  return (
+    <AuthLayout 
+      illustration={<ForgotPasswordIllustration />}
+      illustrationText="Güvenliğiniz bizim için önemli. E-postanızı kontrol edin ve şifre sıfırlama bağlantısına tıklayın."
+    >
+      <div className={styles.authHeader}>
+        <h2 className={styles.authTitle}>Şifrenizi mi unuttunuz?</h2>
+        <p className={styles.authSubtitle}>E-posta adresinizi girin, şifre sıfırlama bağlantısını göndereceğiz</p>
+      </div>
+
+      {errors.general && <div className={styles.errorAlert}>{errors.general}</div>}
+
+      <form onSubmit={handleSubmit} className={styles.authForm}>
+        <div className={styles.inputGroup}>
+          <label htmlFor="email" className={styles.inputLabel}>
+            E-posta Adresi<span className={styles.requiredMark}>*</span>
+          </label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            placeholder="Kayıtlı e-posta adresinizi girin"
+            className={`${styles.inputField} ${errors.email ? styles.inputError : ''}`}
+            autoComplete="email"
+            required
+          />
+          {errors.email && <div className={styles.errorMessage}>{errors.email}</div>}
+        </div>
+
+        <div className={styles.formActions}>
+          <Button
+            type="submit"
+            variant="primary"
+            fullWidth
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Gönderiliyor...' : 'Şifre Sıfırlama Bağlantısı Gönder'}
+          </Button>
+        </div>
+      </form>
+
+      <div className={styles.authLinks}>
+        <span style={{ color: 'var(--text-color-light)' }}>Şifrenizi hatırladınız mı? </span>
+        <Link to="/login" className={styles.authLink}>
+          Giriş yapın
+        </Link>
+      </div>
+    </AuthLayout>
+  );
 };
 
-export default ForgotPassword;
+export default ForgotPassword; 

@@ -118,6 +118,11 @@ const routes = () => [
       }
     ]
   },
+  // Login sayfası için özel route (AuthLayout bypass)
+  {
+    path: 'login',
+    element: <PublicRoute><Login /></PublicRoute>
+  },
   {
     path: '/',
     element: <MainLayout />,
@@ -265,10 +270,6 @@ const routes = () => [
     path: '/',
     element: <AuthLayout />,
     children: [
-      {
-        path: 'login',
-        element: <PublicRoute><Login /></PublicRoute>
-      },
       {
         path: 'register',
         element: <PublicRoute><Register /></PublicRoute>

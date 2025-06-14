@@ -1,78 +1,50 @@
 // src/pages/Auth/Login.jsx - Güncelleme
-import './Login.css';
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import Input from '../../components/ui/Input/Input';
 import Button from '../../components/ui/Button/Button';
+import AuthLayout from '../../components/auth/AuthLayout';
+import PasswordInput from '../../components/auth/PasswordInput';
+import LoginIllustration from '../../components/auth/illustrations/LoginIllustration';
+import useAuthForm from '../../hooks/useAuthForm';
 import { useAuth } from '../../hooks/useAuth';
 import authApi from '../../api/auth';
+import styles from '../../components/auth/auth.module.css';
 
 const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [formData, setFormData] = useState({
+  // Form validation rules
+  const validationRules = {
+    email: true,
+    password: true
+  };
+
+  // Initialize form with remember me functionality
+  const initialData = {
     email: '',
     password: '',
     rememberMe: false
-  });
+  };
 
-  const [errors, setErrors] = useState({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
+  const { formData, errors, handleChange, setError, validateForm, setFormData } = useAuthForm(initialData, validationRules);
 
-  // Location state'inden mesajı al (kayıt başarılı mesajı gibi)
+  // Location state message (from successful registration)
   const message = location.state?.message;
   
-  // Component mount olduğunda localStorage'dan rememberMe değerini kontrol et
+  // Load remember me data on component mount
   useEffect(() => {
     const savedRememberMe = localStorage.getItem('rememberMe') === 'true';
     const savedEmail = savedRememberMe ? localStorage.getItem('userEmail') || '' : '';
     
-    setFormData(prevState => ({
-      ...prevState,
+    setFormData(prev => ({
+      ...prev,
       email: savedEmail,
       rememberMe: savedRememberMe
     }));
-  }, []);
-
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === 'checkbox' ? checked : value
-    });
-
-    // Clear error when field is edited
-    if (errors[name]) {
-      setErrors({
-        ...errors,
-        [name]: ''
-      });
-    }
-  };
-
-  const validateForm = () => {
-    let formErrors = {};
-    let isValid = true;
-
-    if (!formData.email) {
-      formErrors.email = 'E-posta adresi gereklidir';
-      isValid = false;
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      formErrors.email = 'Geçerli bir e-posta adresi giriniz';
-      isValid = false;
-    }
-
-    if (!formData.password) {
-      formErrors.password = 'Şifre gereklidir';
-      isValid = false;
-    }
-
-    setErrors(formErrors);
-    return isValid;
-  };
+  }, [setFormData]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -81,14 +53,13 @@ const Login = () => {
       setIsSubmitting(true);
 
       try {
-        // Gerçek API çağrısı
         const response = await authApi.login({
           email: formData.email,
           password: formData.password,
           rememberMe: formData.rememberMe
         });        
         
-        // Beni hatırla seçeneğini localStorage'a kaydet
+        // Save remember me preference
         localStorage.setItem('rememberMe', formData.rememberMe);
         if (formData.rememberMe) {
           localStorage.setItem('userEmail', formData.email);
@@ -96,102 +67,84 @@ const Login = () => {
           localStorage.removeItem('userEmail');
         }
         
-        // Başarılı login
+        // Successful login
         login(response.user, response.token, formData.rememberMe);
         navigate('/');
       } catch (error) {
-        setErrors({
-          ...errors,
-          general: error.response?.data?.error || 'Giriş başarısız. Lütfen bilgilerinizi kontrol edin.'
-        });
+        setError('general', error.response?.data?.error || 'Giriş başarısız. Lütfen bilgilerinizi kontrol edin.');
       } finally {
         setIsSubmitting(false);
       }
     }
   };
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
-
   return (
-      <div className="login-page">
-        {message && (
-            <div className="success-alert">{message}</div>
-        )}
+    <AuthLayout 
+      illustration={<LoginIllustration />}
+      illustrationText="Optik sınav değerlendirme sistemiyle eğitimde dijital dönüşümü yaşayın. Hızlı, güvenilir ve kolay kullanım."
+      showBackButton={true}
+    >
+      <div className={styles.authHeader}>
+        <h2 className={styles.authTitle}>Hesabınıza giriş yapın</h2>
+        <p className={styles.authSubtitle}>Hoş geldiniz! Kayıt olurken girdiğiniz bilgilerle giriş yapın</p>
+      </div>
 
-        {errors.general && (
-            <div className="error-alert">{errors.general}</div>
-        )}
+      {message && <div className={styles.successAlert}>{message}</div>}
+      {errors.general && <div className={styles.errorAlert}>{errors.general}</div>}
 
-        <form onSubmit={handleSubmit} className="auth-form">
-          <Input
+      <form onSubmit={handleSubmit} className={styles.authForm}>
+        <div className={styles.inputGroup}>
+          <label htmlFor="email" className={styles.inputLabel}>
+            E-posta<span className={styles.requiredMark}>*</span>
+              </label>
+              <input
               type="email"
-              label="E-posta"
               id="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
-              placeholder="E-posta adresinizi girin"
-              error={errors.email}
+                placeholder="ornek@example.com"
+            className={`${styles.inputField} ${errors.email ? styles.inputError : ''}`}
+              autoComplete="email"
               required
           />
+          {errors.email && <div className={styles.errorMessage}>{errors.email}</div>}
+            </div>
 
-          <div className="input-group">
-            <label htmlFor="password" className="input-label">
-              Şifre
-              <span className="required-mark">*</span>
+        <div className={styles.inputGroup}>
+          <label htmlFor="password" className={styles.inputLabel}>
+            Şifre<span className={styles.requiredMark}>*</span>
             </label>
-            <div className="password-input-container">
-              <input
-                type={showPassword ? "text" : "password"}
+          <PasswordInput
                 id="password"
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
                 placeholder="Şifrenizi girin"
-                className={`input-field ${errors.password ? 'input-error' : ''}`}
+            error={errors.password}
+                autoComplete="current-password"
                 required
               />
-              <button 
-                  type="button" 
-                  className="password-toggle" 
-                  onClick={togglePasswordVisibility}
-                  aria-label={showPassword ? "Parolayı gizle" : "Parolayı göster"}
-              >
-                  {showPassword ? (
-                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-                          <line x1="1" y1="1" x2="23" y2="23"></line>
-                      </svg>
-                  ) : (
-                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                          <circle cx="12" cy="12" r="3"></circle>
-                      </svg>
-                  )}
-              </button>
-            </div>
-            {errors.password && <div className="error-message">{errors.password}</div>}
+          {errors.password && <div className={styles.errorMessage}>{errors.password}</div>}
           </div>
 
-          <div className="remember-me-container">
-            <label className="remember-me-label">
+        <div className={styles.rememberMeContainer}>
+          <label className={styles.rememberMeLabel}>
               <input
                 type="checkbox"
                 name="rememberMe"
                 checked={formData.rememberMe}
                 onChange={handleChange}
-                className="remember-me-checkbox"
+              className={styles.rememberMeCheckbox}
               />
-              <span className="remember-me-text">Beni hatırla</span>
+            <span>Beni hatırla</span>
             </label>
-            <Link to="/forgotPassword" className="auth-link forgot-password-link">
+          <Link to="/forgotPassword" className={styles.forgotPasswordLink}>
               Şifremi unuttum
             </Link>
           </div>
 
-          <div className="form-actions">
+        <div className={styles.formActions}>
             <Button
                 type="submit"
                 variant="primary"
@@ -201,27 +154,15 @@ const Login = () => {
               {isSubmitting ? 'Giriş Yapılıyor...' : 'Giriş Yap'}
             </Button>
           </div>
+          </form>
 
-          <div className="auth-divider">
-            <span>veya</span>
-          </div>
-
-          <div className="auth-links">
-            <Link to="/register" className="auth-link">
-              Hesabınız yok mu? Kayıt Olun
+      <div className={styles.authLinks}>
+            <span style={{ color: 'var(--text-color-light)' }}>Hesabınız yok mu? </span>
+        <Link to="/register" className={styles.authLink}>
+              Kayıt Ol
             </Link>
-          </div>
-        </form>
-
-        <div className="back-to-home">
-          <Link to="/" className="back-to-home-link">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="back-icon">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Ana Sayfaya Dön
-          </Link>
-        </div>
       </div>
+    </AuthLayout>
   );
 };
 

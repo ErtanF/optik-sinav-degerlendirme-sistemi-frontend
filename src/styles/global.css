@@ -7,15 +7,12 @@
 
 /* Layouts */
 @import '../components/layouts/MainLayout.css';
-@import '../components/layouts/AuthLayout.css';
 
 /* Shared Components */
 @import '../components/shared/Navbar.css';
 @import '../components/shared/Footer.css';
 
 /* Pages */
-@import '../pages/Auth/Login.css';
-@import '../pages/Auth/Register.css';
 @import '../pages/Dashboard/Dashboard.css';
 @import '../pages/Optik/OptikOlusturma.css';
 @import '../pages/NotFound.css';
