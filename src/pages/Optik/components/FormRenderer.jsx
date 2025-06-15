@@ -91,7 +91,7 @@ const FormRenderer = ({
           overflow: 'hidden', padding: '10px', boxSizing: 'border-box',
           whiteSpace: 'pre-wrap', textAlign: 'left', wordBreak: 'break-word',
           backgroundColor: 'transparent', border: 'none', borderRadius: '4px',
-          fontSize: '14px', lineHeight: '1.5'
+          fontSize: '13px', lineHeight: '1.4',  fontFamily: 'Roboto, sans-serif'
         }}>
           {element.content || ''}
         </div>

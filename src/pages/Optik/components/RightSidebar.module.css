@@ -1,0 +1,73 @@
+/* src/pages/Optik/components/RightSidebar.module.css */
+.container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 250px;
+  background-color: white;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  overflow-y: auto;
+}
+
+.helpSection, .infoSection {
+  padding: 15px;
+}
+
+.helpSteps {
+  margin: 0;
+  padding-left: 18px;
+  margin-bottom: 10px;
+}
+
+.helpSteps li {
+  margin-bottom: 6px;
+}
+
+.calibrationInfo {
+  background-color: #fff8e5;
+  border-left: 3px solid #ffc107;
+  padding: 10px;
+  margin-top: 12px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.infoList {
+  padding-left: 18px;
+  margin: 10px 0;
+}
+
+.infoList li {
+  margin-bottom: 8px;
+}
+
+.tip {
+  color: var(--primary-color);
+  font-style: italic;
+  margin: 10px 0;
+}
+
+.calibrationBox {
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  padding: 12px;
+  margin-top: 15px;
+}
+
+.calibrationBox h4 {
+  margin-top: 0;
+  margin-bottom: 8px;
+  color: var(--text-color-dark);
+  font-size: 14px;
+}
+
+.calibrationList {
+  padding-left: 18px;
+  margin: 8px 0;
+}
+
+.calibrationList li {
+  margin-bottom: 5px;
+  font-size: 13px;
+}

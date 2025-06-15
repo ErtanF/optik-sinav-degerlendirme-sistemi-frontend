@@ -1,8 +1,8 @@
-/* Sadece sayfa genel düzeni için CSS */
+/* src/pages/Optik/OptikOlusturma.css */
 .optik-olusturma-page {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 1rem;
+  padding: 0.5rem;
   height: auto; /* Auto height */
   display: flex;
   flex-direction: column;
@@ -26,38 +26,61 @@
   gap: 1rem;
 }
 
-/* Ana düzen: sol sidebar ve sağ A4 kağıdı */
+/* Ana düzen: sol sidebar, orta A4, sağ bilgi paneli */
 .optik-creator-container {
   display: flex;
-  gap: 2rem;
+  gap: 0.75rem;
   flex: 1;
   position: relative;
 }
 
+/* Sol sidebar - Sadece form elemanları için */
 .sidebar-container {
-  width: 250px;
-  max-height: 700px; /* Sabit bir yükseklik */
+  width: 220px;
+  max-height: 700px;
   overflow-y: auto;
   flex-shrink: 0;
+  margin-left: -0.5rem; /* Sol kenardan daha sola kaydır */
 }
 
+/* Orta kısım - A4 kağıdı */
 .a4-container-wrapper {
   flex: 1;
   position: sticky;
-  top: 100px; /* Navbar'dan sonra yerleştir */
+  top: 100px;
   height: auto;
   display: flex;
   justify-content: center;
-  overflow: visible; /* Scroll'u kaldır */
+  overflow: visible;
+  margin: 0 -0.5rem; /* Orta kısma daha fazla alan sağla */
 }
+
 .a4-wrapper-fixed {
   position: sticky;
-  top: 20px; /* Üstten mesafe */
-  max-height: calc(100vh - 150px); /* Görünür alanda kalacak maksimum yükseklik */
+  top: 20px;
+  max-height: calc(100vh - 150px);
   overflow: auto;
 }
 
-/* src/pages/Optik/OptikOlusturma.css */
+/* Yeni sağ sidebar - Bilgi paneli için */
+.right-sidebar-container {
+  width: 250px;
+  max-height: 700px;
+  overflow-y: auto;
+  flex-shrink: 0;
+  margin-right: -0.5rem; /* Sağ kenardan daha sağa kaydır */
+}
+
+/* Form başlık girişi */
+.form-title-input {
+  width: 100%;
+  padding: 8px;
+  font-size: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  margin-top: 0.5rem;
+}
+
 /* Sınıf seçimi için eklenen stiller */
 .form-header-inputs {
   display: flex;
@@ -106,218 +129,96 @@
   font-size: 0.7rem;
 }
 
-.classes-dropdown-content {
+.classes-dropdown-menu {
   position: absolute;
   top: 100%;
   left: 0;
   width: 100%;
   max-height: 200px;
   overflow-y: auto;
-  background-color: #fff;
+  background-color: white;
   border: 1px solid var(--border-color);
   border-radius: 4px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   z-index: 10;
-  display: none;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.classes-dropdown:hover .classes-dropdown-content {
-  display: block;
-}
-
-.class-item {
+.class-option {
   padding: 8px 12px;
   cursor: pointer;
-}
-
-.class-item:hover {
-  background-color: rgba(var(--primary-color-rgb), 0.05);
-}
-
-.class-checkbox-label {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 8px;
-  cursor: pointer;
 }
 
-.selected-classes-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 8px;
+.class-option:hover {
+  background-color: #f5f5f5;
 }
 
-.selected-class-chip {
-  display: flex;
-  align-items: center;
-  background-color: rgba(var(--primary-color-rgb), 0.1);
-  padding: 4px 8px;
-  border-radius: 16px;
-  font-size: 0.8rem;
-  gap: 4px;
+.class-option.selected {
+  background-color: #e6f7ff;
+  color: var(--primary-color);
 }
 
-.remove-class-btn {
-  background: none;
-  border: none;
-  color: var(--text-color);
-  font-size: 1.1rem;
-  cursor: pointer;
+.selected-icon {
+  color: var(--primary-color);
+  font-weight: bold;
+}
+
+.loading-text, .no-classes-message {
+  padding: 8px 0;
+  color: var(--text-color-light);
+  font-size: 0.9rem;
+}
+
+/* Hata bildirimleri */
+.error-alert {
+  background-color: #ffebee;
+  color: #c62828;
+  padding: 10px 15px;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  border-left: 4px solid #c62828;
+}
+
+/* Yükleniyor göstergesi */
+.loading-container {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 0;
-  width: 18px;
-  height: 18px;
+  height: 300px;
 }
 
-.remove-class-btn:hover {
-  color: var(--error-color);
+.loading-spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top: 4px solid var(--primary-color);
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 15px;
 }
 
-.loading-text, .no-classes {
-  font-size: 0.9rem;
-  color: var(--text-color-light);
-  font-style: italic;
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
-/* Yazdırma için stil düzenlemeleri */
-@media print {
-  .optik-olusturma-page {
-    height: auto;
-    overflow: visible;
-    padding: 0;
-  }
-  
+/* Responsive tasarım */
+@media (max-width: 1200px) {
   .optik-creator-container {
-    display: block;
-    height: auto;
-    overflow: visible;
-  }
-}
-
-/* Responsive tasarım için medya sorguları */
-@media (max-width: 1024px) {
-  .optik-creator-container {
-    grid-template-columns: 200px 1fr;
-  }
-}
-
-/* Mobil için düzenlemeler */
-@media (max-width: 768px) {
-  .optik-olusturma-page {
-    height: auto;
-    min-height: calc(100vh - 80px);
-  }
-  
-  .optik-creator-container {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto 1fr;
-    gap: 1rem;
-  }
-  
-  .page-header {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
   }
   
-  .header-actions {
+  .sidebar-container, .right-sidebar-container {
     width: 100%;
+    max-height: none;
+    margin-bottom: 1.5rem;
   }
   
-  .header-actions button {
-    flex: 1;
-  }
-  .header-title {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  
-  .form-title-input {
-    font-size: 1rem;
-    padding: 0.5rem;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    margin-top: 0.5rem;
-    width: 100%;
-  }
-  
-  .form-title-input:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.2);
-  }
-
-  
-  @media print {
-    /* Yazdırma sırasında sayfanın genel görünümünü ayarla */
-    .optik-olusturma-page {
-      padding: 0;
-      margin: 0;
-    }
-    
-    /* Başlık ve butonları gizle */
-    .page-header,
-    .error-alert,
-    .optik-creator-container > *:first-child {
-      display: none !important;
-    }
-    
-    /* Grid düzenini kaldır */
-    .optik-creator-container {
-      display: block;
-      overflow: visible;
-      height: auto;
-    }
-    
-    /* A4 container stillerini ayarla */
-    .A4Container .wrapper {
-      box-shadow: none;
-      padding: 0;
-      margin: 0;
-      width: 100%;
-    }
-    
-    .A4Container .container {
-      margin: 0;
-      box-shadow: none;
-      border: none;
-      height: auto;
-      width: 100%;
-      min-height: auto;
-    }
-    
-    /* Izgara çizgilerini gizle */
-    .A4Container .gridLines {
-      display: none;
-    }
-    
-    /* Yeniden boyutlandırma tutamaçlarını ve kaldırma butonlarını gizle */
-    .resize-handle,
-    .removeButton {
-      display: none !important;
-    }
-    
-    /* Navbar ve footer'ı gizle */
-    .navbar,
-    .footer {
-      display: none !important;
-    }
-    
-    /* Sayfa kesme kuralları */
-    @page {
-      size: A4 portrait;
-      margin: 0;
-    }
-    
-    body {
-      width: 210mm;
-      height: 297mm;
-      margin: 0;
-      padding: 0;
-    }
+  .a4-container-wrapper {
+    order: -1;
+    margin-bottom: 1.5rem;
   }
 }
