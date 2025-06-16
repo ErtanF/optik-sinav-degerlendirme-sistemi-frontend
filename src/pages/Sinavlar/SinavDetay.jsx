@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import Button from '../../components/ui/Button/Button';
 import examApi from '../../api/exam';
+import optikApi from '../../api/optik';
+import classApi from '../../api/classes'; // Sınıf API'sini ekledik
+import { jsPDF } from 'jspdf';
 import './SinavDetay.css';
 
 const SinavDetay = () => {
@@ -10,6 +13,8 @@ const SinavDetay = () => {
   const [exam, setExam] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [automaticCoding, setAutomaticCoding] = useState(true);
+  const [classDetails, setClassDetails] = useState({}); // Sınıf detaylarını tutacak state ekledik
   
   // Backend URL'ini al
   const getBaseUrl = () => {
@@ -46,6 +51,33 @@ const SinavDetay = () => {
     }
   }, [id]);
   
+  // Sınav yüklendikten sonra, atanan sınıflar için detayları getir
+  useEffect(() => {
+    const fetchClassDetails = async () => {
+      if (!exam || !exam.assignedClasses || exam.assignedClasses.length === 0) return;
+      
+      try {
+        // Sınıf bilgilerini getir
+        const response = await classApi.getClassesBySchool();
+        const allClasses = response.data || [];
+        
+        // Sınıf ID'leri ve bilgileri için bir nesne oluştur
+        const classMap = {};
+        allClasses.forEach(cls => {
+          classMap[cls._id] = cls;
+        });
+        
+        setClassDetails(classMap);
+      } catch (error) {
+        console.error('Sınıf bilgileri yüklenirken hata:', error);
+      }
+    };
+
+    if (exam) {
+      fetchClassDetails();
+    }
+  }, [exam]);
+  
   // Sınavı sil
   const handleDelete = async () => {
     if (!exam) return;
@@ -77,6 +109,155 @@ const SinavDetay = () => {
       setLoading(false);
       
       window.scrollTo(0, 0); // Hata mesajının görünmesi için sayfanın üstüne kaydır
+    }
+  };
+  
+  // Numaraları optik formda işaretle
+  const markStudentNumberOnTemplate = (doc, studentNumber, template, baseY) => {
+    // Öğrenci numarası alanını template.components içinde bul
+    const numberComponent = template.components.find(comp => comp.type === 'number');
+    if (!numberComponent || !studentNumber) return;
+    
+    // Numarayı string'e çevir ve belirli bir uzunluğa tamamla
+    const studentNumberStr = String(studentNumber).padStart(numberComponent.cols, '0');
+    
+    // Numaranın her bir rakamı için
+    for (let i = 0; i < studentNumberStr.length && i < numberComponent.cols; i++) {
+      const digit = parseInt(studentNumberStr[i], 10);
+      
+      if (isNaN(digit)) continue;
+      
+      // Konum hesapla (optik forma göre)
+      // Başlangıç pozisyonuna 43 piksel aşağı ve 7 piksel sağa kaydırma uygula
+      const bubbleX = numberComponent.position.x + (i * 17) + 7; // 17px grid genişliği + 7px sağa kayma
+      const bubbleY = numberComponent.position.y + (digit * 17) + 43; // 17px grid yüksekliği + 43px aşağı kayma
+      
+      // PDF'de mm cinsinden konumu hesapla (A4: 210x297 mm)
+      const pdfX = bubbleX * 0.264583;
+      const pdfY = bubbleY * 0.264583;
+      
+      // Daireleri doldur
+      doc.setFillColor(0, 0, 0);
+      doc.circle(pdfX, pdfY, 1.7, 'F'); // 1.7mm yarıçaplı dolu daire
+    }
+  };
+  
+  // Ad-Soyad alanı varsa kodla
+  const markStudentNameOnTemplate = (doc, studentName, template, baseY) => {
+    // Ad Soyad alanını template.components içinde bul
+    const nameComponent = template.components.find(comp => comp.type === 'nameSurname');
+    if (!nameComponent || !studentName) return;
+    
+    // Adı büyük harfe çevir
+    const upperName = studentName.toUpperCase().replace(/[^A-ZĞÜŞİÖÇ ]/g, '');
+    
+    // İsmin her bir harfi için
+    for (let i = 0; i < upperName.length && i < nameComponent.cols; i++) {
+      const char = upperName[i];
+      if (char === ' ') continue;
+      
+      // Alfabedeki indeksi bul
+      const alphabet = 'ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ';
+      const charIndex = alphabet.indexOf(char);
+      
+      if (charIndex === -1) continue;
+      
+      // Konum hesapla
+      // Başlangıç pozisyonuna 68 piksel aşağı ve 5 piksel sağa kaydırma uygula
+      const bubbleX = nameComponent.position.x + (i * 17) + 7; // 17px grid genişliği + 7px sağa kayma
+      const bubbleY = nameComponent.position.y + (charIndex * 17) + 43; // 17px grid yüksekliği + 43px aşağı kayma
+      
+      // PDF'de mm cinsinden konumu hesapla
+      const pdfX = bubbleX * 0.264583;
+      const pdfY = bubbleY * 0.264583;
+      
+      // Daireleri doldur
+      doc.setFillColor(0, 0, 0);
+      doc.circle(pdfX, pdfY, 1.7, 'F'); // 1.7mm yarıçaplı dolu daire
+    }
+  };
+  
+  // PDF oluştur ve indir
+  const handleDownloadPDF = async () => {
+    if (!exam || !exam.opticalTemplate) {
+      setError('Optik form şablonu bulunamadı.');
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      
+      // Şablon detaylarını al
+      const templateResponse = await optikApi.getFormById(exam.opticalTemplate._id);
+      const template = templateResponse.data;
+      
+      // Otomatik kodlama seçeneğini sor
+      const userAutomaticCoding = window.confirm('Öğrenci bilgilerini optik formlar üzerinde otomatik olarak işaretlemek ister misiniz? "Tamam" seçeneği öğrencilere özel kodlanmış formlar, "İptal" seçeneği tek bir boş form oluşturacaktır.');
+      setAutomaticCoding(userAutomaticCoding);
+      
+      // Şablon görüntü URL'si
+      const baseUrl = getBaseUrl();
+      const templateImageUrl = `${baseUrl}${exam.opticalTemplate.opticalFormImage}`;
+      
+      // Görüntüyü yükle
+      const img = new Image();
+      img.crossOrigin = 'Anonymous';
+      
+      img.onload = async () => {
+        // A4 boyutunda bir PDF oluştur (210mm x 297mm)
+        const pdf = new jsPDF({
+          orientation: 'portrait',
+          unit: 'mm',
+          format: 'a4'
+        });
+        
+        // Otomatik kodlama seçili ise öğrenci sayısı kadar sayfa oluştur
+        if (userAutomaticCoding) {
+          // Öğrenci listesini kontrol et
+          if (!exam.studentIds || exam.studentIds.length === 0) {
+            setError('Bu sınav için atanmış öğrenci bulunamadı.');
+            setLoading(false);
+            return;
+          }
+          
+          // Her öğrenci için bir sayfa oluştur
+          for (let i = 0; i < exam.studentIds.length; i++) {
+            const student = exam.studentIds[i];
+            
+            if (i > 0) {
+              pdf.addPage();
+            }
+            
+            // Şablon görüntüsünü ekle
+            pdf.addImage(img, 'JPEG', 0, 0, 210, 297);
+            
+            // Öğrenci numarasını kodla
+            markStudentNumberOnTemplate(pdf, student.studentNumber, template, 0);
+            
+            // Ad-Soyadı kodla
+            markStudentNameOnTemplate(pdf, `${student.firstName} ${student.lastName}`, template, 0);
+          }
+        } else {
+          // Otomatik kodlama seçili değilse tek bir boş optik form oluştur
+          pdf.addImage(img, 'JPEG', 0, 0, 210, 297);
+        }
+        
+        // PDF'i indir
+        pdf.save(`${exam.title || 'Sınav'}_Optik_Form${userAutomaticCoding ? 'lar' : ''}.pdf`);
+        setLoading(false);
+      };
+      
+      img.onerror = () => {
+        setError('Şablon görüntüsü yüklenirken hata oluştu.');
+        setLoading(false);
+      };
+      
+      img.src = templateImageUrl;
+      
+    } catch (error) {
+      console.error('PDF oluşturma hatası:', error);
+      setError('PDF oluşturulurken bir hata oluştu: ' + error.message);
+      setLoading(false);
     }
   };
   
@@ -262,6 +443,7 @@ const SinavDetay = () => {
         </div>
         <div className="header-actions">
           <Button variant="primary" onClick={handlePrint}>Yazdır</Button>
+          <Button variant="success" onClick={handleDownloadPDF}>Optik Formları İndir</Button>
           <Link to={`/sinav-duzenle/${id}`}>
             <Button variant="outline">Düzenle</Button>
           </Link>
@@ -316,16 +498,26 @@ const SinavDetay = () => {
             </table>
           </div>
 
-          {/* Atanmış Sınıflar Bölümü */}
+          {/* Atanmış Sınıflar Bölümü - Akıllı Gösterim */}
           <div className="details-section">
             <h3>Atanan Sınıflar</h3>
             {exam.assignedClasses && exam.assignedClasses.length > 0 ? (
               <div className="assigned-classes-list">
-                {exam.assignedClasses.map(cls => (
-                  <div key={cls._id} className="assigned-class-item">
-                    {cls.name || 'Bilinmeyen Sınıf'}
-                  </div>
-                ))}
+                {exam.assignedClasses.map(cls => {
+                  // cls bir obje veya string ID olabilir
+                  const classId = typeof cls === 'object' ? cls._id : cls;
+                  const className = typeof cls === 'object' && cls.name 
+                    ? cls.name 
+                    : classDetails[classId] 
+                      ? classDetails[classId].name 
+                      : `Sınıf #${classId ? classId.substring(0, 6) + '...' : 'Bilinmiyor'}`;
+                  
+                  return (
+                    <div key={classId || Math.random().toString()} className="assigned-class-item">
+                      {className}
+                    </div>
+                  );
+                })}
               </div>
             ) : (
               <p>Bu sınav için atanmış sınıf bulunamadı.</p>

@@ -5,6 +5,7 @@ import Input from '../../components/ui/Input/Input';
 import optikApi from '../../api/optik';
 import classApi from '../../api/classes';
 import studentApi from '../../api/students';
+import { jsPDF } from 'jspdf';
 import './SinavOlustur.css';
 
 const SinavOlustur = () => {
@@ -14,6 +15,7 @@ const SinavOlustur = () => {
   const [formTitle, setFormTitle] = useState('');
   const [examDate, setExamDate] = useState('');
   const [selectedTemplateId, setSelectedTemplateId] = useState('');
+  const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [opticalTemplates, setOpticalTemplates] = useState([]);
   const [classes, setClasses] = useState([]);
   const [selectedClasses, setSelectedClasses] = useState([]);
@@ -21,6 +23,7 @@ const SinavOlustur = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [automaticCoding, setAutomaticCoding] = useState(true);  // Otomatik kodlama seçeneği
   
   // Backend URL'ini al
   const getBaseUrl = () => {
@@ -62,6 +65,29 @@ const SinavOlustur = () => {
     }
   };
   
+  // Seçilen şablon değiştiğinde, şablon bilgilerini al
+  useEffect(() => {
+    if (selectedTemplateId) {
+      fetchTemplateDetails(selectedTemplateId);
+    } else {
+      setSelectedTemplate(null);
+    }
+  }, [selectedTemplateId]);
+  
+  // Şablon detaylarını getir
+  const fetchTemplateDetails = async (templateId) => {
+    try {
+      setLoading(true);
+      const response = await optikApi.getFormById(templateId);
+      setSelectedTemplate(response.data);
+    } catch (error) {
+      console.error('Şablon detayları yüklenirken hata:', error);
+      setError('Şablon detayları yüklenemedi.');
+    } finally {
+      setLoading(false);
+    }
+  };
+  
   // Sınıf seçildiğinde öğrencileri getir
   const handleClassSelect = async (classId) => {
     // Sınıf zaten seçili mi kontrol et
@@ -96,6 +122,164 @@ const SinavOlustur = () => {
     setSelectedTemplateId(templateId);
   };
   
+  // Otomatik kodlama seçeneğini değiştir
+  const handleAutomaticCodingChange = (e) => {
+    setAutomaticCoding(e.target.checked);
+  };
+  
+  // Numaraları optik formda işaretle
+  const markStudentNumberOnTemplate = (doc, studentNumber, template, baseY) => {
+    // Öğrenci numarası alanını template.components içinde bul
+    const numberComponent = template.components.find(comp => comp.type === 'number');
+    if (!numberComponent || !studentNumber) return;
+    
+    // Numarayı string'e çevir ve belirli bir uzunluğa tamamla
+    const studentNumberStr = String(studentNumber).padStart(numberComponent.cols, '0');
+    
+    // Numaranın her bir rakamı için
+    for (let i = 0; i < studentNumberStr.length && i < numberComponent.cols; i++) {
+      const digit = parseInt(studentNumberStr[i], 10);
+      
+      if (isNaN(digit)) continue;
+      
+      // Konum hesapla (optik forma göre)
+      // Başlangıç pozisyonuna 43 piksel aşağı ve 7 piksel sağa kaydırma uygula
+      const bubbleX = numberComponent.position.x + (i * 17) + 7; // 17px grid genişliği + 7px sağa kayma
+      const bubbleY = numberComponent.position.y + (digit * 17) + 43; // 17px grid yüksekliği + 43px aşağı kayma
+      
+      // PDF'de mm cinsinden konumu hesapla (A4: 210x297 mm)
+      const pdfX = bubbleX * 0.264583;
+      const pdfY = bubbleY * 0.264583;
+      
+      // Daireleri doldur
+      doc.setFillColor(0, 0, 0);
+      doc.circle(pdfX, pdfY, 1.7, 'F'); // 1.7mm yarıçaplı dolu daire
+    }
+  };
+  
+  // Ad-Soyad alanı varsa kodla
+  const markStudentNameOnTemplate = (doc, studentName, template, baseY) => {
+    // Ad Soyad alanını template.components içinde bul
+    const nameComponent = template.components.find(comp => comp.type === 'nameSurname');
+    if (!nameComponent || !studentName) return;
+    
+    // Adı büyük harfe çevir
+    const upperName = studentName.toUpperCase().replace(/[^A-ZĞÜŞİÖÇ ]/g, '');
+    
+    // İsmin her bir harfi için
+    for (let i = 0; i < upperName.length && i < nameComponent.cols; i++) {
+      const char = upperName[i];
+      if (char === ' ') continue;
+      
+      // Alfabedeki indeksi bul
+      const alphabet = 'ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ';
+      const charIndex = alphabet.indexOf(char);
+      
+      if (charIndex === -1) continue;
+      
+      // Konum hesapla
+      // Başlangıç pozisyonuna 68 piksel aşağı ve 5 piksel sağa kaydırma uygula
+      const bubbleX = nameComponent.position.x + (i * 17) + 7; // 17px grid genişliği + 5px sağa kayma
+      const bubbleY = nameComponent.position.y + (charIndex * 17) + 43; // 17px grid yüksekliği + 68px aşağı kayma
+      
+      // PDF'de mm cinsinden konumu hesapla
+      const pdfX = bubbleX * 0.264583;
+      const pdfY = bubbleY * 0.264583;
+      
+      // Daireleri doldur
+      doc.setFillColor(0, 0, 0);
+      doc.circle(pdfX, pdfY, 1.7, 'F'); // 1.7mm yarıçaplı dolu daire
+    }
+  };
+  
+  // PDF oluştur ve indir
+  const generateAndDownloadPDF = async () => {
+    if (!selectedTemplate || !selectedTemplateId) {
+      setError('Lütfen bir optik şablon seçin.');
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      
+      // Şablon görüntü URL'si
+      const baseUrl = getBaseUrl();
+      const templateImageUrl = `${baseUrl}${selectedTemplate.opticalFormImage}`;
+      
+      // Görüntüyü yükle
+      const img = new Image();
+      img.crossOrigin = 'Anonymous';
+      
+      img.onload = async () => {
+        // A4 boyutunda bir PDF oluştur (210mm x 297mm)
+        const pdf = new jsPDF({
+          orientation: 'portrait',
+          unit: 'mm',
+          format: 'a4'
+        });
+        
+        // Otomatik kodlama seçili ise öğrenci sayısı kadar sayfa oluştur
+        if (automaticCoding) {
+          // Tüm seçili sınıfların öğrencilerini topla
+          const allStudents = [];
+          selectedClasses.forEach(classId => {
+            if (classStudents[classId]) {
+              allStudents.push(...classStudents[classId]);
+            }
+          });
+          
+          if (allStudents.length === 0) {
+            setError('Seçili sınıflarda öğrenci bulunamadı.');
+            setLoading(false);
+            return;
+          }
+          
+          // Her öğrenci için bir sayfa oluştur
+          for (let i = 0; i < allStudents.length; i++) {
+            const student = allStudents[i];
+            
+            if (i > 0) {
+              pdf.addPage();
+            }
+            
+            // Şablon görüntüsünü ekle
+            pdf.addImage(img, 'JPEG', 0, 0, 210, 297);
+            
+            // Öğrenci numarasını kodla
+            markStudentNumberOnTemplate(pdf, student.studentNumber, selectedTemplate, 0);
+            
+            // Ad-Soyadı kodla
+            markStudentNameOnTemplate(pdf, `${student.firstName} ${student.lastName}`, selectedTemplate, 0);
+            
+            // Not: Öğrenci bilgisini artık eklemiyoruz, sadece kodlama yapıyoruz
+          }
+        } else {
+          // Otomatik kodlama seçili değilse tek bir boş optik form oluştur
+          pdf.addImage(img, 'JPEG', 0, 0, 210, 297);
+          
+          // Not: Sınav bilgisini artık eklemiyoruz
+        }
+        
+        // PDF'i indir
+        pdf.save(`${formTitle || 'Sınav'}_Optik_Form${automaticCoding ? 'lar' : ''}.pdf`);
+        setLoading(false);
+        setSuccess('Optik form' + (automaticCoding ? 'lar' : '') + ' başarıyla oluşturuldu ve indirildi.');
+      };
+      
+      img.onerror = () => {
+        setError('Şablon görüntüsü yüklenirken hata oluştu.');
+        setLoading(false);
+      };
+      
+      img.src = templateImageUrl;
+      
+    } catch (error) {
+      console.error('PDF oluşturma hatası:', error);
+      setError('PDF oluşturulurken bir hata oluştu: ' + error.message);
+      setLoading(false);
+    }
+  };
+  
   // Formu kaydet
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -119,6 +303,14 @@ const SinavOlustur = () => {
     if (selectedClasses.length === 0) {
       setError('Lütfen en az bir sınıf seçin.');
       return;
+    }
+    
+    // Optik formları indirme seçeneği
+    const shouldDownloadForms = window.confirm('Sınav kaydedilecek. Ayrıca seçilen sınıfların öğrencileri için optik formları PDF olarak indirmek ister misiniz?');
+    
+    // PDF indirme işlemi
+    if (shouldDownloadForms) {
+      await generateAndDownloadPDF();
     }
     
     // Tüm seçili sınıfların öğrenci ID'lerini topla
@@ -277,6 +469,22 @@ const SinavOlustur = () => {
               Sınava katılacak sınıfları seçin. Seçilen sınıfların tüm öğrencileri otomatik olarak sınava dahil edilecektir.
             </p>
             
+            {/* Otomatik Kodlama Seçeneği */}
+            <div className="form-group" style={{ marginBottom: '20px' }}>
+              <div className="checkbox-container">
+                <input
+                  type="checkbox"
+                  id="automaticCoding"
+                  checked={automaticCoding}
+                  onChange={handleAutomaticCodingChange}
+                />
+                <label htmlFor="automaticCoding" className="checkbox-label">Öğrenci bilgilerini optik formlara otomatik kodla</label>
+                <p className="checkbox-help">
+                  Bu seçenek etkinleştirildiğinde, PDF oluşturulurken öğrenci numarası ve adı optik formlarda otomatik olarak işaretlenecektir.
+                </p>
+              </div>
+            </div>
+            
             {loading && <div className="loading-container"><div className="loading-spinner"></div></div>}
             
             <div className="classes-grid">
@@ -292,11 +500,13 @@ const SinavOlustur = () => {
                       <span className="class-grade">{cls.grade}. Sınıf</span>
                     </div>
                     <div className="class-students-count">
-                      {cls.students?.length || 0} Öğrenci
+                      {classStudents[cls._id] ? 
+                        `${classStudents[cls._id].length} Öğrenci` : 
+                        'Yükleniyor...'}
                     </div>
                     {selectedClasses.includes(cls._id) && (
                       <div className="class-selected-badge">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                           <polyline points="20 6 9 17 4 12"></polyline>
                         </svg>
                         Seçildi
@@ -306,7 +516,7 @@ const SinavOlustur = () => {
                 ))
               ) : (
                 <div className="no-classes">
-                  <p>Okulunuza ait sınıf bulunamadı.</p>
+                  <p>Henüz sınıf oluşturmadınız.</p>
                   <Button 
                     variant="primary" 
                     onClick={() => navigate('/classes/new')}
@@ -318,68 +528,27 @@ const SinavOlustur = () => {
             </div>
           </div>
           
-          {selectedClasses.length > 0 && (
-            <div className="form-section">
-              <h2 className="section-title">Seçilen Sınıfların Öğrencileri</h2>
-              <p className="section-description">
-                Seçtiğiniz sınıfların tüm öğrencileri aşağıda listelenmiştir.
-              </p>
-              
-              <div className="students-accordion">
-                {selectedClasses.map(classId => {
-                  const classInfo = classes.find(c => c._id === classId);
-                  const students = classStudents[classId] || [];
-                  
-                  return (
-                    <div key={classId} className="class-students-panel">
-                      <div className="class-students-header">
-                        <h3>{classInfo?.name || 'Sınıf'}</h3>
-                        <span className="student-count">{students.length} Öğrenci</span>
-                      </div>
-                      <div className="class-students-body">
-                        {students.length > 0 ? (
-                          <div className="students-list">
-                            <table className="students-table">
-                              <thead>
-                                <tr>
-                                  <th>Öğrenci No</th>
-                                  <th>Ad Soyad</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {students.map(student => (
-                                  <tr key={student._id}>
-                                    <td>{student.studentNumber}</td>
-                                    <td>{student.firstName} {student.lastName}</td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
-                        ) : (
-                          <div className="no-students">
-                            <p>Bu sınıfta öğrenci bulunmuyor.</p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-          
           <div className="form-actions">
-            <Button
-              type="submit"
-              variant="primary"
+            <Button 
+              type="submit" 
+              variant="primary" 
               disabled={loading}
             >
-              {loading ? 'Oluşturuluyor...' : 'Sınavı Oluştur'}
+              {loading ? 'İşleniyor...' : 'Sınavı Oluştur'}
             </Button>
-            <Button
-              type="button"
-              variant="outline"
+            
+            <Button 
+              type="button" 
+              variant="secondary"
+              onClick={generateAndDownloadPDF}
+              disabled={loading || !selectedTemplateId || selectedClasses.length === 0}
+            >
+              Sadece Optik Formları İndir
+            </Button>
+            
+            <Button 
+              type="button" 
+              variant="outline" 
               onClick={() => navigate('/sinavlar')}
             >
               İptal

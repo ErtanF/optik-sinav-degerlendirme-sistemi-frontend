@@ -28,10 +28,6 @@ const OptikOlusturmaContent = () => {
   const [formImage, setFormImage] = useState(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   
-  // Sınıf listesi ve seçim için state
-  const [classes, setClasses] = useState([]);
-  const [selectedClasses, setSelectedClasses] = useState([]);
-  const [classesLoading, setClassesLoading] = useState(false);
   
   // Eğer düzenleme modu ise, form verilerini yükle
   useEffect(() => {
@@ -67,9 +63,7 @@ const loadExistingForm = async (formId) => {
       setFormImage(formData.opticalFormImage);
     }
     
-    // NOT: assignedClasses artık OpticalTemplate'de yok
-    // Bu yüzden bu kısmı kaldırıyoruz veya boş bırakıyoruz
-    setSelectedClasses([]); // Boş array
+   
     
     // Form bileşenlerini FormEditor context'ine yükle
     if (formData.components && Array.isArray(formData.components)) {
@@ -112,41 +106,12 @@ const loadExistingForm = async (formId) => {
         const userData = JSON.parse(userStr);
         setUserData(userData);
         
-        // Kullanıcı bilgileri yüklendiğinde okulun sınıflarını getir
-        if (userData.school?._id || userData.schoolId) {
-          fetchClasses();
-        }
+        
       }
     } catch (err) {
       console.error("Kullanıcı bilgileri alınamadı:", err);
     }
   }, []);
-  
-  // Okul sınıflarını getir
-  const fetchClasses = async () => {
-    try {
-      setClassesLoading(true);
-      const response = await classApi.getClassesBySchool();
-      setClasses(response.data || []);
-    } catch (error) {
-      console.error("Sınıflar yüklenirken hata:", error);
-      setError("Okul sınıfları yüklenirken bir sorun oluştu.");
-    } finally {
-      setClassesLoading(false);
-    }
-  };
-  
-  // Sınıf seçimi işleme
-  const handleClassSelect = (classId) => {
-    setSelectedClasses(prevSelected => {
-      // Eğer sınıf zaten seçiliyse, seçimden kaldır
-      if (prevSelected.includes(classId)) {
-        return prevSelected.filter(id => id !== classId);
-      }
-      // Değilse listeye ekle
-      return [...prevSelected, classId];
-    });
-  };
   
   // Form başlığı değişikliği
   const handleTitleChange = (e) => {
@@ -282,60 +247,6 @@ const handleSave = async () => {
               className="form-title-input"
               placeholder="Form Başlığı"
             />
-            
-            {/* Sınıf seçim alanı */}
-            <div className="class-selection-container">
-              <div className="class-selection-label">Sınıflar:</div>
-              <div className="class-selection-chips">
-                {classesLoading ? (
-                  <div className="loading-text">Sınıflar yükleniyor...</div>
-                ) : classes.length > 0 ? (
-                  <div className="classes-dropdown">
-                    <button className="classes-dropdown-button">
-                      {selectedClasses.length > 0 
-                        ? `${selectedClasses.length} sınıf seçildi` 
-                        : "Sınıf seçin"}
-                      <span className="dropdown-arrow">▼</span>
-                    </button>
-                    <div className="classes-dropdown-content">
-                      {classes.map(cls => (
-                        <div key={cls._id} className="class-item">
-                          <label className="class-checkbox-label">
-                            <input
-                              type="checkbox"
-                              checked={selectedClasses.includes(cls._id)}
-                              onChange={() => handleClassSelect(cls._id)}
-                            />
-                            {cls.name}
-                          </label>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="no-classes">Okulunuza ait sınıf bulunamadı</div>
-                )}
-                
-                {selectedClasses.length > 0 && (
-                  <div className="selected-classes-list">
-                    {selectedClasses.map(classId => {
-                      const classItem = classes.find(c => c._id === classId);
-                      return (
-                        <div key={classId} className="selected-class-chip">
-                          {classItem?.name || 'Sınıf'}
-                          <button
-                            className="remove-class-btn"
-                            onClick={() => handleClassSelect(classId)}
-                          >
-                            &times;
-                          </button>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            </div>
           </div>
         </div>
         <div className="header-actions">
