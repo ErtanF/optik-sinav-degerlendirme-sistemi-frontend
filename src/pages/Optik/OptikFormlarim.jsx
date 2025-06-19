@@ -99,7 +99,7 @@ const OptikFormlarim = () => {
           <div className="forms-grid">
             {forms.map(form => (
               <div key={form._id} className="form-card">
-                <h3>{form.title}</h3>
+                <h3>{form.name}</h3>
                 <p>Oluşturulma: {new Date(form.createdAt).toLocaleDateString('tr-TR')}</p>
                 <div className="form-actions">
                   <Link to={`/optik/${form._id}`}>

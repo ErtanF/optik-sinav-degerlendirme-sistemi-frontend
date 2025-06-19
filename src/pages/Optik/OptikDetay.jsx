@@ -317,7 +317,7 @@ const OptikDetay = () => {
               <tbody>
                 <tr>
                   <td>Form Adı:</td>
-                  <td>{form.title}</td>
+                  <td>{form.name}</td>
                 </tr>
                 <tr>
                   <td>Oluşturulma Tarihi:</td>
