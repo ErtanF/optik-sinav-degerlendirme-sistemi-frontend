@@ -1,6 +1,6 @@
 .hero-section {
   background: linear-gradient(135deg, #0474C4 0%, #5379AE 50%, #2C444C 100%);
-  min-height: 85vh;
+  min-height: 100vh;
   display: flex;
   align-items: center;
   position: relative;
@@ -32,7 +32,7 @@
   grid-template-columns: 1fr 1fr;
   gap: 3rem;
   align-items: center;
-  min-height: 70vh;
+  min-height: 85vh;
 }
 
 .hero-text {
@@ -313,14 +313,14 @@
 /* Mobile Responsive */
 @media (max-width: 768px) {
   .hero-section {
-    min-height: 75vh;
+    min-height: 100vh;
   }
 
   .hero-content {
     grid-template-columns: 1fr;
     gap: 1.5rem;
     text-align: center;
-    min-height: 60vh;
+    min-height: 80vh;
   }
 
   .hero-title {
