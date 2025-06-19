@@ -8,28 +8,28 @@ const FAQSection = () => {
   const faqs = [
     {
       id: 1,
-      question: 'Optik okuma sistemi nasıl çalışır?',
-      answer: 'Sistemimiz, tarayıcı ile taranmış optik formları otomatik olarak okur ve cevapları dijital ortama aktarır. Gelişmiş görüntü işleme algoritmaları sayesinde yüksek doğruluk oranı sağlar.'
+      question: 'OpTürk Optik Sınav Değerlendirme Sistemi nedir?',
+      answer: 'OpTürk, eğitimcilerin kolayca optik sınav formları oluşturmasını, öğrenci sınavlarını düzenlemesini ve sonuçları otomatik olarak değerlendirmesini sağlayan modern bir web tabanlı platformdur.'
     },
     {
       id: 2,
-      question: 'Hangi tarayıcı türleri destekleniyor?',
-      answer: 'Çoğu standart tarayıcı ile uyumludur. 300 DPI ve üzeri çözünürlükte tarama yapabilen herhangi bir tarayıcı kullanabilirsiniz.'
+      question: 'Sistemi kullanabilmek için nasıl kayıt olabilirim?',
+      answer: 'Ana sayfadan "Ücretsiz Başla" butonuna tıklayarak kayıt olabilirsiniz. Kayıt sonrası öğretmen hesabınızın okul yöneticisi tarafından onaylanması gerekir. Onay sonrası tüm özelliklere erişim sağlarsınız.'
     },
     {
       id: 3,
-      question: 'Sistem ücretsiz mi?',
-      answer: 'Temel özellikler ücretsizdir. Aylık 100 forma kadar ücretsiz kullanım hakkınız bulunmaktadır. Daha fazla kullanım için uygun fiyatlı paketlerimiz mevcuttur.'
+      question: 'Optik form nasıl oluştururum?',
+      answer: 'Dashboard\'tan "Optik Form Oluştur" seçeneğine tıklayarak form oluşturma arayüzüne erişebilirsiniz. Sol panelden form elemanlarını seçip A4 sayfasına sürükleyerek formunuzu tasarlayabilirsiniz.'
     },
     {
       id: 4,
-      question: 'Verilerim güvende mi?',
-      answer: 'Evet, tüm verileriniz SSL şifreleme ile korunmaktadır. KVKK uyumlu olarak çalışıyoruz ve verilerinizi üçüncü şahıslarla paylaşmıyoruz.'
+      question: 'Sistem ücretsiz mi?',
+      answer: 'Temel özellikler ücretsizdir. Aylık 100 forma kadar ücretsiz kullanım hakkınız bulunmaktadır. Daha fazla kullanım ve gelişmiş özellikler için uygun fiyatlı premium paketlerimiz mevcuttur.'
     },
     {
       id: 5,
-      question: 'Mobil cihazlardan kullanabilir miyim?',
-      answer: 'Evet, sistemimiz responsive tasarıma sahiptir. Tablet ve akıllı telefonlardan da rahatlıkla kullanabilirsiniz.'
+      question: 'Verilerim güvende mi?',
+      answer: 'Evet, tüm verileriniz SSL şifreleme ile korunmaktadır. KVKK uyumlu olarak çalışıyoruz ve verilerinizi kesinlikle üçüncü şahıslarla paylaşmıyoruz.'
     }
   ];
 

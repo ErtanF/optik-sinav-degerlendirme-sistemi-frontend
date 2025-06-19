@@ -58,9 +58,18 @@
 
 .brand-name {
   font-size: 1.5rem;
-  font-weight: 700;
-  color: #06457F;
+  font-weight: 800;
   line-height: 1;
+  display: flex;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.brand-name-op {
+  color: #3949ab;
+}
+
+.brand-name-turk {
+  color: #f44336;
 }
 
 .brand-slogan {

@@ -84,7 +84,15 @@
   margin: 0;
   line-height: 1.1;
   letter-spacing: -0.025em;
-  color: #06457F;
+  display: flex;
+}
+
+.brand-title-op {
+  color: #3949ab;
+}
+
+.brand-title-turk {
+  color: #f44336;
 }
 
 .brand-slogan {

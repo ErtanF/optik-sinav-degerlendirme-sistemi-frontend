@@ -23,7 +23,10 @@ const LandingFooter = () => {
               <div className="brand-logo-container">
                 <img src={favicon} alt="OpTürk Logo" className="brand-logo" />
                 <div className="brand-text">
-                  <h3 className="brand-title">OpTürk</h3>
+                  <h3 className="brand-title">
+                    <span className="brand-title-op">OP</span>
+                    <span className="brand-title-turk">TÜRK</span>
+                  </h3>
                   <span className="brand-slogan">Optik Sınav Değerlendirme Sistemi</span>
                 </div>
               </div>

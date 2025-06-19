@@ -26,128 +26,128 @@ const FAQ = () => {
   const faqs = [
     {
       id: 1,
-      question: 'Optik okuma sistemi nasıl çalışır?',
-      answer: 'Sistemimiz, tarayıcı ile taranmış optik formları otomatik olarak okur ve cevapları dijital ortama aktarır. Gelişmiş görüntü işleme algoritmaları sayesinde yüksek doğruluk oranı sağlar.'
+      question: 'OpTürk Optik Sınav Değerlendirme Sistemi nedir?',
+      answer: 'OpTürk, eğitimcilerin kolayca optik sınav formları oluşturmasını, öğrenci sınavlarını düzenlemesini ve sonuçları otomatik olarak değerlendirmesini sağlayan modern bir web tabanlı platformdur.'
     },
     {
       id: 2,
-      question: 'Hangi tarayıcı türleri destekleniyor?',
-      answer: 'Çoğu standart tarayıcı ile uyumludur. 300 DPI ve üzeri çözünürlükte tarama yapabilen herhangi bir tarayıcı kullanabilirsiniz.'
+      question: 'Sistemi kullanabilmek için nasıl kayıt olabilirim?',
+      answer: 'Ana sayfadan "Ücretsiz Başla" butonuna tıklayarak kayıt olabilirsiniz. Kayıt sonrası öğretmen hesabınızın okul yöneticisi tarafından onaylanması gerekir. Onay sonrası tüm özelliklere erişim sağlarsınız.'
     },
     {
       id: 3,
-      question: 'Sistem ücretsiz mi?',
-      answer: 'Temel özellikler ücretsizdir. Aylık 100 forma kadar ücretsiz kullanım hakkınız bulunmaktadır. Daha fazla kullanım için uygun fiyatlı paketlerimiz mevcuttur.'
+      question: 'Optik form nasıl oluştururum?',
+      answer: 'Dashboard\'tan "Optik Form Oluştur" seçeneğine tıklayarak form oluşturma arayüzüne erişebilirsiniz. Sol panelden form elemanlarını seçip A4 sayfasına sürükleyerek formunuzu tasarlayabilirsiniz.'
     },
     {
       id: 4,
-      question: 'Verilerim güvende mi?',
-      answer: 'Evet, tüm verileriniz SSL şifreleme ile korunmaktadır. KVKK uyumlu olarak çalışıyoruz ve verilerinizi üçüncü şahıslarla paylaşmıyoruz.'
+      question: 'Hangi form elemanları kullanılabilir?',
+      answer: 'Sistemde Ad Soyad Alanı (A-Z harfler), Numara Alanı (0-9 rakamlar), TC Kimlik No (11 haneli), Telefon No (10 haneli), Çoktan Seçmeli Sorular (A-E şıkları), Kitapçık Kodu, Sınıf ve Şube kodlama alanları bulunmaktadır.'
     },
     {
       id: 5,
-      question: 'Mobil cihazlardan kullanabilir miyim?',
-      answer: 'Evet, sistemimiz responsive tasarıma sahiptir. Tablet ve akıllı telefonlardan da rahatlıkla kullanabilirsiniz.'
+      question: 'Yazı alanı ve resim ekleyebilir miyim?',
+      answer: 'Evet, form elemanları arasında bulunan "Yazı Alanı" ile düzenlenebilir metin alanları ve "Resim Ekle" özelliği ile cihazınızdan yüklediğiniz görselleri formunuza ekleyebilirsiniz.'
     },
     {
       id: 6,
-      question: 'Teknik destek alabilir miyim?',
-      answer: 'Tabii ki! E-posta, telefon ve canlı destek kanallarımız ile 7/24 teknik destek sağlıyoruz.'
+      question: 'Kalibrasyon işaretleri nedir ve neden önemli?',
+      answer: 'Formun dört köşesindeki kare işaretler optik okuyucular için kalibrasyon noktalarıdır. Bu işaretler sayesinde form doğru tanınır, eğri taramalar düzeltilir ve tüm elemanlar doğru konumlarında okunur.'
     },
     {
       id: 7,
-      question: 'Optik formları nasıl oluşturabilirim?',
-      answer: 'Sistem içindeki form oluşturma modülü ile kolayca optik formlar oluşturabilirsiniz. Hazır şablonlar kullanabilir veya tamamen özelleştirilmiş formlar tasarlayabilirsiniz.'
+      question: 'Sınav nasıl oluştururum?',
+      answer: '"Sınav Oluştur" sayfasından sınav adını, tarihini belirleyip önceden oluşturduğunuz optik form şablonlarından birini seçebilirsiniz. Ardından sınava katılacak sınıfları seçerek sınavınızı oluşturabilirsiniz.'
     },
     {
       id: 8,
-      question: 'Kaç öğrenci için kullanabilirim?',
-      answer: 'Sistemimizde öğrenci sayısı sınırlaması bulunmamaktadır. İster küçük bir sınıf, ister büyük bir okul veya kurum için kullanabilirsiniz.'
+      question: 'Sınıf ve öğrenci yönetimi nasıl çalışır?',
+      answer: 'Sistemde sınıflarınızı oluşturup öğrencilerinizi tek tek ekleyebilir veya Excel dosyası ile toplu olarak içeri aktarabilirsiniz. Her sınıf için ayrı ayrı optik formlar atayabilirsiniz.'
     },
     {
       id: 9,
-      question: 'Sonuçları nasıl paylaşabilirim?',
-      answer: 'Sonuçları PDF, Excel veya CSV formatında dışa aktarabilir, e-posta ile paylaşabilir veya sistem üzerinden öğrencilere özel erişim sağlayabilirsiniz.'
+      question: 'Oluşturduğum formları nasıl düzenleyebilirim?',
+      answer: '"Optik Formlarım" sayfasından formlarınızı görüntüleyebilir, düzenleyebilir veya silebilirsiniz. Her formun yanındaki "Düzenle" butonuna tıklayarak form editörünü açabilirsiniz.'
     },
     {
       id: 10,
-      question: 'Farklı sınav türleri oluşturabilir miyim?',
-      answer: 'Evet, çoktan seçmeli, doğru/yanlış, eşleştirme ve açık uçlu sorular içeren sınavlar oluşturabilirsiniz.'
+      question: 'Formları yazdırabilir miyim?',
+      answer: 'Evet, oluşturduğunuz formları yüksek kalitede yazdırabilirsiniz. Form detay sayfasında "Yazdır" butonu bulunmaktadır. Sistem A4 formatında tasarlanmıştır.'
     },
     {
       id: 11,
-      question: 'Form elemanları nelerdir ve nasıl kullanılır?',
-      answer: 'Ad Soyad Alanı (A-Z harfler), Numara Alanı (0-9 rakamlar), TC Kimlik No (11 haneli), Telefon No (10 haneli), Çoktan Seçmeli (A-E şıkları), Kitapçık Kodu, Sınıf ve Şube kodlama alanları mevcuttur.'
+      question: 'Sistem mobil cihazlarda çalışır mı?',
+      answer: 'Evet, OpTürk responsive tasarıma sahiptir. Tablet ve akıllı telefonlardan da sistemi kullanabilirsiniz. Ancak form oluşturma işlemleri daha büyük ekranlarda daha rahat yapılabilir.'
     },
     {
       id: 12,
-      question: 'Kalibrasyon işaretleri nedir?',
-      answer: 'Formun dört köşesindeki kare işaretler optik tarayıcılar için kalibrasyon noktalarıdır. Bu işaretler sayesinde form doğru tanınır ve eğri taramalar düzeltilir.'
+      question: 'Verilerim güvende mi?',
+      answer: 'Evet, tüm verileriniz SSL şifreleme ile korunmaktadır. KVKK uyumlu olarak çalışıyoruz ve verilerinizi kesinlikle üçüncü şahıslarla paylaşmıyoruz.'
     },
     {
       id: 13,
-      question: 'Formlara resim ekleyebilir miyim?',
-      answer: 'Evet, form oluşturma arayüzünde resim ekleme özelliği bulunmaktadır. Cihazınızdan yükleyeceğiniz resimler forma entegre edilebilir.'
+      question: 'Kaç öğrenci için kullanabilirim?',
+      answer: 'Sistemimizde öğrenci sayısı sınırlaması bulunmamaktadır. İster küçük bir sınıf, ister büyük bir okul veya kurum için rahatlıkla kullanabilirsiniz.'
     },
     {
       id: 14,
-      question: 'Yazı alanı nasıl eklenir?',
-      answer: 'Form elemanları arasında bulunan "Yazı Alanı" seçeneği ile forma düzenlenebilir metin alanları ekleyebilirsiniz.'
+      question: 'Sistem ücretsiz mi?',
+      answer: 'Temel özellikler ücretsizdir. Aylık 100 forma kadar ücretsiz kullanım hakkınız bulunmaktadır. Daha fazla kullanım ve gelişmiş özellikler için uygun fiyatlı premium paketlerimiz mevcuttur.'
     },
     {
       id: 15,
-      question: 'Oluşturduğum formları nasıl düzenlerim?',
-      answer: '"Optik Formlarım" sayfasından istediğiniz formu seçip "Düzenle" butonuna tıklayarak form üzerinde değişiklik yapabilirsiniz.'
+      question: 'Sınavlarımı nasıl takip edebilirim?',
+      answer: '"Sınavlar" sayfasından oluşturduğunuz tüm sınavları görüntüleyebilir, düzenleyebilir ve detaylarına bakabilirsiniz. Her sınav için atanan sınıfları ve öğrencileri görebilirsiniz.'
     },
     {
       id: 16,
-      question: 'Formları yazdırabilir miyim?',
-      answer: 'Evet, oluşturduğunuz formları yüksek kalitede yazdırabilirsiniz. Form detay sayfasında "Yazdır" butonu bulunmaktadır.'
+      question: 'Form elemanlarını nasıl konumlandırırım?',
+      answer: 'Sol panelden bir form elemanı seçtikten sonra A4 sayfasında istediğiniz konuma tıklayarak yerleştirebilirsiniz. Elemanları daha sonra sürükleyerek yeniden konumlandırabilirsiniz.'
     },
     {
       id: 17,
-      question: 'Sınıflara form ataması nasıl yapılır?',
-      answer: 'Form oluştururken veya düzenlerken sınıf seçim alanından bir veya birden fazla sınıfı formunuza atayabilirsiniz.'
+      question: 'Formlara başlık ekleyebilir miyim?',
+      answer: 'Evet, her form elemanının varsayılan başlığı vardır (ör. AD SOYAD, NUMARA, TEST). Bu başlıkları element özelliklerinden özelleştirebilirsiniz.'
     },
     {
       id: 18,
-      question: 'A4 sayfa formatı destekleniyor mu?',
-      answer: 'Evet, sistemimiz standart A4 sayfa formatını desteklemektedir ve tüm form elemanları A4 boyutlarına uygun olarak tasarlanmıştır.'
-    },
-    {
-      id: 19,
-      question: 'Form elemanlarını nasıl konumlandırırım?',
-      answer: 'Form elemanlarını seçtikten sonra A4 sayfasında istediğiniz konuma tıklayarak yerleştirebilirsiniz. Elemanları daha sonra sürükleyerek de taşıyabilirsiniz.'
-    },
-    {
-      id: 20,
       question: 'Birden fazla sayfalı form oluşturabilir miyim?',
       answer: 'Şu anda sistem tek sayfa A4 formatında form oluşturmayı desteklemektedir. Çok uzun sınavlar için ayrı formlar oluşturmanız önerilir.'
     },
     {
+      id: 19,
+      question: 'Dashboard\'ta neler görebilirim?',
+      answer: 'Dashboard\'ta hızlı erişim menüleri, son oluşturduğunuz formlar, yaklaşan sınavlar ve sistem istatistiklerinizi görebilirsiniz.'
+    },
+    {
+      id: 20,
+      question: 'Optik okuma nasıl çalışacak?',
+      answer: 'Gelecek güncellemelerde, tarayıcı ile taranmış optik formları sisteme yükleyerek otomatik değerlendirme yapılabilecek. Gelişmiş görüntü işleme algoritmaları ile yüksek doğruluk oranı sağlanacak.'
+    },
+    {
       id: 21,
-      question: 'Form başlığını nasıl değiştiririm?',
-      answer: 'Form oluşturma sayfasında üst kısımda bulunan "Form Başlığı" alanından formunuzun başlığını değiştirebilirsiniz.'
+      question: 'Sınıflara form ataması nasıl yapılır?',
+      answer: 'Sınav oluşturma sayfasında optik form şablonunu seçtikten sonra, "Sınıf Seçimi" bölümünden sınava katılacak sınıfları işaretleyebilirsiniz.'
     },
     {
       id: 22,
-      question: 'Oluşturduğum formları silebilir miyim?',
-      answer: 'Evet, "Optik Formlarım" sayfasından istediğiniz formu seçip "Sil" butonuna tıklayarak formlarınızı silebilirsiniz.'
+      question: 'Öğrenci bilgilerini Excel ile ekleyebilir miyim?',
+      answer: 'Evet, "Öğrenciler" sayfasında "Excel İçe Aktar" özelliği bulunmaktadır. Excel dosyanızı sisteme yükleyerek toplu öğrenci kaydı yapabilirsiniz.'
     },
     {
       id: 23,
-      question: 'Okul bilgilerim sistem tarafından nasıl kullanılıyor?',
-      answer: 'Okul bilgileriniz formlarınızı organize etmek ve sadece sizin okulunuza ait sınıfları göstermek için kullanılır. Verileriniz güvenli şekilde saklanır.'
+      question: 'Teknik destek alabilir miyim?',
+      answer: 'Tabii ki! İletişim sayfamızdan bizlere ulaşabilir, e-posta ve telefon ile destek alabilirsiniz. Ayrıca bu SSS sayfası da size yardımcı olmak için tasarlanmıştır.'
     },
     {
       id: 24,
       question: 'Sistemde kaç tane form oluşturabilirim?',
-      answer: 'Ücretsiz hesaplarda aylık 100 forma kadar sınır bulunmaktadır. Premium hesaplarda bu sınır kaldırılmıştır.'
+      answer: 'Ücretsiz hesaplarda aylık 100 forma kadar sınır bulunmaktadır. Premium hesaplarda bu sınır kaldırılmış olup sınırsız form oluşturabilirsiniz.'
     },
     {
       id: 25,
       question: 'Form önizlemesi nasıl çalışır?',
-      answer: '"Önizle ve Kaydet" butonuna tıklayarak formunuzun son halini görebilir ve bu görünümü kayıt edebilirsiniz.'
+      answer: 'Form oluşturma sayfasında "Önizleme" butonuna tıklayarak formunuzun son halini görebilir ve bu görünümü kayıt edebilirsiniz. Önizleme modunda formunuzun yazıcıda nasıl görüneceğini de kontrol edebilirsiniz.'
     }
   ];
 
@@ -211,10 +211,6 @@ const FAQ = () => {
         <div className="faq-search">
           <div className="search-container">
             <div className="search-input-wrapper">
-              <svg className="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <circle cx="11" cy="11" r="8"></circle>
-                <path d="M21 21l-4.35-4.35"></path>
-              </svg>
               <input
                 type="text"
                 className="search-input"

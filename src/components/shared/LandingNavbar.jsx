@@ -60,7 +60,10 @@ const LandingNavbar = () => {
               className="brand-logo" 
             />
             <div className="brand-text">
-              <span className="brand-name">OpTürk</span>
+              <span className="brand-name">
+                <span className="brand-name-op">OP</span>
+                <span className="brand-name-turk">TÜRK</span>
+              </span>
               <span className="brand-slogan">Optik Sınav Değerlendirme Sistemi</span>
             </div>
           </button>
