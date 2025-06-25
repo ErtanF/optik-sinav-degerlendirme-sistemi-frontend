@@ -202,25 +202,44 @@ const BubbleGrid = memo(function BubbleGrid({
 
     // Kitapçık kodu elemanı için özel düzen
     if (type === 'bookletCode') {
-      return (
-        <div className={styles.horizontalGrid}>
-          <div className={styles.questionRow}>
-            {/* Soru numarası kısmını boş bırak */}
-            <div className={styles.emptyCell}></div>
-            <div className={styles.choices}>
-              {availableChoices.slice(0, displayedCols).map((char, colIndex) => (
-                <div 
-                  key={`choice-0-${colIndex}`} 
-                  className={`${styles.choiceContainer} ${colIndex % 2 === 0 ? styles.oddColumn : ''}`}
-                >
-                  {renderBubble(0, colIndex, char)}
-                </div>
-              ))}
+  const choiceWidth = 51; // Her şık 3 grid (51px)
+  const totalWidth = displayedCols * choiceWidth;
+  
+  return (
+    <div className={styles.horizontalGrid}>
+      <div className={styles.questionRow}>
+        <div className={styles.emptyCell}></div>
+        <div 
+          className={styles.choices}
+          style={{
+            width: `${totalWidth}px`, // Dinamik toplam genişlik
+            display: 'flex'
+          }}
+        >
+          {availableChoices.slice(0, displayedCols).map((char, colIndex) => (
+            <div 
+              key={`choice-0-${colIndex}`} 
+              className={`${styles.choiceContainer} ${colIndex % 2 === 0 ? styles.oddColumn : ''}`}
+              style={{
+                width: `${choiceWidth}px`, // Her şık 51px
+                height: '17px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxSizing: 'border-box',
+                padding: '0',
+                margin: '0',
+                flexShrink: 0
+              }}
+            >
+              {renderBubble(0, colIndex, char)}
             </div>
-          </div>
+          ))}
         </div>
-      );
-    }
+      </div>
+    </div>
+  );
+}
 
     // Normal çoktan seçmeli için mevcut düzen
     return (

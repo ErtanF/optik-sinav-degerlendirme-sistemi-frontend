@@ -201,11 +201,11 @@ const ElementPropertiesPanel = () => {
       newWidth = (newCols + 1) * 17;
     } 
     else if (activeElement.type === 'bookletCode') {
-      // Kitapçık kodu için özel ölçeklendirme
-      maxCols = 5;
-      newCols = Math.min(maxCols, Math.max(1, newCols));
-      newWidth = newCols * 17; // Her şıkkın tam olarak 20px genişliği olur
-    }
+  // Kitapçık kodu için özel ölçeklendirme - her şık 3 grid sütunu
+  maxCols = 5;  // Maksimum 5 şık (A,B,C,D,E)
+  newCols = Math.min(maxCols, Math.max(1, newCols));
+  newWidth = newCols * 3 * 17; // Her şık 3 grid sütunu × şık sayısı
+}
     else if (activeElement.type === 'nameSurname' || activeElement.type === 'number' || 
              activeElement.type === 'classBranch' || activeElement.type === 'classNumber') {
       maxCols = activeElement.type === 'number' ? 15 : 26;

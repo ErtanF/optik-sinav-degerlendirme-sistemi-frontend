@@ -90,7 +90,7 @@ const FormRenderer = ({
           alignItems: 'flex-start', justifyContent: 'flex-start', 
           overflow: 'hidden', padding: '10px', boxSizing: 'border-box',
           whiteSpace: 'pre-wrap', textAlign: 'left', wordBreak: 'break-word',
-          backgroundColor: 'transparent', border: 'none', borderRadius: '4px',
+          backgroundColor: 'transparent', border: '1px solid #ff65b5', borderRadius: '4px',
           fontSize: '13px', lineHeight: '1.4',  fontFamily: 'Roboto, sans-serif'
         }}>
           {element.content || ''}

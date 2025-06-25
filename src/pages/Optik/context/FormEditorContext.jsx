@@ -185,12 +185,12 @@ const getDefaultElementSize = useCallback((type) => {
         };
     // Yeni eklenen Kitapçık Kodu elemanı
     case 'bookletCode':
-      return {
-        width: 5 * gridSize,
-        height: 2 * gridSize, // Tek satır + başlık yüksekliği
-        rows: 1, // Tek satır
-        cols: 5  // Varsayılan 5 karakter (A,B,C,D,E)
-      };
+  return {
+    width: 15 * gridSize,  // 5 şık × 3 grid = 15 grid sütunu (255px)
+    height: 2 * gridSize, 
+    rows: 1, 
+    cols: 5  // A, B, C, D, E şıkları
+  };
       case 'classNumber':
   return {
     width: 3 * gridSize,
